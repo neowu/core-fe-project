@@ -1,12 +1,13 @@
 import {Action as HistoryAction, Location} from "history";
 import {SagaIterator} from "redux-saga";
+import {Exception} from "./exception";
 
 export interface Listener {
     onInitialized?();
 
     onLocationChanged?(event: LocationChangedEvent);
 
-    onError?(error: any); // TODO: formalize error type
+    onError?(error: Exception);
 
     onTick?();
 }

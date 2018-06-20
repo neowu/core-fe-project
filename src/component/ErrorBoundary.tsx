@@ -1,35 +1,37 @@
-import React, {ErrorInfo, ReactNode} from "react";
+import React, {ErrorInfo, ReactElement, ReactNode} from "react";
 import {connect, DispatchProp} from "react-redux";
 import {errorAction, Exception} from "../exception";
 
-export class ReactException implements Exception {
-    constructor(public message: string, public stack: string, public componentStack: string) {}
+export class ReactLifecycleException extends Exception {
+    constructor(public message: string, public stack: string, public componentStack: string) {
+        super(message);
+    }
 }
 
 interface Props extends DispatchProp<any> {
+    render?: (exception: ReactLifecycleException) => ReactElement<any>;
     children: ReactNode;
 }
 
 interface State {
-    errorMessage: string;
+    exception: ReactLifecycleException;
 }
 
-class ErrorBoundary extends React.PureComponent<Props, State> {
-    state: State = {
-        errorMessage: "",
+class Component extends React.PureComponent<Props, State> {
+    public static defaultProps: Partial<Props> = {
+        render: exception => <h2>Render fail: {exception.message}</h2>,
     };
+    state: State = {exception: null};
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        this.setState({errorMessage: error.message});
-        this.props.dispatch(errorAction(new ReactException(error.message, error.stack, errorInfo.componentStack)));
+        const exception = new ReactLifecycleException(error.message, error.stack, errorInfo.componentStack);
+        this.props.dispatch(errorAction(exception));
+        this.setState({exception});
     }
 
     render() {
-        if (this.state.errorMessage) {
-            return <div>failed to render, error: {this.state.errorMessage}</div>;
-        }
-        return this.props.children;
+        return this.state.exception ? this.props.render(this.state.exception) : this.props.children;
     }
 }
 
-export default connect()(ErrorBoundary);
+export const ErrorBoundary = connect()(Component);

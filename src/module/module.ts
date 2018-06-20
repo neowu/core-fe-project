@@ -31,9 +31,6 @@ function registerHandler<H, S>(namespace: string, handlers: ActionHandler<H, S>,
         const type = qualifiedActionType(handler, namespace, actionType);
         if (handler.effect === true) {
             console.info(`[framework] add effect, namespace=${namespace}, actionType=${type}, loading=${handler.loading}`);
-            if (!handler.global || !app.sagaActionTypes.includes(type)) {
-                app.sagaActionTypes.push(type); // saga takeLatest() requires string[], global action type could exists in multiple modules
-            }
             app.effects.put(type, namespace, handler);
         } else {
             console.info(`[framework] add reducer, namespace=${namespace}, actionType=${type}`);
@@ -46,10 +43,10 @@ function registerHandler<H, S>(namespace: string, handlers: ActionHandler<H, S>,
 
 function registerListener(namespace: string, listener: Listener): void {
     if (listener.onLocationChanged) {
-        app.effects.put(LOCATION_CHANGE, namespace, listener.onLocationChanged); // LocationChangedActionType is already in app.sagaActionTypes
+        app.effects.put(LOCATION_CHANGE, namespace, listener.onLocationChanged);
     }
     if (listener.onError) {
-        app.effects.put(ERROR_ACTION_TYPE, namespace, listener.onError); // ERROR_ACTION_TYPE is already in app.sagaActionTypes
+        app.effects.put(ERROR_ACTION_TYPE, namespace, listener.onError);
     }
 
     app.sagaMiddleware.run(initializeModule, listener);

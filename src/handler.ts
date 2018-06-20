@@ -51,7 +51,6 @@ export function* run<S>(handler: Handler<S>, payload?: any, state?: S, rootState
         }
         yield* handler(payload, state, rootState);
     } catch (error) {
-        console.error(error);
         yield put(errorAction(error));
     } finally {
         if (handler.loading) {
