@@ -1,12 +1,10 @@
 {
   "name": "core-fe",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
-  "files": [
-    "lib", "src"
-  ],
+  "files": ["lib", "src"],
   "scripts": {
     "build": "node build/build.js",
     "test": "jest --config build/jest.json",
