@@ -1,1 +1,1 @@
-module.exports = require("./build/prettier.json");
+module.exports = require("./node/prettier.json");

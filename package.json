@@ -1,14 +1,14 @@
 {
   "name": "core-fe",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
-  "files": ["lib", "src"],
+  "repository": "github:neowu/frontend-framework",
   "scripts": {
-    "build": "node build/build.js",
-    "test": "jest --config build/jest.json",
-    "format": "prettier --config build/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
+    "build": "node node/build.js",
+    "test": "jest --config node/jest.json",
+    "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@types/jest": "23.1.1",

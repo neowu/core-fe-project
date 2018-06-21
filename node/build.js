@@ -18,27 +18,35 @@ function spawn(command, arguments, errorMessage) {
 
 function checkCodeStyle() {
     console.info(chalk`{green.bold [task]} {white.bold check code style}`);
-    return spawn("prettier", ["--config", "build/prettier.json", "--list-different", "{src,test}/**/*.{ts,tsx,less}"], "check code style failed, please format above files");
+    return spawn("prettier", ["--config", "node/prettier.json", "--list-different", "{src,test}/**/*.{ts,tsx}"], "check code style failed, please format above files");
 }
 
 function test() {
     console.info(chalk`{green.bold [task]} {white.bold test}`);
-    return spawn("jest", ["--config", "build/jest.json"], "test failed, please fix");
+    return spawn("jest", ["--config", "node/jest.json"], "test failed, please fix");
 }
 
 function lint() {
     console.info(chalk`{green.bold [task]} {white.bold lint}`);
-    return spawn("tslint", ["-c", "build/tslint.json", "{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
+    return spawn("tslint", ["-c", "node/tslint.json", "{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
 }
 
 function cleanup() {
     console.info(chalk`{green.bold [task]} {white.bold cleanup}`);
-    fs.emptyDirSync("lib");
+    fs.emptyDirSync("build");
 }
 
 function compile() {
     console.info(chalk`{green.bold [task]} {white.bold compile}`);
-    return spawn("tsc", ["-p", "build/tsconfig.json"], "compile failed, please fix");
+    return spawn("tsc", ["-p", "node/tsconfig.json"], "compile failed, please fix");
+}
+
+function distribute() {
+    console.info(chalk`{green.bold [task]} {white.bold distribute}`);
+    fs.mkdirsSync("build/dist/lib");
+    fs.copySync("build/out/src", "build/dist/lib/", {dereference: true});
+    fs.copySync("package.json", "build/dist/package.json", {dereference: true});
+    fs.copySync("src", "build/dist/src", {dereference: true});
 }
 
 function build() {
@@ -47,6 +55,7 @@ function build() {
     test();
     lint();
     compile();
+    distribute();
 }
 
 build();

@@ -10,7 +10,7 @@
   "moduleDirectories": ["node_modules", "src"],
   "globals": {
     "ts-jest": {
-      "tsConfigFile": "build/tsconfig.json",
+      "tsConfigFile": "node/tsconfig.json",
       "enableTsDiagnostics": true
     }
   }
