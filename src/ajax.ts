@@ -8,9 +8,12 @@ export class APIException extends Exception {
 }
 
 function handleError(error: AxiosError) {
-    const statusCode = error.response ? error.response.status : null;
-    const responseData = error.response ? error.response.data : null;
-    throw new APIException(`failed to call api, url=${error.config.url}`, statusCode, error.config.url, responseData);
+    const httpErrorCode = error.response ? error.response.status : 0;
+    const responseData = error.response ? error.response.data : "";
+
+    // try to get server errorMessage from response
+    const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${error.config.url}`;
+    throw new APIException(errorMessage, httpErrorCode, error.config.url!, responseData);
 }
 
 axios.interceptors.response.use(
@@ -21,7 +24,7 @@ axios.interceptors.response.use(
 );
 
 const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\d(?:T[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d*)(?:Z|[\+-][\d|:]*)?)?$/;
-const parser = (key, value) => {
+const parser = (key: any, value: any) => {
     if (typeof value === "string" && ISO_DATE_FORMAT.test(value)) {
         return new Date(value);
     }

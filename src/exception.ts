@@ -25,7 +25,7 @@ export class NotFoundException extends Exception {
 }
 
 export class RuntimeException extends Exception {
-    constructor(message: string, public error: Error) {
+    constructor(message: string, public error: Error | null) {
         super(message);
     }
 }

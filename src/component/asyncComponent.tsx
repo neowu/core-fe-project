@@ -1,7 +1,7 @@
 import React, {ComponentType} from "react";
 
 interface State {
-    Component: React.ComponentType<any>;
+    Component: React.ComponentType<any> | null;
 }
 
 export function asyncComponent(resolve: () => Promise<ComponentType<any>>, LoadingComponent: React.ComponentType<any> = () => <div />): React.ComponentType<{}> {

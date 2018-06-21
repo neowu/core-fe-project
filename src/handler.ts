@@ -33,7 +33,7 @@ export function effect(target: any, propertyKey: string, descriptor: PropertyDes
 }
 
 export function loading(loading: string): MethodDecorator {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor): void => {
+    return (target, propertyKey, descriptor: PropertyDescriptor): void => {
         const handler: Handler<any> = descriptor.value;
         handler.loading = loading;
     };

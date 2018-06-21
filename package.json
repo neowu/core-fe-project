@@ -1,10 +1,13 @@
 {
   "name": "core-fe",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:neowu/frontend-framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neowu/frontend-framework.git"
+  },
   "scripts": {
     "build": "node node/build.js",
     "test": "jest --config node/jest.json",
@@ -17,7 +20,7 @@
     "jest": "23.1.0",
     "prettier": "1.13.5",
     "ts-jest": "22.4.6",
-    "ts-node": "6.1.1",
+    "ts-node": "6.1.2",
     "tslint": "5.10.0",
     "tslint-react": "3.6.0",
     "typescript": "2.9.2"
@@ -31,12 +34,12 @@
     "@types/react-router-dom": "4.2.7",
     "axios": "0.18.0",
     "connected-react-router": "4.3.0",
+    "history": "4.7.2",
     "react": "16.4.1",
     "react-dom": "16.4.1",
     "react-redux": "5.0.7",
     "react-router-dom": "4.3.1",
     "redux": "4.0.0",
-    "redux-saga": "0.16.0",
-    "history": "4.7.2"
+    "redux-saga": "0.16.0"
   }
 }

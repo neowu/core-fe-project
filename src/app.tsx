@@ -16,7 +16,7 @@ import {LOADING_ACTION_TYPE, loadingReducer} from "./loading";
 import {initialState, State} from "./state";
 
 interface App {
-    readonly store: Store<State>;
+    readonly store: Store<State, Action<any>>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly namespaces: Set<string>;
@@ -33,7 +33,7 @@ export function render(component: ComponentType<any>, container: string): void {
     }
     const WithRouterComponent = withRouter(component);
     ReactDOM.render(
-        <Provider store={app.store}>
+        <Provider store={app.store as any}>
             <ErrorBoundary>
                 <ConnectedRouter history={app.history}>
                     <WithRouterComponent />
@@ -59,8 +59,8 @@ function devtools(enhancer: StoreEnhancer): StoreEnhancer {
     return enhancer;
 }
 
-function errorMiddleware(): Middleware<{}, State, Dispatch<Action<any>>> {
-    return (store: MiddlewareAPI<Dispatch<Action<any>>, State>) => (next: Dispatch<Action<any>>) => (action: Action<any>): Action<any> => {
+function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
+    return (store: MiddlewareAPI<Dispatch<any>, State>) => (next: Dispatch<Action<any>>) => (action: Action<any>): Action<any> => {
         try {
             return next(action);
         } catch (error) {
@@ -69,7 +69,7 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<Action<any>>> {
     };
 }
 
-function* saga(effects: HandlerMap, store: Store<State>): SagaIterator {
+function* saga(effects: HandlerMap, store: Store<State, Action<any>>): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
         const handlers = effects.get(action.type);
         if (handlers) {
@@ -123,12 +123,13 @@ function createApp(): App {
     const sagaMiddleware = createSagaMiddleware();
 
     const rootReducer = createRootReducer(reducers);
-    const store = createStore(connectRouter(history)(rootReducer), devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
+    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer as Reducer<State>);
+    const store = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     sagaMiddleware.run(saga, effects, store);
 
-    window.onerror = (message: string, source?: string, line?: number, column?: number, error?: Error): boolean => {
+    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
-            error = new Error(message);
+            error = new Error(message.toString());
         }
         store.dispatch(errorAction(error));
         return true;

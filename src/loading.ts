@@ -26,3 +26,7 @@ export function loadingReducer(state: LoadingState = {}, action: Action<LoadingA
         [payload.loading]: count + (payload.show ? 1 : -1),
     };
 }
+
+export function showLoading(state: LoadingState, loading: string): boolean {
+    return state[loading] > 0;
+}

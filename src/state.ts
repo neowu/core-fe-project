@@ -2,7 +2,7 @@ import {RouterState} from "connected-react-router";
 import {LoadingState} from "./loading";
 
 export interface State {
-    router: RouterState;
+    router: RouterState | null;
     loading: LoadingState;
     app: {};
 }

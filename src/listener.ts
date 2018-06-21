@@ -3,13 +3,13 @@ import {SagaIterator} from "redux-saga";
 import {Exception} from "./exception";
 
 export interface Listener {
-    onInitialized?();
+    onInitialized?(): void;
 
-    onLocationChanged?(event: LocationChangedEvent);
+    onLocationChanged?(event: LocationChangedEvent): void;
 
-    onError?(error: Exception);
+    onError?(error: Exception): void;
 
-    onTick?();
+    onTick?(): void;
 }
 
 export interface LocationChangedEvent {
@@ -22,7 +22,7 @@ export type TickListener = (() => SagaIterator) & {
 };
 
 export function interval(seconds: number): MethodDecorator {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor): void => {
+    return (target, propertyKey, descriptor: PropertyDescriptor): void => {
         const handler: TickListener = descriptor.value;
         handler.interval = seconds;
     };

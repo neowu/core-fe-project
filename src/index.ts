@@ -5,6 +5,7 @@ export {ajax, APIException} from "./ajax";
 export {actionCreator} from "./action";
 export {effect, loading, global} from "./handler";
 export {Listener, LocationChangedEvent, interval} from "./listener";
+export {showLoading} from "./loading";
 export {register} from "./module/module";
 export {State} from "./state";
 export {asyncComponent} from "./component/asyncComponent";

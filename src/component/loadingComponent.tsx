@@ -1,5 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
+import {showLoading} from "../loading";
 import {State} from "../state";
 
 interface Props {
@@ -15,7 +16,7 @@ export function loadingComponent(loading: string, Component: React.ComponentType
     }
 
     return connect((state: State) => {
-        const show = state.loading[loading] > 0;
+        const show = showLoading(state.loading, loading);
         return {show};
     })(Loading);
 }
