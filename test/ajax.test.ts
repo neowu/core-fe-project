@@ -11,14 +11,12 @@ test("url", () => {
 });
 
 test("callAJAX", () => {
-    const ajax = (arg: string): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            return resolve("result");
-        });
-    };
+    const ajax = (request: string): Promise<string> => Promise.resolve(request);
 
-    const effect = callAJAX(ajax, "argument");
-    expect(effect.CALL).toBeDefined();
-    expect(effect.CALL.args).toEqual(["argument"]);
-    expect(effect.response).toBeInstanceOf(Function);
+    const effect = callAJAX(ajax, "value");
+    const call = effect.CALL;
+    expect(call.args).toEqual(["value"]);
+    expect(call.fn.apply(call.context, call.args))
+        .resolves.toEqual("value")
+        .then(() => expect(effect.response()).toEqual("value"));
 });

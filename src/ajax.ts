@@ -1,6 +1,6 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
-import {Exception} from "./exception";
 import {call, CallEffect} from "redux-saga/effects";
+import {Exception} from "./exception";
 
 export class APIException extends Exception {
     constructor(message: string, public statusCode: number | null, public requestURL: string, public responseData: object | null) {
@@ -92,17 +92,20 @@ interface CallAJAX {
 
 export const callAJAX: CallAJAX = (func: (...args: any[]) => Promise<any>, ...args: any[]) => {
     let response: any;
-    const proxy = (...args: any[]) => {
-        return func(...args)
-            .then(result => {
+    const effect: CallAJAXEffect<any> = call.call(
+        null,
+        (...args: any[]) =>
+            func(...args).then(result => {
                 response = result;
                 return response;
-            })
-            .catch(reject => {
-                throw reject;
-            });
+            }),
+        ...args
+    );
+    effect.response = () => {
+        if (response === undefined) {
+            throw new Error("response is undefined, please yield effect before calling response()");
+        }
+        return response;
     };
-    const effect: CallAJAXEffect<any> = (call as any)(proxy, ...args);
-    effect.response = () => response;
     return effect;
 };
