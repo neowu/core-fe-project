@@ -5,7 +5,7 @@
   "transform": {
     "^.+\\.tsx?$": "ts-jest"
   },
-  "testRegex": "\\.test\\.tsx?$",
+  "testRegex": "^.+\\.test\\.tsx?$",
   "moduleFileExtensions": ["ts", "tsx", "js"],
   "moduleDirectories": ["node_modules", "src"],
   "globals": {
