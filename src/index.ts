@@ -1,7 +1,8 @@
 import "@babel/polyfill";
 
 export {render} from "./app";
-export {ajax, APIException, callAJAX} from "./ajax";
+export {ajax, APIException} from "./ajax/ajax";
+export {callAJAX} from "./ajax/call";
 export {actionCreator} from "./action";
 export {effect, loading, global} from "./handler";
 export {Listener, LocationChangedEvent, interval} from "./listener";

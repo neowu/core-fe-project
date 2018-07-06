@@ -1,10 +1,10 @@
-import React, {ComponentType} from "react";
+import React from "react";
 
 interface State {
     Component: React.ComponentType<any> | null;
 }
 
-export function asyncComponent(resolve: () => Promise<ComponentType<any>>, LoadingComponent: React.ComponentType<any> = () => <div />): React.ComponentType<{}> {
+export function asyncComponent(resolve: () => Promise<React.ComponentType<any>>, LoadingComponent: React.ComponentType<any> = () => <div />): React.ComponentType<{}> {
     class Async extends React.PureComponent<{}, State> {
         state: State = {
             Component: null,
