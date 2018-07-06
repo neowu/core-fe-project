@@ -1,4 +1,4 @@
-import React, {ErrorInfo, ReactElement, ReactNode} from "react";
+import React from "react";
 import {connect, DispatchProp} from "react-redux";
 import {errorAction, Exception} from "../exception";
 
@@ -9,8 +9,8 @@ export class ReactLifecycleException extends Exception {
 }
 
 interface Props extends DispatchProp<any> {
-    render?: (exception: ReactLifecycleException) => ReactElement<any>;
-    children: ReactNode;
+    render?: (exception: ReactLifecycleException) => React.ReactElement<any>;
+    children: React.ReactNode;
 }
 
 interface State {
@@ -23,7 +23,7 @@ class Component extends React.PureComponent<Props, State> {
     };
     state: State = {};
 
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         const exception = new ReactLifecycleException(error.message, error.stack!, errorInfo.componentStack);
         this.props.dispatch(errorAction(exception));
         this.setState({exception});

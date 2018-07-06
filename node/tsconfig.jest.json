@@ -1,0 +1,7 @@
+{
+  "extends": "./node/tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true
+  }
+}
