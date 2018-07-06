@@ -49,7 +49,7 @@ export function* run<S>(handler: Handler<S>, payload?: any, state?: S, rootState
         if (handler.loading) {
             yield put(loadingAction(handler.loading, true));
         }
-        yield* handler(payload, state, rootState);
+        yield* handler(payload, state, rootState) as SagaIterator;
     } catch (error) {
         yield put(errorAction(error));
     } finally {
