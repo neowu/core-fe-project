@@ -3,13 +3,13 @@ import {SagaIterator} from "redux-saga";
 import {Exception} from "./exception";
 
 export interface Listener {
-    onInitialized?(): void;
+    onInitialized?(): SagaIterator;
 
-    onLocationChanged?(event: LocationChangedEvent): void;
+    onLocationChanged?(event: LocationChangedEvent): SagaIterator;
 
-    onError?(error: Exception): void;
+    onError?(error: Exception): SagaIterator;
 
-    onTick?(): void;
+    onTick?(): SagaIterator;
 }
 
 export interface LocationChangedEvent {
