@@ -32,10 +32,10 @@ type ActionCreators<A> = {readonly [K in keyof A]: A[K] extends () => void ? Act
 type Actions<A> = {[K in keyof A]: (payload?: any) => void}; // all methods in Actions must be (payload?) => void
 
 // usage: const actions = actionCreator<Actions>(namespace, handler);
-export function actionCreator<A extends Actions<A>>(namespace: string, handlers: A): ActionCreators<A> {
+export function actionCreator<A extends Actions<A>>(namespace: string, actionHandler: A): ActionCreators<A> {
     const actionCreators = {};
-    Object.keys(Object.getPrototypeOf(handlers)).forEach(actionType => {
-        const handler: Handler<any> = handlers[actionType];
+    Object.keys(Object.getPrototypeOf(actionHandler)).forEach(actionType => {
+        const handler: Handler<any> = actionHandler[actionType];
         const type = qualifiedActionType(handler, namespace, actionType);
         actionCreators[actionType] = (payload?: any) => ({type, payload});
     });
