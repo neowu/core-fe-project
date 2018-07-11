@@ -10,7 +10,7 @@ interface HandlerMetadata {
     global?: boolean;
 }
 
-export type Handler<S> = ((payload?: any, state?: S, rootState?: State) => S | SagaIterator) & HandlerMetadata;
+export type Handler<S> = ((payload: any, state?: S, rootState?: State) => S | SagaIterator) & HandlerMetadata;
 
 export class HandlerMap {
     private handlers: {[actionType: string]: {[namespace: string]: Handler<any>}} = {};

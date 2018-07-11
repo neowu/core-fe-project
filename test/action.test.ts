@@ -34,7 +34,6 @@ test("actionCreator", () => {
 
     const handler = new ActionHandler();
     const actions = actionCreator<Actions>("namespace", handler);
-
     const payload1 = {name: "value"};
     const action1 = actions.action1(payload1);
     expect(action1.type).toEqual("namespace/action1");
