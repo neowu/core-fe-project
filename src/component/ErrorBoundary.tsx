@@ -9,7 +9,7 @@ export class ReactLifecycleException extends Exception {
 }
 
 interface Props extends DispatchProp<any> {
-    render?: (exception: ReactLifecycleException) => React.ReactElement<any>;
+    render: (exception: ReactLifecycleException) => React.ReactNode;
     children: React.ReactNode;
 }
 
@@ -19,7 +19,7 @@ interface State {
 
 class Component extends React.PureComponent<Props, State> {
     public static defaultProps: Partial<Props> = {
-        render: exception => <h2>Render fail: {exception.message}</h2>,
+        render: exception => <h2>render failed: {exception.message}</h2>,
     };
     state: State = {};
 
@@ -30,7 +30,7 @@ class Component extends React.PureComponent<Props, State> {
     }
 
     render() {
-        return this.state.exception ? this.props.render!(this.state.exception) : this.props.children;
+        return this.state.exception ? this.props.render(this.state.exception) : this.props.children;
     }
 }
 

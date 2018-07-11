@@ -2,7 +2,7 @@ import {push} from "connected-react-router";
 import {run} from "handler";
 import {TickListener} from "listener";
 import {initializeModule, register} from "module/module";
-import {delay, SagaIterator} from "redux-saga";
+import {delay} from "redux-saga";
 import {call, put} from "redux-saga/effects";
 
 test("tick every 3 secs", () => {
