@@ -9,7 +9,7 @@ export class ReactLifecycleException extends Exception {
 }
 
 interface Props extends DispatchProp<any> {
-    render: (exception: ReactLifecycleException) => React.ReactNode;
+    render?: (exception: ReactLifecycleException) => React.ReactNode;
     children: React.ReactNode;
 }
 
@@ -30,7 +30,7 @@ class Component extends React.PureComponent<Props, State> {
     }
 
     render() {
-        return this.state.exception ? this.props.render(this.state.exception) : this.props.children;
+        return this.state.exception ? this.props.render!(this.state.exception) : this.props.children;
     }
 }
 
