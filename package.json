@@ -43,11 +43,11 @@
     "redux-saga": "0.16.0"
   },
   "peerDependencies": {
-    "@babel/polyfill": "7.0.0-beta.52",
+    "@babel/polyfill": "7.0.0-beta.54",
     "@types/node": "10.5.2",
     "@types/react": "16.4.6",
     "@types/react-dom": "16.0.6",
-    "@types/react-redux": "6.0.3",
+    "@types/react-redux": "6.0.4",
     "@types/react-router-dom": "4.2.7",
     "axios": "0.18.0",
     "connected-react-router": "4.3.0",
