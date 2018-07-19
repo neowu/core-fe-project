@@ -5,23 +5,32 @@ import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
+import {
+    applyMiddleware,
+    compose,
+    createStore,
+    Dispatch,
+    Middleware,
+    MiddlewareAPI,
+    Reducer,
+    Store,
+    StoreEnhancer
+} from "redux";
 import createSagaMiddleware, {SagaIterator, SagaMiddleware} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
-import {Action, INIT_STATE_ACTION_TYPE, initStateReducer} from "./action";
+import {run} from "./action/function";
+import {Action, ActionStore} from "./action/index";
+import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
+import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {errorAction} from "./exception";
-import {HandlerMap, run} from "./handler";
-import {LOADING_ACTION_TYPE, loadingReducer} from "./loading";
 import {initialState, State} from "./state";
 
 interface App {
     readonly store: Store<State, Action<any>>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
-    readonly namespaces: Set<string>;
-    readonly reducers: HandlerMap;
-    readonly effects: HandlerMap;
+    readonly actions: ActionStore; // This stores all effects, reducers, and their contexts.
 }
 
 console.time("[framework] initialized");
@@ -69,22 +78,23 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
     };
 }
 
-function* saga(effects: HandlerMap, store: Store<State, Action<any>>): SagaIterator {
+function* saga(actions: ActionStore, store: Store<State, Action<any>>): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
-        const handlers = effects.get(action.type);
-        if (handlers) {
-            const rootState = store.getState();
-            for (const namespace of Object.keys(handlers)) {
-                const handler = handlers[namespace];
-                yield call(run, handler, action.payload, rootState.app[namespace], rootState);
+        const effectFunctions = actions.getEffects(action.type);
+        if (effectFunctions) {
+            for (const namespace of Object.keys(effectFunctions)) {
+                const handler = effectFunctions[namespace];
+
+                yield call(run, handler, action.payload);
             }
         }
     });
 }
 
-function createRootReducer(reducers: HandlerMap): Reducer<State, Action<any>> {
+function createRootReducer(actions: ActionStore): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
         const nextState: State = initialState;
+        const previousAppState = rootState.app;
 
         if (action.type === LOADING_ACTION_TYPE) {
             nextState.loading = loadingReducer(rootState.loading, action);
@@ -96,13 +106,15 @@ function createRootReducer(reducers: HandlerMap): Reducer<State, Action<any>> {
             return nextState;
         }
 
-        const handlers = reducers.get(action.type);
-        if (handlers) {
-            const previousAppState = rootState.app;
+        const reducerFunctions = actions.getReducers(action.type);
+        if (reducerFunctions) {
             const nextAppState = {...previousAppState};
-            for (const namespace of Object.keys(handlers)) {
-                const handler = handlers[namespace];
-                nextAppState[namespace] = handler(action.payload, previousAppState[namespace], rootState);
+            for (const namespace of Object.keys(reducerFunctions)) {
+                const reducerFunction = reducerFunctions[namespace];
+                const updatedState = reducerFunction(...action.payload); // Spread payload array
+                // Use "as any" to remove readonly here
+                (actions.contextObjects[namespace] as any).state = updatedState;
+                nextAppState[namespace] = updatedState;
             }
             nextState.app = nextAppState;
             return nextState; // with our current design if action type is defined in handler, the state will always change
@@ -115,17 +127,14 @@ function createRootReducer(reducers: HandlerMap): Reducer<State, Action<any>> {
 function createApp(): App {
     console.info("[framework] initialize");
 
-    const namespaces = new Set<string>();
-    const reducers = new HandlerMap();
-    const effects = new HandlerMap();
-
+    const actions = new ActionStore();
     const history = createHistory();
     const sagaMiddleware = createSagaMiddleware();
 
-    const rootReducer = createRootReducer(reducers);
+    const rootReducer = createRootReducer(actions);
     const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer as Reducer<State>);
     const store = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
-    sagaMiddleware.run(saga, effects, store);
+    sagaMiddleware.run(saga, actions, store);
 
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
@@ -135,5 +144,5 @@ function createApp(): App {
         return true;
     };
 
-    return {history, store, namespaces, reducers, effects, sagaMiddleware};
+    return {history, store, actions, sagaMiddleware};
 }
