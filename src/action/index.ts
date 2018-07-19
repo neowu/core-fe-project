@@ -93,6 +93,8 @@ export class ActionStore {
 export function createAndRegisterActions<S, A extends BaseAction<S>>(namespace: string, actionObject: A): ActionCreators<A> {
     const actionCreators = {};
     if (!app.actions.hasNamespace(namespace)) {
+        // TODO: Maybe we do not need exclude these here, because Runtime properties do not affect.
+        // Only need to assure: TypeScript does not give extra property hints.
         const excludedProperties = ["constructor", "onInitialized", "onLocationChanged", "onError", "onTick"];
         const addPrototypeToContext = (actionPrototype: any) => {
             Object.keys(actionPrototype).forEach(actionType => {

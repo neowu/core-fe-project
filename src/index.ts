@@ -3,7 +3,7 @@ import "@babel/polyfill";
 export {render} from "./app";
 export {ajax, APIException} from "./ajax/ajax";
 export {callAJAX} from "./ajax/call";
-export {createAndRegisterActions} from "./action";
+export {BaseAction, createAndRegisterActions} from "./action";
 export {loading, global} from "./action/function";
 export {Listener, LocationChangedEvent, interval} from "./listener";
 export {showLoading} from "./action/loading";
