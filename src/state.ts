@@ -1,5 +1,5 @@
 import {RouterState} from "connected-react-router";
-import {LoadingState} from "./loading";
+import {LoadingState} from "./action/loading";
 
 export interface State {
     router: RouterState | null;

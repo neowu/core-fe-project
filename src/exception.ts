@@ -1,4 +1,4 @@
-import {Action} from "./action";
+import {Action} from "./action/index";
 
 export abstract class Exception {
     protected constructor(public message: string) {}
