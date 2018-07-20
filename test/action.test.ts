@@ -1,9 +1,10 @@
-import {actionCreator} from "action";
-import {SagaIterator} from "redux-saga";
-import {put} from "redux-saga/effects";
-import {effect, global} from "handler";
+import {Handler, register, tick} from "action";
+import {global, run} from "action/handler";
+import {TickListener} from "listener";
+import {delay, SagaIterator} from "redux-saga";
+import {call, put} from "redux-saga/effects";
 
-test("actionCreator", () => {
+test("register", () => {
     interface State {
         name: string;
     }
@@ -12,18 +13,21 @@ test("actionCreator", () => {
         name: "value",
     };
 
-    class ActionHandler {
-        action1(payload: {name: string}, state: State = initialState): State {
-            return state;
+    class ActionHandler extends Handler<State> {
+        constructor() {
+            super("namespace", initialState);
         }
 
-        action2(payload?: void, state: State = initialState): State {
-            return state;
+        action1(name: string): State {
+            return this.state();
         }
 
-        @effect
-        *action3(payload: {name: string}): SagaIterator {
-            yield put(actions.action1(payload));
+        action2(): State {
+            return this.state();
+        }
+
+        *action3(name: string): SagaIterator {
+            yield put(actions.action1(name));
         }
 
         @global
@@ -32,18 +36,31 @@ test("actionCreator", () => {
         }
     }
 
-    const handler = new ActionHandler();
-    const actions = actionCreator("namespace", handler);
-    const payload1 = {name: "value"};
-    const action1 = actions.action1(payload1);
+    const actions = register(new ActionHandler());
+    const action1 = actions.action1("value");
     expect(action1.type).toEqual("namespace/action1");
-    expect(action1.payload).toEqual(payload1);
+    expect(action1.payload).toEqual(["value"]);
 
     const action2 = actions.action2();
     expect(action2.type).toEqual("namespace/action2");
-    expect(action2.payload).toBeUndefined();
+    expect(action2.payload).toEqual([]);
 
     const action4 = actions.action4();
     expect(action4.type).toEqual("action4");
-    expect(action4.payload).toBeUndefined();
+    expect(action4.payload).toEqual([]);
+});
+
+test("tick", () => {
+    const onTick = {interval: 3} as TickListener;
+    const generator1 = tick(onTick, 3);
+    expect(generator1.next().value).toEqual(call(run, onTick));
+    expect(generator1.next().value).toEqual(call(delay, 3000));
+    expect(generator1.next().value).toEqual(call(run, onTick));
+    expect(generator1.next().value).toEqual(call(delay, 3000));
+
+    const generator2 = tick(onTick, undefined);
+    expect(generator2.next().value).toEqual(call(run, onTick));
+    expect(generator2.next().value).toEqual(call(delay, 1000));
+    expect(generator2.next().value).toEqual(call(run, onTick));
+    expect(generator2.next().value).toEqual(call(delay, 1000));
 });

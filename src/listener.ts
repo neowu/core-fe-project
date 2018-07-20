@@ -18,7 +18,7 @@ export interface LocationChangedEvent {
 }
 
 export type TickListener = (() => SagaIterator) & {
-    interval: number;
+    interval?: number;
 };
 
 export function interval(seconds: number): MethodDecorator {

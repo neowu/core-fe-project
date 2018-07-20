@@ -5,21 +5,11 @@ import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {
-    applyMiddleware,
-    compose,
-    createStore,
-    Dispatch,
-    Middleware,
-    MiddlewareAPI,
-    Reducer,
-    Store,
-    StoreEnhancer
-} from "redux";
+import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator, SagaMiddleware} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
-import {run} from "./action/function";
-import {Action, ActionStore} from "./action/index";
+import {ActionHandlers, run} from "./action/handler";
+import {Action} from "./action";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {ErrorBoundary} from "./component/ErrorBoundary";
@@ -30,7 +20,9 @@ interface App {
     readonly store: Store<State, Action<any>>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
-    readonly actions: ActionStore; // This stores all effects, reducers, and their contexts.
+    readonly reducers: ActionHandlers;
+    readonly effects: ActionHandlers;
+    readonly namespaces: Set<string>;
 }
 
 console.time("[framework] initialized");
@@ -78,20 +70,19 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
     };
 }
 
-function* saga(actions: ActionStore, store: Store<State, Action<any>>): SagaIterator {
+function* saga(effects: ActionHandlers, store: Store<State, Action<any>>): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
-        const effectFunctions = actions.getEffects(action.type);
-        if (effectFunctions) {
-            for (const namespace of Object.keys(effectFunctions)) {
-                const handler = effectFunctions[namespace];
-
+        const handlers = effects.get(action.type);
+        if (handlers) {
+            for (const namespace of Object.keys(handlers)) {
+                const handler = handlers[namespace];
                 yield call(run, handler, action.payload);
             }
         }
     });
 }
 
-function createRootReducer(actions: ActionStore): Reducer<State, Action<any>> {
+function createRootReducer(reducers: ActionHandlers): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
         const nextState: State = initialState;
         const previousAppState = rootState.app;
@@ -106,15 +97,12 @@ function createRootReducer(actions: ActionStore): Reducer<State, Action<any>> {
             return nextState;
         }
 
-        const reducerFunctions = actions.getReducers(action.type);
-        if (reducerFunctions) {
+        const handlers = reducers.get(action.type);
+        if (handlers) {
             const nextAppState = {...previousAppState};
-            for (const namespace of Object.keys(reducerFunctions)) {
-                const reducerFunction = reducerFunctions[namespace];
-                const updatedState = reducerFunction(...action.payload); // Spread payload array
-                // Use "as any" to remove readonly here
-                (actions.contextObjects[namespace] as any).state = updatedState;
-                nextAppState[namespace] = updatedState;
+            for (const namespace of Object.keys(reducers)) {
+                const handler = handlers[namespace];
+                nextAppState[namespace] = handler(...action.payload);
             }
             nextState.app = nextAppState;
             return nextState; // with our current design if action type is defined in handler, the state will always change
@@ -127,15 +115,16 @@ function createRootReducer(actions: ActionStore): Reducer<State, Action<any>> {
 function createApp(): App {
     console.info("[framework] initialize");
 
-    const actions = new ActionStore();
     const history = createHistory();
-    const sagaMiddleware = createSagaMiddleware();
+    const reducers = new ActionHandlers();
+    const effects = new ActionHandlers();
 
-    const rootReducer = createRootReducer(actions);
+    const sagaMiddleware = createSagaMiddleware();
+    const rootReducer = createRootReducer(reducers);
     const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer as Reducer<State>);
     const store = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
-    sagaMiddleware.run(saga, actions, store);
 
+    sagaMiddleware.run(saga, effects, store);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
             error = new Error(message.toString());
@@ -143,6 +132,5 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-
-    return {history, store, actions, sagaMiddleware};
+    return {history, store, sagaMiddleware, effects, reducers, namespaces: new Set<string>()};
 }
