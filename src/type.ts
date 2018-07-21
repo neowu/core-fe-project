@@ -15,21 +15,21 @@ export interface State {
     app: {};
 }
 
-export type ActionHandler<S> = ((...args: any[]) => S | SagaIterator) & {
+export type HandlerMethod<S> = ((...args: any[]) => S | SagaIterator) & {
     loading?: string;
     global?: boolean;
 };
 
-export interface ActionHandlers {
-    [actionType: string]: {[namespace: string]: ActionHandler<any>};
+export interface HandlerMethods {
+    [actionType: string]: {[namespace: string]: HandlerMethod<any>};
 }
 
 export interface App {
     readonly store: Store<State, Action<any>>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
-    readonly reducers: ActionHandlers;
-    readonly effects: ActionHandlers;
+    readonly reducers: HandlerMethods;
+    readonly effects: HandlerMethods;
     readonly namespaces: Set<string>;
 }
 
@@ -67,4 +67,4 @@ type ActionCreator<H> = H extends () => any
                 ? ActionCreator3<P1, P2, P3>
                 : H extends (arg1: infer P1, arg2: infer P2, arg3: infer P3, arg4: infer P4) => any ? ActionCreator4<P1, P2, P3, P4> : H extends (arg1: infer P1, arg2: infer P2, arg3: infer P3, arg4: infer P4, arg5: infer P5) => any ? ActionCreator5<P1, P2, P3, P4, P5> : never;
 
-export type ActionCreators<A> = {readonly [K in Exclude<keyof A, "state" | "rootState" | keyof Listener>]: ActionCreator<A[K]>};
+export type ActionCreators<A> = {readonly [K in Exclude<keyof A, "state" | "rootState" | "reduceState" | keyof Listener>]: ActionCreator<A[K]>};

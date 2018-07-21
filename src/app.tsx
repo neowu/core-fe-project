@@ -10,11 +10,11 @@ import {call, takeEvery} from "redux-saga/effects";
 import {run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
-import {registerActions} from "./action/module";
+import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {errorAction} from "./exception";
 import {initialState, State} from "./state";
-import {Action, ActionCreators, ActionHandlers, App} from "./type";
+import {Action, ActionCreators, HandlerMethods, App} from "./type";
 
 console.time("[framework] initialized");
 const app = createApp();
@@ -52,7 +52,7 @@ export function render(component: ComponentType<any>, container: string): void {
     }
     const WithRouterComponent = withRouter(component);
     ReactDOM.render(
-        <Provider store={app.store as any}>
+        <Provider store={app.store}>
             <ErrorBoundary>
                 <ConnectedRouter history={app.history}>
                     <WithRouterComponent />
@@ -88,7 +88,7 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
     };
 }
 
-function* saga(effects: ActionHandlers): SagaIterator {
+function* saga(effects: HandlerMethods): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
         const handlers = effects[action.type];
         if (handlers) {
@@ -100,7 +100,7 @@ function* saga(effects: ActionHandlers): SagaIterator {
     });
 }
 
-function createRootReducer(reducers: ActionHandlers): Reducer<State, Action<any>> {
+function createRootReducer(reducers: HandlerMethods): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
         const nextState: State = initialState;
         const previousAppState = rootState.app;
@@ -155,6 +155,6 @@ function createApp(): App {
     return {history, store, sagaMiddleware, effects, reducers, namespaces: new Set<string>()};
 }
 
-export function register<S extends object, A extends Handler<S>>(actions: A): ActionCreators<A> {
-    return registerActions(actions, app);
+export function register<S extends object, A extends Handler<S>>(handler: A): void {
+    return registerHandler(handler, app);
 }
