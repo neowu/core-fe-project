@@ -1,8 +1,9 @@
-import {Handler, register, tick} from "action";
+import {tick} from "action/module";
 import {global, run} from "action/handler";
 import {TickListener} from "listener";
 import {delay, SagaIterator} from "redux-saga";
 import {call, put} from "redux-saga/effects";
+import {Handler, register} from "app";
 
 test("register", () => {
     interface State {
@@ -53,14 +54,14 @@ test("register", () => {
 test("tick", () => {
     const onTick = {interval: 3} as TickListener;
     const generator1 = tick(onTick, 3);
-    expect(generator1.next().value).toEqual(call(run, onTick));
+    expect(generator1.next().value).toEqual(call(run, onTick, []));
     expect(generator1.next().value).toEqual(call(delay, 3000));
-    expect(generator1.next().value).toEqual(call(run, onTick));
+    expect(generator1.next().value).toEqual(call(run, onTick, []));
     expect(generator1.next().value).toEqual(call(delay, 3000));
 
     const generator2 = tick(onTick, undefined);
-    expect(generator2.next().value).toEqual(call(run, onTick));
+    expect(generator2.next().value).toEqual(call(run, onTick, []));
     expect(generator2.next().value).toEqual(call(delay, 1000));
-    expect(generator2.next().value).toEqual(call(run, onTick));
+    expect(generator2.next().value).toEqual(call(run, onTick, []));
     expect(generator2.next().value).toEqual(call(delay, 1000));
 });

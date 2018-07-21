@@ -1,5 +1,5 @@
 import {State} from "../state";
-import {Action} from "./index";
+import {Action} from "../type";
 
 export const INIT_STATE_ACTION_TYPE: string = "@@framework/initState";
 
@@ -8,7 +8,7 @@ interface InitStateActionPayload {
     state: any;
 }
 
-export function initStateAction(namespace: string, state: any): Action<InitStateActionPayload> {
+export function initStateAction(namespace: string, state: object): Action<InitStateActionPayload> {
     return {
         type: INIT_STATE_ACTION_TYPE,
         payload: {namespace, state},
