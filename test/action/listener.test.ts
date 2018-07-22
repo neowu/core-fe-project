@@ -1,6 +1,5 @@
 import {run} from "action/handler";
-import {tick} from "action/register";
-import {TickListener} from "listener";
+import {tick, TickListener} from "action/listener";
 import {delay} from "redux-saga";
 import {call} from "redux-saga/effects";
 

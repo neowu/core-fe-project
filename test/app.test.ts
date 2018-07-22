@@ -1,9 +1,10 @@
+import {push} from "connected-react-router";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
-import {actionCreator} from "action/creator";
 import {Handler} from "action/handler";
+import {register} from "app";
 
-test("actionCreator", () => {
+test("register", () => {
     interface State {
         name: string;
     }
@@ -26,20 +27,13 @@ test("actionCreator", () => {
         }
 
         *action3(name: string): SagaIterator {
-            yield put(actions.action1(name));
+            yield put(push("/"));
         }
 
         *action4(): SagaIterator {
-            yield put(actions.action2());
+            yield put(push("/"));
         }
     }
 
-    const actions = actionCreator(new TestHandler());
-    const action1 = actions.action1("value");
-    expect(action1.type).toEqual("namespace/action1");
-    expect(action1.payload).toEqual(["value"]);
-
-    const action2 = actions.action2();
-    expect(action2.type).toEqual("namespace/action2");
-    expect(action2.payload).toEqual([]);
+    register(new TestHandler());
 });

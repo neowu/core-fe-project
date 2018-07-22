@@ -1,4 +1,4 @@
-import {Action, HandlerMethod} from "../type";
+import {Action, ActionHandler} from "../type";
 
 export interface LoadingState {
     [loading: string]: number; // use number to track loading status, because for global action type, there may be multiple effects listen to it, hide loading component when status reduce to 0
@@ -32,8 +32,8 @@ export function showLoading(state: LoadingState, loading: string): boolean {
 }
 
 export function loading(loading: string): MethodDecorator {
-    return (target, propertyKey, descriptor: PropertyDescriptor): void => {
-        const handler: HandlerMethod<any> = descriptor.value;
+    return (target, propertyKey, descriptor: TypedPropertyDescriptor<any>): void => {
+        const handler: ActionHandler<any> = descriptor.value;
         handler.loading = loading;
     };
 }

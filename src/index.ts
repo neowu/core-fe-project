@@ -1,14 +1,14 @@
 import "@babel/polyfill";
 
-export {render, Handler, register} from "./app";
-export {ajax, APIException} from "./ajax/client";
+export {render, register} from "./app";
 export {actionCreator} from "./action/creator";
+export {Handler} from "./action/handler";
+export {Listener, LocationChangedEvent, interval} from "./action/listener";
 export {loading} from "./action/loading";
 export {callAJAX} from "./ajax/call";
-export {global} from "./action/handler";
-export {Listener, LocationChangedEvent, interval} from "./listener";
-export {State} from "./state";
+export {ajax, APIException} from "./ajax/client";
 export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";
 export {Loading} from "./component/Loading";
 export {Exception, NotFoundException} from "./exception";
+export {State} from "./type";

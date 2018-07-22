@@ -1,14 +1,13 @@
 import {LOCATION_CHANGE} from "connected-react-router";
-import {delay, SagaIterator} from "redux-saga";
+import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
-import {Handler} from "../app";
 import {ERROR_ACTION_TYPE} from "../exception";
-import {Listener, LocationChangedEvent, TickListener} from "../listener";
-import {App, HandlerMethod, HandlerMethods} from "../type";
-import {run} from "./handler";
+import {ActionHandler, ActionHandlers, App} from "../type";
+import {Handler, run} from "./handler";
 import {initStateAction} from "./init";
+import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 
-export function registerHandler<S extends object, H extends Handler<S>>(handler: H, app: App): void {
+export function registerHandler(handler: Handler<any>, app: App): void {
     if (app.namespaces.has(handler.namespace)) {
         throw new Error(`namespace is already registered, namespace=${handler.namespace}`);
     }
@@ -16,14 +15,14 @@ export function registerHandler<S extends object, H extends Handler<S>>(handler:
 
     const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"];
     keys.forEach(actionType => {
-        const method: HandlerMethod<any> = handler[actionType];
-        const qualifiedActionType = method.global ? actionType : `${handler.namespace}/${actionType}`;
-        const isGenerator = method.toString().indexOf('["__generator"]') > 0;
+        const method: ActionHandler<any> = handler[actionType];
+        const qualifiedActionType = `${handler.namespace}/${actionType}`;
 
+        const isGenerator = method.toString().indexOf('["__generator"]') > 0;
         if (isGenerator) {
-            put(app.effects, qualifiedActionType, handler.namespace, bindEffect(method, handler));
+            put(app.effects, qualifiedActionType, actionHandler(method, handler));
         } else {
-            put(app.reducers, qualifiedActionType, handler.namespace, method.bind(handler));
+            put(app.reducers, qualifiedActionType, actionHandler(method, handler));
         }
     });
 
@@ -32,51 +31,45 @@ export function registerHandler<S extends object, H extends Handler<S>>(handler:
     registerListener(handler, app);
 }
 
-function bindEffect(method: HandlerMethod<any>, handler: any): HandlerMethod<any> {
-    const boundMethod: HandlerMethod<any> = method.bind(handler);
+function actionHandler<S extends object>(method: ActionHandler<S>, handler: Handler<S>): ActionHandler<any> {
+    const boundMethod: ActionHandler<any> = method.bind(handler);
     boundMethod.loading = method.loading;
+    boundMethod.namespace = handler.namespace;
     return boundMethod;
 }
 
-function put(handlers: HandlerMethods, actionType: string, namespace: string, handler: HandlerMethod<any>): void {
+function put(handlers: ActionHandlers, actionType: string, handler: ActionHandler<any>): void {
     if (!handlers[actionType]) {
-        handlers[actionType] = {};
+        handlers[actionType] = [];
     }
-    handlers[actionType][namespace] = handler;
+    handlers[actionType].push(handler);
 }
 
-function registerListener<A extends Handler<any>>(handler: A, app: App) {
+function registerListener(handler: Handler<any>, app: App) {
     const listener = handler as Listener;
     if (listener.onLocationChanged) {
-        put(app.effects, LOCATION_CHANGE, handler.namespace, bindEffect(listener.onLocationChanged, listener));
+        put(app.effects, LOCATION_CHANGE, actionHandler(listener.onLocationChanged, handler));
     }
     if (listener.onError) {
-        put(app.effects, ERROR_ACTION_TYPE, handler.namespace, bindEffect(listener.onError, listener));
+        put(app.effects, ERROR_ACTION_TYPE, actionHandler(listener.onError, handler));
     }
-    app.sagaMiddleware.run(initializeListener, listener, app);
+    app.sagaMiddleware.run(initializeListener, handler, app);
 }
 
 // initialize module in one effect to make it deterministic, onInitialized -> onLocationChanged -> onTick (repeated)
-function* initializeListener(listener: Listener, app: App): SagaIterator {
+function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
+    const listener = handler as Listener;
     if (listener.onInitialized) {
-        yield call(run, bindEffect(listener.onInitialized, listener), []);
+        yield call(run, actionHandler(listener.onInitialized, handler), []);
     }
 
     if (listener.onLocationChanged) {
         const event: LocationChangedEvent = {location: app.history.location, action: "PUSH"};
-        yield call(run, bindEffect(listener.onLocationChanged, listener), [event]); // history listener won't trigger on first refresh or on module loading, manual trigger once
+        yield call(run, actionHandler(listener.onLocationChanged, handler), [event]); // history listener won't trigger on first refresh or on module loading, manual trigger once
     }
 
     const onTick = listener.onTick as TickListener;
     if (onTick) {
-        yield* tick(bindEffect(onTick, listener), onTick.interval);
-    }
-}
-
-export function* tick(onTick: TickListener, interval?: number): SagaIterator {
-    while (true) {
-        // use call instead of fork, to delay next tick execution if onTick() took long. usually, it will not happen! Because we only put(action) within most onTick(), which is a non-blocking effect.
-        yield call(run, onTick, []);
-        yield call(delay, (interval || 1) * 1000);
+        yield* tick(actionHandler(onTick, handler), onTick.interval);
     }
 }
