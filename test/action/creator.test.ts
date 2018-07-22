@@ -14,7 +14,7 @@ test("actionCreator", () => {
 
     class TestHandler extends Handler<State> {
         constructor() {
-            super("namespace", initialState);
+            super("test", initialState);
         }
 
         action1(name: string): State {
@@ -36,10 +36,14 @@ test("actionCreator", () => {
 
     const actions = actionCreator(new TestHandler());
     const action1 = actions.action1("value");
-    expect(action1.type).toEqual("namespace/action1");
+    expect(action1.type).toEqual("test/action1");
     expect(action1.payload).toEqual(["value"]);
 
     const action2 = actions.action2();
-    expect(action2.type).toEqual("namespace/action2");
+    expect(action2.type).toEqual("test/action2");
     expect(action2.payload).toEqual([]);
+
+    const resetAction = actions.resetState();
+    expect(resetAction.type).toEqual("test/resetState");
+    expect(resetAction.payload).toEqual([]);
 });

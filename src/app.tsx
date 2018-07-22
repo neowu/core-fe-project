@@ -1,4 +1,4 @@
-import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
+import {ConnectedRouter, connectRouter, LOCATION_CHANGE, routerMiddleware} from "connected-react-router";
 import createHistory from "history/createBrowserHistory";
 import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
@@ -7,14 +7,14 @@ import {withRouter} from "react-router-dom";
 import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
-import {Handler, run, handlerListener} from "./action/handler";
+import {Handler, handlerListener, run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
-import {errorAction} from "./exception";
+import {ERROR_ACTION_TYPE, errorAction} from "./exception";
 import {initialState} from "./state";
-import {Action, ActionHandlers, App, State} from "./type";
+import {Action, App, EffectHandler, ErrorHandler, LocationChangeHandler, ReducerHandler, State} from "./type";
 
 console.time("[framework] initialized");
 const app = createApp();
@@ -61,38 +61,46 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
     };
 }
 
-function* saga(effects: ActionHandlers): SagaIterator {
+function* saga(effects: {[actionType: string]: EffectHandler}, onErrorEffects: ErrorHandler[], onLocationChangeEffects: LocationChangeHandler[]): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
-        const handlers = effects[action.type];
-        if (handlers) {
-            for (const handler of handlers) {
-                yield call(run, handler, action.payload);
-            }
+        switch (action.type) {
+            case LOCATION_CHANGE:
+                for (const handler of onLocationChangeEffects) {
+                    yield call(run, handler, action.payload);
+                }
+                break;
+            case ERROR_ACTION_TYPE:
+                for (const handler of onErrorEffects) {
+                    yield call(run, handler, action.payload);
+                }
+                break;
+            default:
+                const handler = effects[action.type];
+                if (handler) {
+                    yield call(run, handler, action.payload);
+                }
         }
     });
 }
 
-function createRootReducer(reducers: ActionHandlers): Reducer<State, Action<any>> {
+function createRootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
-        const nextState: State = rootState;
+        const nextState: State = {...rootState};
 
         if (action.type === LOADING_ACTION_TYPE) {
-            nextState.loading = loadingReducer(rootState.loading, action);
+            nextState.loading = loadingReducer(nextState.loading, action);
             return nextState;
         }
 
         if (action.type === INIT_STATE_ACTION_TYPE) {
-            nextState.app = initStateReducer(rootState.app, action);
+            nextState.app = initStateReducer(nextState.app, action);
             return nextState;
         }
 
-        const handlers = reducers[action.type];
-        if (handlers) {
-            const previousAppState = rootState.app;
-            const nextAppState = {...previousAppState};
-            for (const handler of handlers) {
-                nextAppState[handler.namespace!] = handler(...action.payload);
-            }
+        const handler = reducers[action.type];
+        if (handler) {
+            const nextAppState = {...nextState.app};
+            nextAppState[handler.namespace!] = handler(...action.payload);
             nextState.app = nextAppState;
             return nextState; // with our current design if action type is defined in handler, the state will always change
         }
@@ -105,15 +113,16 @@ function createApp(): App {
     console.info("[framework] initialize");
 
     const history = createHistory();
-    const reducers = {};
+    const reducers: {[actionType: string]: ReducerHandler<any>} = {};
     const effects = {};
+    const onErrorEffects: ErrorHandler[] = [];
+    const onLocationChangeEffects: LocationChangeHandler[] = [];
 
     const sagaMiddleware = createSagaMiddleware();
-    const rootReducer = createRootReducer(reducers);
-    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer as Reducer<State>);
+    const reducer: Reducer<State, Action<any>> = connectRouter(history)(createRootReducer(reducers) as Reducer<State>);
     const store: Store<State, Action<any>> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     store.subscribe(handlerListener(store));
-    sagaMiddleware.run(saga, effects);
+    sagaMiddleware.run(saga, effects, onErrorEffects, onLocationChangeEffects);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
             error = new Error(message.toString());
@@ -121,7 +130,7 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, effects, reducers, namespaces: new Set<string>()};
+    return {history, store, sagaMiddleware, reducers, effects, onErrorEffects, onLocationChangeEffects, namespaces: new Set<string>()};
 }
 
 export function register(handler: Handler<any>): void {

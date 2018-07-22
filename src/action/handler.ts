@@ -3,7 +3,7 @@ import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {errorAction} from "../exception";
 import {initialState} from "../state";
-import {Action, ActionHandler, State} from "../type";
+import {Action, EffectHandler, State} from "../type";
 import {loadingAction} from "./loading";
 
 let state = initialState;
@@ -25,7 +25,7 @@ export abstract class Handler<S extends object> {
         return state;
     }
 
-    resetState(): Readonly<S> {
+    resetState(): S {
         return this.initialState;
     }
 
@@ -38,12 +38,12 @@ export const handlerListener = (store: Store<State, Action<any>>) => () => {
     state = store.getState();
 };
 
-export function* run(handler: ActionHandler<any>, payload: any[]): SagaIterator {
+export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     try {
         if (handler.loading) {
             yield put(loadingAction(handler.loading, true));
         }
-        yield* handler(...payload) as SagaIterator;
+        yield* handler(...payload);
     } catch (error) {
         yield put(errorAction(error));
     } finally {

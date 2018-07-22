@@ -26,7 +26,7 @@ export type ActionCreators<H> = {readonly [K in Exclude<keyof H, "state" | "root
 export function actionCreator<H extends Handler<any>>(handler: H): ActionCreators<H> {
     const actionCreators = {};
 
-    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"];
+    const keys = [...Object.keys(Object.getPrototypeOf(handler)), "resetState"];
     keys.forEach(actionType => {
         const qualifiedActionType = `${handler.namespace}/${actionType}`;
         actionCreators[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});

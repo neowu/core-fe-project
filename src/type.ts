@@ -1,7 +1,8 @@
 import {RouterState} from "connected-react-router";
-import {Action as HistoryAction, History, Location} from "history";
+import {History} from "history";
 import {Action as ReduxAction, Store} from "redux";
 import {SagaIterator, SagaMiddleware} from "redux-saga";
+import {LocationChangedEvent} from "./action/listener";
 import {LoadingState} from "./action/loading";
 import {Exception} from "./exception";
 
@@ -15,20 +16,22 @@ export interface State {
     app: {};
 }
 
-export type ActionHandler<S> = ((...args: any[]) => S | SagaIterator) & {
-    namespace?: string;
+export type ReducerHandler<S> = ((...args: any[]) => S) & {
+    namespace: string;
+};
+export type EffectHandler = ((...args: any[]) => SagaIterator) & {
     loading?: string;
 };
-
-export interface ActionHandlers {
-    [actionType: string]: Array<ActionHandler<any>>;
-}
+export type ErrorHandler = (error: Exception) => SagaIterator;
+export type LocationChangeHandler = (event: LocationChangedEvent) => SagaIterator;
 
 export interface App {
     readonly store: Store<State, Action<any>>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
-    readonly reducers: ActionHandlers;
-    readonly effects: ActionHandlers;
+    readonly reducers: {[actionType: string]: ReducerHandler<any>}; // TODO: extract following to class
+    readonly effects: {[actionType: string]: EffectHandler};
+    readonly onErrorEffects: ErrorHandler[];
+    readonly onLocationChangeEffects: LocationChangeHandler[];
     readonly namespaces: Set<string>;
 }
