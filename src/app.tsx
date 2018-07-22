@@ -11,10 +11,11 @@ import {Handler, handlerListener, run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {registerHandler} from "./action/register";
+import {HandlerStore} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {ERROR_ACTION_TYPE, errorAction} from "./exception";
-import {initialState} from "./state";
-import {Action, App, EffectHandler, ErrorHandler, LocationChangeHandler, ReducerHandler, State} from "./type";
+import {initialState, State} from "./state";
+import {Action, App} from "./type";
 
 console.time("[framework] initialized");
 const app = createApp();
@@ -61,21 +62,21 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
     };
 }
 
-function* saga(effects: {[actionType: string]: EffectHandler}, onErrorEffects: ErrorHandler[], onLocationChangeEffects: LocationChangeHandler[]): SagaIterator {
+function* saga(handlers: HandlerStore): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
         switch (action.type) {
             case LOCATION_CHANGE:
-                for (const handler of onLocationChangeEffects) {
+                for (const handler of handlers.onLocationChangeEffects) {
                     yield call(run, handler, action.payload);
                 }
                 break;
             case ERROR_ACTION_TYPE:
-                for (const handler of onErrorEffects) {
+                for (const handler of handlers.onErrorEffects) {
                     yield call(run, handler, action.payload);
                 }
                 break;
             default:
-                const handler = effects[action.type];
+                const handler = handlers.effects[action.type];
                 if (handler) {
                     yield call(run, handler, action.payload);
                 }
@@ -83,7 +84,7 @@ function* saga(effects: {[actionType: string]: EffectHandler}, onErrorEffects: E
     });
 }
 
-function createRootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Reducer<State, Action<any>> {
+function createRootReducer(handlers: HandlerStore): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
         const nextState: State = {...rootState};
 
@@ -97,7 +98,7 @@ function createRootReducer(reducers: {[actionType: string]: ReducerHandler<any>}
             return nextState;
         }
 
-        const handler = reducers[action.type];
+        const handler = handlers.reducers[action.type];
         if (handler) {
             const nextAppState = {...nextState.app};
             nextAppState[handler.namespace!] = handler(...action.payload);
@@ -113,16 +114,13 @@ function createApp(): App {
     console.info("[framework] initialize");
 
     const history = createHistory();
-    const reducers: {[actionType: string]: ReducerHandler<any>} = {};
-    const effects = {};
-    const onErrorEffects: ErrorHandler[] = [];
-    const onLocationChangeEffects: LocationChangeHandler[] = [];
+    const handlers = new HandlerStore();
 
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State, Action<any>> = connectRouter(history)(createRootReducer(reducers) as Reducer<State>);
+    const reducer: Reducer<State, Action<any>> = connectRouter(history)(createRootReducer(handlers) as Reducer<State>);
     const store: Store<State, Action<any>> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     store.subscribe(handlerListener(store));
-    sagaMiddleware.run(saga, effects, onErrorEffects, onLocationChangeEffects);
+    sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
             error = new Error(message.toString());
@@ -130,7 +128,7 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, reducers, effects, onErrorEffects, onLocationChangeEffects, namespaces: new Set<string>()};
+    return {history, store, sagaMiddleware, handlers, namespaces: new Set<string>()};
 }
 
 export function register(handler: Handler<any>): void {

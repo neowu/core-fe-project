@@ -2,9 +2,10 @@ import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {errorAction} from "../exception";
-import {initialState} from "../state";
-import {Action, EffectHandler, State} from "../type";
+import {initialState, State} from "../state";
+import {Action} from "../type";
 import {loadingAction} from "./loading";
+import {EffectHandler} from "./store";
 
 let state = initialState;
 

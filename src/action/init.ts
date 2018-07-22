@@ -1,4 +1,5 @@
-import {Action, State} from "../type";
+import {State} from "../state";
+import {Action} from "../type";
 
 export const INIT_STATE_ACTION_TYPE: string = "@@framework/initState";
 

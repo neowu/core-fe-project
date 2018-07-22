@@ -1,9 +1,10 @@
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
-import {App, EffectHandler, ReducerHandler} from "../type";
+import {App} from "../type";
 import {Handler, run} from "./handler";
 import {initStateAction} from "./init";
 import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
+import {EffectHandler, ReducerHandler} from "./store";
 
 export function registerHandler(handler: Handler<any>, app: App): void {
     if (app.namespaces.has(handler.namespace)) {
@@ -18,9 +19,9 @@ export function registerHandler(handler: Handler<any>, app: App): void {
 
         const isGenerator = method.toString().indexOf('["__generator"]') > 0;
         if (isGenerator) {
-            app.effects[qualifiedActionType] = effectHandler(method, handler);
+            app.handlers.effects[qualifiedActionType] = effectHandler(method, handler);
         } else {
-            app.reducers[qualifiedActionType] = reducerHandler(method, handler);
+            app.handlers.reducers[qualifiedActionType] = reducerHandler(method, handler);
         }
     });
 
@@ -44,10 +45,10 @@ function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHand
 function registerListener(handler: Handler<any>, app: App) {
     const listener = handler as Listener;
     if (listener.onLocationChanged) {
-        app.onLocationChangeEffects.push(effectHandler(listener.onLocationChanged, handler));
+        app.handlers.onLocationChangeEffects.push(effectHandler(listener.onLocationChanged, handler));
     }
     if (listener.onError) {
-        app.onErrorEffects.push(effectHandler(listener.onError, handler));
+        app.handlers.onErrorEffects.push(effectHandler(listener.onError, handler));
     }
     app.sagaMiddleware.run(initializeListener, handler, app);
 }

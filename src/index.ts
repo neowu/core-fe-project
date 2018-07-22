@@ -11,4 +11,4 @@ export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";
 export {Loading} from "./component/Loading";
 export {Exception, NotFoundException} from "./exception";
-export {State} from "./type";
+export {State} from "./state";

@@ -1,27 +1,23 @@
-import {SagaIterator} from "redux-saga";
-import {put} from "redux-saga/effects";
 import {actionCreator} from "action/creator";
 import {Handler} from "action/handler";
+import {SagaIterator} from "redux-saga";
+import {put} from "redux-saga/effects";
 
 test("actionCreator", () => {
-    interface State {
-        name: string;
-    }
-
-    const initialState: State = {
+    const initialState = {
         name: "value",
     };
 
-    class TestHandler extends Handler<State> {
+    class TestHandler extends Handler<typeof initialState> {
         constructor() {
             super("test", initialState);
         }
 
-        action1(name: string): State {
+        action1(name: string) {
             return this.state();
         }
 
-        action2(): State {
+        action2() {
             return this.state();
         }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
-import {State} from "../type";
+import {State} from "../state";
 import {showLoading} from "../action/loading";
 
 interface OwnProps {
