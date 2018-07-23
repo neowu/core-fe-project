@@ -7,7 +7,7 @@ import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 import {EffectHandler, ReducerHandler} from "./store";
 
 export function registerHandler(handler: Handler<any>, app: App) {
-    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"];
+    const keys = [...Object.keys(Object.getPrototypeOf(handler)), "resetState"];
     keys.forEach(actionType => {
         const method = handler[actionType];
         const qualifiedActionType = `${handler.namespace}/${actionType}`;
