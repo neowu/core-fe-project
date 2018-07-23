@@ -21,7 +21,7 @@ type ActionCreator<H> = H extends () => any
                 ? ActionCreator3<P1, P2, P3>
                 : H extends (arg1: infer P1, arg2: infer P2, arg3: infer P3, arg4: infer P4) => any ? ActionCreator4<P1, P2, P3, P4> : H extends (arg1: infer P1, arg2: infer P2, arg3: infer P3, arg4: infer P4, arg5: infer P5) => any ? ActionCreator5<P1, P2, P3, P4, P5> : never;
 
-export type ActionCreators<H> = {readonly [K in Exclude<keyof H, "state" | "rootState" | "reduceState" | keyof Listener>]: ActionCreator<H[K]>};
+export type ActionCreators<H> = {readonly [K in Exclude<keyof H, "state" | "rootState" | "namespace" | keyof Listener>]: ActionCreator<H[K]>};
 
 export function actionCreator<H extends Handler<any>>(handler: H): ActionCreators<H> {
     const actionCreators = {};

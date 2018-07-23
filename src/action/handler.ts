@@ -13,25 +13,21 @@ export abstract class Handler<S extends object> {
     readonly namespace: string;
     private readonly initialState: S;
 
-    protected constructor(namespace: string, initialState: S) {
+    public constructor(namespace: string, initialState: S) {
         this.namespace = namespace;
         this.initialState = initialState;
     }
 
-    state(): Readonly<S> {
+    get state(): Readonly<S> {
         return state.app[this.namespace];
     }
 
-    rootState(): Readonly<State> {
+    get rootState(): Readonly<State> {
         return state;
     }
 
     resetState(): S {
         return this.initialState;
-    }
-
-    reduceState(newState: Partial<S>): S {
-        return Object.assign({}, this.state(), newState);
     }
 }
 

@@ -14,6 +14,6 @@ export type LocationChangeHandler = (event: LocationChangedEvent) => SagaIterato
 export class HandlerStore {
     readonly reducers: {[actionType: string]: ReducerHandler<any>} = {};
     readonly effects: {[actionType: string]: EffectHandler} = {};
-    readonly onErrorEffects: ErrorHandler[] = [];
+    readonly onErrorEffects: ErrorHandler[] = []; // TODO: merge following into listenerEffects to simplify
     readonly onLocationChangeEffects: LocationChangeHandler[] = [];
 }

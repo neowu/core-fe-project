@@ -30,10 +30,10 @@ export function interval(seconds: number): MethodDecorator {
     };
 }
 
-export function* tick(onTick: TickListener, interval?: number): SagaIterator {
+export function* tick(onTick: TickListener): SagaIterator {
     while (true) {
         // use call instead of fork, to delay next tick execution if onTick() took long. usually, it will not happen! Because we only put(action) within most onTick(), which is a non-blocking effect.
         yield call(run, onTick, []);
-        yield call(delay, (interval || 1) * 1000);
+        yield call(delay, (onTick.interval || 1) * 1000);
     }
 }

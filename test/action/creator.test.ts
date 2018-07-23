@@ -9,16 +9,12 @@ test("actionCreator", () => {
     };
 
     class TestHandler extends Handler<typeof initialState> {
-        constructor() {
-            super("test", initialState);
-        }
-
         action1(name: string) {
-            return this.state();
+            return this.state;
         }
 
         action2() {
-            return this.state();
+            return this.state;
         }
 
         *action3(name: string): SagaIterator {
@@ -30,7 +26,7 @@ test("actionCreator", () => {
         }
     }
 
-    const actions = actionCreator(new TestHandler());
+    const actions = actionCreator(new TestHandler("test", initialState));
     const action1 = actions.action1("value");
     expect(action1.type).toEqual("test/action1");
     expect(action1.payload).toEqual(["value"]);

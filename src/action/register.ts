@@ -6,12 +6,7 @@ import {initStateAction} from "./init";
 import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 import {EffectHandler, ReducerHandler} from "./store";
 
-export function registerHandler(handler: Handler<any>, app: App): void {
-    if (app.namespaces.has(handler.namespace)) {
-        throw new Error(`namespace is already registered, namespace=${handler.namespace}`);
-    }
-    app.namespaces.add(handler.namespace);
-
+export function registerHandler(handler: Handler<any>, app: App) {
     const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"];
     keys.forEach(actionType => {
         const method = handler[actionType];
@@ -67,6 +62,8 @@ function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
 
     const onTick = listener.onTick as TickListener;
     if (onTick) {
-        yield* tick(effectHandler(onTick, handler), onTick.interval);
+        const tickHandler = effectHandler(onTick, handler) as TickListener;
+        tickHandler.interval = onTick.interval;
+        yield* tick(tickHandler);
     }
 }

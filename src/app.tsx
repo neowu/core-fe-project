@@ -11,7 +11,7 @@ import {Handler, handlerListener, run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {registerHandler} from "./action/register";
-import {HandlerStore} from "./action/store";
+import {HandlerStore, ReducerHandler} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {ERROR_ACTION_TYPE, errorAction} from "./exception";
 import {initialState, State} from "./state";
@@ -84,7 +84,7 @@ function* saga(handlers: HandlerStore): SagaIterator {
     });
 }
 
-function createRootReducer(handlers: HandlerStore): Reducer<State, Action<any>> {
+function rootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Reducer<State, Action<any>> {
     return (rootState: State = initialState, action: Action<any>): State => {
         const nextState: State = {...rootState};
 
@@ -98,7 +98,7 @@ function createRootReducer(handlers: HandlerStore): Reducer<State, Action<any>> 
             return nextState;
         }
 
-        const handler = handlers.reducers[action.type];
+        const handler = reducers[action.type];
         if (handler) {
             const nextAppState = {...nextState.app};
             nextAppState[handler.namespace!] = handler(...action.payload);
@@ -115,9 +115,8 @@ function createApp(): App {
 
     const history = createHistory();
     const handlers = new HandlerStore();
-
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State, Action<any>> = connectRouter(history)(createRootReducer(handlers) as Reducer<State>);
+    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer(handlers.reducers) as Reducer<State>);
     const store: Store<State, Action<any>> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     store.subscribe(handlerListener(store));
     sagaMiddleware.run(saga, handlers);
@@ -132,5 +131,9 @@ function createApp(): App {
 }
 
 export function register(handler: Handler<any>): void {
+    if (app.namespaces.has(handler.namespace)) {
+        throw new Error(`namespace is already registered, namespace=${handler.namespace}`);
+    }
+    app.namespaces.add(handler.namespace);
     return registerHandler(handler, app);
 }
