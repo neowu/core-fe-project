@@ -1,5 +1,7 @@
+import {LOCATION_CHANGE} from "connected-react-router";
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
+import {ERROR_ACTION_TYPE} from "../exception";
 import {App} from "../type";
 import {Handler, run} from "./handler";
 import {initStateAction} from "./init";
@@ -20,7 +22,6 @@ export function registerHandler(handler: Handler<any>, app: App) {
         }
     });
 
-    // initialize the state
     app.store.dispatch(initStateAction(handler.namespace, handler.resetState()));
     registerListener(handler, app);
 }
@@ -40,10 +41,10 @@ function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHand
 function registerListener(handler: Handler<any>, app: App) {
     const listener = handler as Listener;
     if (listener.onLocationChanged) {
-        app.handlers.onLocationChangeEffects.push(effectHandler(listener.onLocationChanged, handler));
+        app.handlers.listenerEffects[LOCATION_CHANGE].push(effectHandler(listener.onLocationChanged, handler));
     }
     if (listener.onError) {
-        app.handlers.onErrorEffects.push(effectHandler(listener.onError, handler));
+        app.handlers.listenerEffects[ERROR_ACTION_TYPE].push(effectHandler(listener.onError, handler));
     }
     app.sagaMiddleware.run(initializeListener, handler, app);
 }

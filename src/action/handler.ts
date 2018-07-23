@@ -9,7 +9,7 @@ import {EffectHandler} from "./store";
 
 let state = initialState;
 
-export abstract class Handler<S extends object> {
+export class Handler<S extends object> {
     readonly namespace: string;
     private readonly initialState: S;
 

@@ -64,22 +64,16 @@ function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
 
 function* saga(handlers: HandlerStore): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
-        switch (action.type) {
-            case LOCATION_CHANGE:
-                for (const handler of handlers.onLocationChangeEffects) {
-                    yield call(run, handler, action.payload);
-                }
-                break;
-            case ERROR_ACTION_TYPE:
-                for (const handler of handlers.onErrorEffects) {
-                    yield call(run, handler, action.payload);
-                }
-                break;
-            default:
-                const handler = handlers.effects[action.type];
-                if (handler) {
-                    yield call(run, handler, action.payload);
-                }
+        const listeners = handlers.listenerEffects[action.type];
+        if (listeners) {
+            for (const listener of listeners) {
+                yield call(run, listener, action.payload);
+            }
+            return;
+        }
+        const handler = handlers.effects[action.type];
+        if (handler) {
+            yield call(run, handler, action.payload);
         }
     });
 }

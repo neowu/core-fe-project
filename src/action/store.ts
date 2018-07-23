@@ -1,6 +1,6 @@
+import {LOCATION_CHANGE} from "connected-react-router";
 import {SagaIterator} from "redux-saga";
-import {Exception} from "../exception";
-import {LocationChangedEvent} from "./listener";
+import {ERROR_ACTION_TYPE} from "../exception";
 
 export type ReducerHandler<S> = ((...args: any[]) => S) & {
     namespace: string;
@@ -8,12 +8,12 @@ export type ReducerHandler<S> = ((...args: any[]) => S) & {
 export type EffectHandler = ((...args: any[]) => SagaIterator) & {
     loading?: string;
 };
-export type ErrorHandler = (error: Exception) => SagaIterator;
-export type LocationChangeHandler = (event: LocationChangedEvent) => SagaIterator;
 
 export class HandlerStore {
     readonly reducers: {[actionType: string]: ReducerHandler<any>} = {};
     readonly effects: {[actionType: string]: EffectHandler} = {};
-    readonly onErrorEffects: ErrorHandler[] = []; // TODO: merge following into listenerEffects to simplify
-    readonly onLocationChangeEffects: LocationChangeHandler[] = [];
+    readonly listenerEffects: {[actionType: string]: EffectHandler[]} = {
+        [LOCATION_CHANGE]: [],
+        [ERROR_ACTION_TYPE]: [],
+    };
 }
