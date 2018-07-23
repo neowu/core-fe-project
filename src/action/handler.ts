@@ -9,7 +9,7 @@ import {EffectHandler} from "./store";
 
 let state = initialState;
 
-export class Handler<S extends object> {
+export class Handler<S extends object, RS extends State = State> {
     readonly namespace: string;
     private readonly initialState: S;
 
@@ -22,8 +22,8 @@ export class Handler<S extends object> {
         return state.app[this.namespace];
     }
 
-    get rootState(): Readonly<State> {
-        return state;
+    get rootState(): Readonly<RS> {
+        return state as Readonly<RS>;
     }
 
     resetState(): S {

@@ -2,13 +2,20 @@ import {actionCreator} from "action/creator";
 import {Handler} from "action/handler";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
+import {State} from "state";
 
 test("actionCreator", () => {
     const initialState = {
         name: "value",
     };
 
-    class TestHandler extends Handler<typeof initialState> {
+    interface RootState extends State {
+        app: {
+            main: {};
+        };
+    }
+
+    class TestHandler extends Handler<typeof initialState, RootState> {
         action1(name: string) {
             return this.state;
         }
