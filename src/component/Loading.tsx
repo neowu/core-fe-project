@@ -1,7 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
 import {State} from "../state";
-import {showLoading} from "../action/loading";
 
 interface OwnProps {
     loading: string;
@@ -27,7 +26,7 @@ class Component extends React.PureComponent<Props> {
 }
 
 const mapStateToProps = (state: State, props: OwnProps) => ({
-    show: showLoading(state.loading, props.loading),
+    show: state.loading[props.loading] > 0,
 });
 
 export const Loading = connect(mapStateToProps)(Component);

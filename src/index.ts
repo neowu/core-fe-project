@@ -2,7 +2,7 @@ import "@babel/polyfill";
 
 export {render, register} from "./app";
 export {actionCreator} from "./action/creator";
-export {Handler} from "./action/handler";
+export {Handler, effect} from "./action/handler";
 export {Listener, LocationChangedEvent, interval} from "./action/listener";
 export {loading} from "./action/loading";
 export {callAJAX} from "./ajax/call";

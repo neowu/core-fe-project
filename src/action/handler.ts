@@ -35,6 +35,11 @@ export const handlerListener = (store: Store<State, Action<any>>) => () => {
     state = store.getState();
 };
 
+export function effect(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
+    const handler = descriptor.value;
+    handler.effect = true;
+}
+
 export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     try {
         if (handler.loading) {

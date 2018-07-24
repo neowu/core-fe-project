@@ -9,13 +9,12 @@ import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 import {EffectHandler, ReducerHandler} from "./store";
 
 export function registerHandler(handler: Handler<any>, app: App) {
-    const keys = [...Object.keys(Object.getPrototypeOf(handler)), "resetState"];
+    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"]; // in target js files there is always constructor
     keys.forEach(actionType => {
         const method = handler[actionType];
         const qualifiedActionType = `${handler.namespace}/${actionType}`;
 
-        const isGenerator = method.toString().indexOf('["__generator"]') > 0;
-        if (isGenerator) {
+        if (method.effect) {
             app.handlers.effects[qualifiedActionType] = effectHandler(method, handler);
         } else {
             app.handlers.reducers[qualifiedActionType] = reducerHandler(method, handler);

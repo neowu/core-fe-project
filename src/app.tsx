@@ -79,8 +79,8 @@ function* saga(handlers: HandlerStore): SagaIterator {
 }
 
 function rootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Reducer<State, Action<any>> {
-    return (rootState: State = initialState, action: Action<any>): State => {
-        const nextState: State = {...rootState};
+    return (state: State = initialState, action: Action<any>): State => {
+        const nextState: State = {...state};
 
         if (action.type === LOADING_ACTION_TYPE) {
             nextState.loading = loadingReducer(nextState.loading, action);
@@ -100,7 +100,7 @@ function rootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Red
             return nextState; // with our current design if action type is defined in handler, the state will always change
         }
 
-        return rootState;
+        return state;
     };
 }
 

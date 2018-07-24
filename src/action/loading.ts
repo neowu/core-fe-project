@@ -28,10 +28,6 @@ export function loadingReducer(state: LoadingState = {}, action: Action<LoadingA
     };
 }
 
-export function showLoading(state: LoadingState, loading: string): boolean {
-    return state[loading] > 0;
-}
-
 export function loading(loading: string): MethodDecorator {
     return (target, propertyKey, descriptor: TypedPropertyDescriptor<any>): void => {
         const handler: EffectHandler = descriptor.value;
