@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -29,9 +29,9 @@
   "dependencies": {
     "@babel/polyfill": "7.0.0-beta.54",
     "@types/node": "10.5.2",
-    "@types/react": "16.4.6",
+    "@types/react": "16.4.7",
     "@types/react-dom": "16.0.6",
-    "@types/react-redux": "6.0.4",
+    "@types/react-redux": "6.0.5",
     "@types/react-router-dom": "4.3.0",
     "axios": "0.18.0",
     "connected-react-router": "4.3.0",
@@ -45,9 +45,9 @@
   "peerDependencies": {
     "@babel/polyfill": "7.0.0-beta.54",
     "@types/node": "10.5.2",
-    "@types/react": "16.4.6",
+    "@types/react": "16.4.7",
     "@types/react-dom": "16.0.6",
-    "@types/react-redux": "6.0.4",
+    "@types/react-redux": "6.0.5",
     "@types/react-router-dom": "4.3.0",
     "axios": "0.18.0",
     "connected-react-router": "4.3.0",
