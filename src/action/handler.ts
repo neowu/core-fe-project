@@ -35,7 +35,7 @@ export const handlerListener = (store: Store<State, Action<any>>) => () => {
     state = store.getState();
 };
 
-export function effect(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
+export function effect(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void {
     const handler = descriptor.value;
     handler.effect = true;
 }
