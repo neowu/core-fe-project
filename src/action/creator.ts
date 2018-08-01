@@ -1,9 +1,8 @@
-import {Handler} from "./handler";
 import {Action} from "../type";
+import {Handler} from "./handler";
 import {Listener} from "./listener";
 
-type ActionCreatorX<P extends any[]> = (...args: P) => Action<P>;
-type ActionCreator<H> = H extends <P>(...args: infer P) => any ? ActionCreatorX<P> : never;
+type ActionCreator<H> = H extends <P>(...args: infer P) => any ? ((...args: P) => Action<P>) : never;
 
 export type ActionCreators<H> = {readonly [K in Exclude<keyof H, "state" | "rootState" | "namespace" | keyof Listener>]: ActionCreator<H[K]>};
 
