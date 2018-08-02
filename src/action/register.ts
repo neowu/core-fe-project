@@ -9,7 +9,7 @@ import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 import {EffectHandler, ReducerHandler} from "./store";
 
 export function registerHandler(handler: Handler<any>, app: App) {
-    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"]; // in target js files there is always constructor
+    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"]; // there is always constructor in handler regardless declared in js
     keys.forEach(actionType => {
         const method = handler[actionType];
         const qualifiedActionType = `${handler.namespace}/${actionType}`;
