@@ -9,8 +9,7 @@ import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
 import {EffectHandler, ReducerHandler} from "./store";
 
 export function registerHandler(handler: Handler<any>, app: App) {
-    const keys = [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"]; // there is always constructor in handler regardless declared in js
-    keys.forEach(actionType => {
+    keys(handler).forEach(actionType => {
         const method = handler[actionType];
         const qualifiedActionType = `${handler.namespace}/${actionType}`;
 
@@ -23,6 +22,10 @@ export function registerHandler(handler: Handler<any>, app: App) {
 
     app.store.dispatch(initStateAction(handler.namespace, handler.resetState()));
     registerListener(handler, app);
+}
+
+export function keys(handler: Handler<any>): string[] {
+    return [...Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor"), "resetState"]; // there is always constructor in handler regardless declared in js
 }
 
 function reducerHandler<S extends object>(method: (...args: any[]) => S, handler: Handler<S>): ReducerHandler<S> {
