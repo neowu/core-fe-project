@@ -1,81 +1,95 @@
 import {URLImpl} from "util/URL";
 
-const mockLocation = {
-    host: "127.0.0.1",
-    search: "",
-    pathname: "/",
-    hash: "",
-} as Location;
-
 test("queryString", () => {
-    mockLocation.search = "?test=foo%20bar";
-    expect(URLImpl.parseQueryString(mockLocation)).toEqual({
+    const location = {
+        host: "127.0.0.1",
+        search: "",
+        pathname: "/",
+        hash: "",
+    } as Location;
+
+    location.search = "?test=foo%20bar";
+    expect(URLImpl.parseQueryString(location)).toEqual({
         test: "foo bar",
     });
 
-    mockLocation.search = "?page=10&pageSize=30&showOldItem&name=abc";
-    expect(URLImpl.parseQueryString(mockLocation)).toEqual({
+    location.search = "?page=10&pageSize=30&showOldItem&name=abc";
+    expect(URLImpl.parseQueryString(location)).toEqual({
         page: "10",
         pageSize: "30",
         showOldItem: "",
         name: "abc",
     });
 
-    mockLocation.search = "";
-    expect(URLImpl.parseQueryString(mockLocation)).toEqual({});
+    location.search = "";
+    expect(URLImpl.parseQueryString(location)).toEqual({});
 });
 
 test("path", () => {
-    mockLocation.pathname = "/foo/12/bar/34/test/";
-    expect(URLImpl.path(mockLocation, "foo")).toEqual("12");
-    expect(URLImpl.path(mockLocation, "12")).toEqual(null);
-    expect(URLImpl.path(mockLocation, "bar")).toEqual("34");
-    expect(URLImpl.path(mockLocation, "34")).toEqual(null);
-    expect(URLImpl.path(mockLocation, "test")).toEqual("");
-    expect(URLImpl.path(mockLocation, "other")).toEqual(null);
+    const location = {
+        host: "127.0.0.1",
+        search: "",
+        pathname: "/",
+        hash: "",
+    } as Location;
 
-    mockLocation.pathname = "/foo/12///bar/34/test";
-    expect(URLImpl.path(mockLocation, "foo")).toEqual("12");
-    expect(URLImpl.path(mockLocation, "12")).toEqual(null);
-    expect(URLImpl.path(mockLocation, "bar")).toEqual("34");
-    expect(URLImpl.path(mockLocation, "34")).toEqual(null);
-    expect(URLImpl.path(mockLocation, "test")).toEqual("");
-    expect(URLImpl.path(mockLocation, "other")).toEqual(null);
+    location.pathname = "/foo/12/bar/34/test/";
+    expect(URLImpl.path(location, "foo")).toEqual("12");
+    expect(URLImpl.path(location, "12")).toEqual(null);
+    expect(URLImpl.path(location, "bar")).toEqual("34");
+    expect(URLImpl.path(location, "34")).toEqual(null);
+    expect(URLImpl.path(location, "test")).toEqual("");
+    expect(URLImpl.path(location, "other")).toEqual(null);
 
-    mockLocation.pathname = "/";
-    expect(URLImpl.path(mockLocation, "")).toEqual(null);
-    expect(URLImpl.path(mockLocation, "any")).toEqual(null);
+    location.pathname = "/foo/12///bar/34/test";
+    expect(URLImpl.path(location, "foo")).toEqual("12");
+    expect(URLImpl.path(location, "12")).toEqual(null);
+    expect(URLImpl.path(location, "bar")).toEqual("34");
+    expect(URLImpl.path(location, "34")).toEqual(null);
+    expect(URLImpl.path(location, "test")).toEqual("");
+    expect(URLImpl.path(location, "other")).toEqual(null);
 
-    mockLocation.pathname = "/test";
-    expect(URLImpl.path(mockLocation, "test")).toEqual("");
-    expect(URLImpl.path(mockLocation, "any")).toEqual(null);
+    location.pathname = "/";
+    expect(URLImpl.path(location, "")).toEqual(null);
+    expect(URLImpl.path(location, "any")).toEqual(null);
+
+    location.pathname = "/test";
+    expect(URLImpl.path(location, "test")).toEqual("");
+    expect(URLImpl.path(location, "any")).toEqual(null);
 });
 
 test("startWithPath", () => {
-    mockLocation.pathname = "/reg";
-    expect(URLImpl.startWithPath(mockLocation, "reg")).toEqual(true);
-    expect(URLImpl.startWithPath(mockLocation, "re")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "REG")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "reg2")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "other")).toEqual(false);
+    const location = {
+        host: "127.0.0.1",
+        search: "",
+        pathname: "/",
+        hash: "",
+    } as Location;
 
-    mockLocation.pathname = "/reg/123456";
-    expect(URLImpl.startWithPath(mockLocation, "reg")).toEqual(true);
-    expect(URLImpl.startWithPath(mockLocation, "re")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "REG")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "reg2")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "other")).toEqual(false);
+    location.pathname = "/reg";
+    expect(URLImpl.startWithPath(location, "reg")).toEqual(true);
+    expect(URLImpl.startWithPath(location, "re")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "REG")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "reg2")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "other")).toEqual(false);
 
-    mockLocation.pathname = "/reg/";
-    expect(URLImpl.startWithPath(mockLocation, "reg")).toEqual(true);
-    expect(URLImpl.startWithPath(mockLocation, "re")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "REG")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "reg2")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "other")).toEqual(false);
+    location.pathname = "/reg/123456";
+    expect(URLImpl.startWithPath(location, "reg")).toEqual(true);
+    expect(URLImpl.startWithPath(location, "re")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "REG")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "reg2")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "other")).toEqual(false);
 
-    mockLocation.pathname = "/test/reg/";
-    expect(URLImpl.startWithPath(mockLocation, "reg")).toEqual(false);
-    expect(URLImpl.startWithPath(mockLocation, "test")).toEqual(true);
-    expect(URLImpl.startWithPath(mockLocation, "test/reg")).toEqual(true);
-    expect(URLImpl.startWithPath(mockLocation, "other")).toEqual(false);
+    location.pathname = "/reg/";
+    expect(URLImpl.startWithPath(location, "reg")).toEqual(true);
+    expect(URLImpl.startWithPath(location, "re")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "REG")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "reg2")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "other")).toEqual(false);
+
+    location.pathname = "/test/reg/";
+    expect(URLImpl.startWithPath(location, "reg")).toEqual(false);
+    expect(URLImpl.startWithPath(location, "test")).toEqual(true);
+    expect(URLImpl.startWithPath(location, "test/reg")).toEqual(true);
+    expect(URLImpl.startWithPath(location, "other")).toEqual(false);
 });
