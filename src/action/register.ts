@@ -1,8 +1,8 @@
 import {LOCATION_CHANGE} from "connected-react-router";
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
-import {ERROR_ACTION_TYPE} from "../exception";
 import {App} from "../type";
+import {ERROR_ACTION_TYPE} from "./exception";
 import {Handler, run} from "./handler";
 import {initStateAction} from "./init";
 import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
@@ -37,6 +37,7 @@ function reducerHandler<S extends object>(method: (...args: any[]) => S, handler
 function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHandler {
     const boundMethod: EffectHandler = method.bind(handler);
     boundMethod.loading = method.loading;
+    boundMethod.beforeStartup = method.beforeStartup;
     return boundMethod;
 }
 
@@ -48,6 +49,7 @@ function registerListener(handler: Handler<any>, app: App) {
     if (listener.onError) {
         app.handlers.listenerEffects[ERROR_ACTION_TYPE].push(effectHandler(listener.onError, handler));
     }
+
     app.sagaMiddleware.run(initializeListener, handler, app);
 }
 

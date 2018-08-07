@@ -1,4 +1,4 @@
-import {Storage} from "util/Storage";
+import {StorageUtil} from "util/StorageUtil";
 
 class MockLocalStorage {
     private store: {} = {};
@@ -23,17 +23,17 @@ class MockLocalStorage {
 (global as any).localStorage = new MockLocalStorage();
 
 test("get", () => {
-    expect(Storage.get("not_existed_key")).toEqual(null);
+    expect(StorageUtil.get("not_existed_key")).toEqual(null);
 
     localStorage.setItem("key2", "invalidJSON");
-    expect(Storage.get("key2")).toEqual(null);
+    expect(StorageUtil.get("key2")).toEqual(null);
 });
 
 test("set", () => {
     const value = {name: "name", value: "value"};
-    Storage.set("key1", value);
-    expect(Storage.get("key1")).toEqual(value);
+    StorageUtil.set("key1", value);
+    expect(StorageUtil.get("key1")).toEqual(value);
 
-    Storage.set("key1", null);
-    expect(Storage.get("key1")).toEqual(null);
+    StorageUtil.set("key1", null);
+    expect(StorageUtil.get("key1")).toEqual(null);
 });

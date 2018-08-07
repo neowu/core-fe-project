@@ -1,4 +1,4 @@
-import {errorAction, NotFoundException, RuntimeException} from "exception";
+import {errorAction, NotFoundException, RuntimeException} from "action/exception";
 
 test("errorAction", () => {
     const notFoundException = new NotFoundException();

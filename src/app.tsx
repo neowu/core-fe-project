@@ -1,19 +1,29 @@
-import {ConnectedRouter, connectRouter, LOCATION_CHANGE, routerMiddleware} from "connected-react-router";
+import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
 import createHistory from "history/createBrowserHistory";
-import React, {ComponentType} from "react";
+import React, {ComponentType, ReactElement} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
+import {
+    applyMiddleware,
+    compose,
+    createStore,
+    Dispatch,
+    Middleware,
+    MiddlewareAPI,
+    Reducer,
+    Store,
+    StoreEnhancer
+} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
+import {errorAction} from "./action/exception";
 import {Handler, handlerListener, run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
 import {registerHandler} from "./action/register";
 import {HandlerStore, ReducerHandler} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
-import {ERROR_ACTION_TYPE, errorAction} from "./exception";
 import {initialState, State} from "./state";
 import {Action, App} from "./type";
 
@@ -21,9 +31,6 @@ console.time("[framework] initialized");
 const app = createApp();
 
 export function render(component: ComponentType<any>, container: string): void {
-    if (!component) {
-        throw new Error("component must not be null");
-    }
     const WithRouterComponent = withRouter(component);
     ReactDOM.render(
         <Provider store={app.store}>
@@ -34,6 +41,40 @@ export function render(component: ComponentType<any>, container: string): void {
             </ErrorBoundary>
         </Provider>,
         document.getElementById(container)
+    );
+    console.timeEnd("[framework] initialized");
+}
+
+export function renderWithStartup(component: ComponentType<any>, startupComponent: ReactElement<any> | null = null): void {
+    const rootElement: HTMLDivElement = document.createElement("div");
+    rootElement.id = "framework-app-root";
+    document.body.appendChild(rootElement);
+
+    if (startupComponent) {
+        const startupElement: HTMLDivElement = document.createElement("div");
+        startupElement.id = "framework-startup-overlay";
+        startupElement.style.position = "fixed";
+        startupElement.style.top = "0";
+        startupElement.style.left = "0";
+        startupElement.style.backgroundColor = "#fff";
+        startupElement.style.width = "100%";
+        startupElement.style.height = "100%";
+        startupElement.style.zIndex = "9999";
+        document.body.appendChild(startupElement);
+
+        ReactDOM.render(startupComponent, startupElement);
+    }
+
+    const WithRouterComponent = withRouter(component);
+    ReactDOM.render(
+        <Provider store={app.store}>
+            <ErrorBoundary>
+                <ConnectedRouter history={app.history}>
+                    <WithRouterComponent />
+                </ConnectedRouter>
+            </ErrorBoundary>
+        </Provider>,
+        rootElement
     );
     console.timeEnd("[framework] initialized");
 }

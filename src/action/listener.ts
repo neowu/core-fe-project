@@ -1,7 +1,7 @@
 import {Action as HistoryAction, Location} from "history";
 import {delay, SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
-import {Exception} from "../exception";
+import {Exception} from "./exception";
 import {run} from "./handler";
 
 export interface Listener {

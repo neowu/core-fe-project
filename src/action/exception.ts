@@ -1,4 +1,4 @@
-import {Action} from "./type";
+import {Action} from "../type";
 
 export abstract class Exception {
     protected constructor(public message: string) {}
