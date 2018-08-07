@@ -37,7 +37,7 @@ function reducerHandler<S extends object>(method: (...args: any[]) => S, handler
 function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHandler {
     const boundMethod: EffectHandler = method.bind(handler);
     boundMethod.loading = method.loading;
-    boundMethod.beforeStartup = method.beforeStartup;
+    boundMethod.appInitialized = method.appInitialized;
     return boundMethod;
 }
 

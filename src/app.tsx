@@ -4,17 +4,7 @@ import React, {ComponentType, ReactElement} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {
-    applyMiddleware,
-    compose,
-    createStore,
-    Dispatch,
-    Middleware,
-    MiddlewareAPI,
-    Reducer,
-    Store,
-    StoreEnhancer
-} from "redux";
+import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/exception";
@@ -30,22 +20,11 @@ import {Action, App} from "./type";
 console.time("[framework] initialized");
 const app = createApp();
 
-export function render(component: ComponentType<any>, container: string): void {
-    const WithRouterComponent = withRouter(component);
-    ReactDOM.render(
-        <Provider store={app.store}>
-            <ErrorBoundary>
-                <ConnectedRouter history={app.history}>
-                    <WithRouterComponent />
-                </ConnectedRouter>
-            </ErrorBoundary>
-        </Provider>,
-        document.getElementById(container)
-    );
-    console.timeEnd("[framework] initialized");
+export function render(component: ComponentType<any>): void {
+    renderWithStartup(component, null);
 }
 
-export function renderWithStartup(component: ComponentType<any>, startupComponent: ReactElement<any> | null = null): void {
+export function renderWithStartup(component: ComponentType<any>, startupComponent: ReactElement<any> | null): void {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);

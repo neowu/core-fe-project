@@ -41,9 +41,9 @@ export function effect(target: any, propertyKey: string, descriptor: TypedProper
     handler.effect = true;
 }
 
-export function beforeStartup(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void {
+export function appInitialized(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void {
     const handler = descriptor.value;
-    handler.beforeStartup = true;
+    handler.appInitialized = true;
 }
 
 export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
@@ -59,7 +59,7 @@ export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
             yield put(loadingAction(handler.loading, false));
         }
 
-        if (handler.beforeStartup) {
+        if (handler.appInitialized) {
             // Remove global Startup overlay
             setTimeout(() => {
                 const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");

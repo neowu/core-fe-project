@@ -7,7 +7,7 @@ export type ReducerHandler<S> = ((...args: any[]) => S) & {
 };
 export type EffectHandler = ((...args: any[]) => SagaIterator) & {
     loading?: string;
-    beforeStartup?: boolean;
+    appInitialized?: boolean;
 };
 
 export class HandlerStore {
