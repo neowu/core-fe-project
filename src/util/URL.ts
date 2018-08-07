@@ -1,8 +1,4 @@
-/**
- * URLUtilWithLocation class is only for unit test.
- * Because location cannot be correctly retrieved from global context.
- */
-export class URLUtilWithLocation {
+export class URLImpl {
     /**
      * If current query string is ?page=10&pageSize=30&showOldItem&name=abc
      * This function returns following object:
@@ -36,7 +32,7 @@ export class URLUtilWithLocation {
      * (4) Input: "12", Output: null
      * (5) Input: <anything else>, Output: null
      */
-    static parsePath(location: Location, pathSegmentName: string): string | null {
+    static path(location: Location, pathSegmentName: string): string | null {
         const currentPathSegments = location.pathname.split("/").filter(_ => _);
         for (let i = 0; i < currentPathSegments.length; i += 2) {
             if (pathSegmentName === currentPathSegments[i]) {
@@ -58,16 +54,16 @@ export class URLUtilWithLocation {
     }
 }
 
-export class URLUtil {
-    static parseQueryString(): {[name: string]: string} {
-        return URLUtilWithLocation.parseQueryString(location);
+export class URL {
+    static queryString(): {[name: string]: string} {
+        return URLImpl.parseQueryString(location);
     }
 
-    static parsePath(pathSegmentName: string): string | null {
-        return URLUtilWithLocation.parsePath(location, pathSegmentName);
+    static path(pathSegmentName: string): string | null {
+        return URLImpl.path(location, pathSegmentName);
     }
 
     static startWithPath(pathName: string): boolean {
-        return URLUtilWithLocation.startWithPath(location, pathName);
+        return URLImpl.startWithPath(location, pathName);
     }
 }

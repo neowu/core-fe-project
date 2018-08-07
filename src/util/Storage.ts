@@ -1,4 +1,4 @@
-export class StorageUtil {
+export class Storage {
     static set(key: string, data: any) {
         if (data) {
             localStorage.setItem(key, JSON.stringify(data));

@@ -11,8 +11,8 @@ export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";
 export {Loading} from "./component/Loading";
 export {NotFoundException} from "./exception";
-export {StorageUtil} from "./util/StorageUtil";
-export {URLUtil} from "./util/URLUtil";
+export {Storage} from "./util/Storage";
+export {URL} from "./util/URL";
 
 import {Listener, LocationChangedEvent} from "./action/listener";
 import {State} from "./state";
