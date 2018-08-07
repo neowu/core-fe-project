@@ -7,7 +7,7 @@ import {withRouter} from "react-router-dom";
 import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
-import {errorAction} from "./action/exception";
+import {errorAction} from "./action/error";
 import {Handler, handlerListener, run} from "./action/handler";
 import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
 import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
@@ -25,7 +25,7 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    const renderRoot = () => {
+    const renderApp = () => {
         const WithRouterComponent = withRouter(component);
         ReactDOM.render(
             <Provider store={app.store}>
@@ -41,6 +41,7 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
     };
 
     if (startupComponent) {
+        app.startup = true;
         const startupElement: HTMLDivElement = document.createElement("div");
         startupElement.id = "framework-startup-overlay";
         startupElement.style.position = "fixed";
@@ -52,9 +53,9 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
         startupElement.style.zIndex = "9999";
         document.body.appendChild(startupElement);
 
-        ReactDOM.render(startupComponent, startupElement, renderRoot);
+        ReactDOM.render(startupComponent, startupElement, renderApp);
     } else {
-        renderRoot();
+        renderApp();
     }
 }
 
@@ -141,7 +142,7 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}};
+    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}, startup: null};
 }
 
 export function register(handler: Handler<any>): void {

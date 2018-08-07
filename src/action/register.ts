@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
 import {App} from "../type";
-import {ERROR_ACTION_TYPE} from "./exception";
+import {ERROR_ACTION_TYPE} from "./error";
 import {Handler, run} from "./handler";
 import {initStateAction} from "./init";
 import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
@@ -65,10 +65,10 @@ function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
         yield call(run, effectHandler(listener.onLocationChanged, handler), [event]); // history listener won't trigger on first refresh or on module loading, manual trigger once
     }
 
-    // Remove global Startup overlay
+    // remove startup overlay
     app.moduleLoaded[handler.namespace] = true;
-    const everyModuleLoaded = Object.values(app.moduleLoaded).every(_ => _);
-    if (everyModuleLoaded) {
+    if (app.startup && Object.values(app.moduleLoaded).every(_ => _)) {
+        app.startup = false;
         setTimeout(() => {
             const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");
             if (startupElement && startupElement.parentNode) {

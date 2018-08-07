@@ -1,8 +1,5 @@
+import {Exception, RuntimeException} from "../exception";
 import {Action} from "../type";
-
-export abstract class Exception {
-    protected constructor(public message: string) {}
-}
 
 export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
@@ -16,16 +13,4 @@ export function errorAction(error: any): Action<Exception> {
         type: ERROR_ACTION_TYPE,
         payload: exception,
     };
-}
-
-export class NotFoundException extends Exception {
-    constructor() {
-        super(`not found, url=${location.href}`);
-    }
-}
-
-export class RuntimeException extends Exception {
-    constructor(message: string, public error: Error | null) {
-        super(message);
-    }
 }

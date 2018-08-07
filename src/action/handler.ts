@@ -3,7 +3,7 @@ import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {initialState, State} from "../state";
 import {Action} from "../type";
-import {errorAction} from "./exception";
+import {errorAction} from "./error";
 import {loadingAction} from "./loading";
 import {EffectHandler} from "./store";
 

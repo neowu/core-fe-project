@@ -1,5 +1,5 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
-import {Exception} from "../action/exception";
+import {Exception} from "../exception";
 
 export class APIException extends Exception {
     constructor(message: string, public statusCode: number | null, public requestURL: string, public responseData: object | null) {

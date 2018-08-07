@@ -1,6 +1,6 @@
 import {LOCATION_CHANGE} from "connected-react-router";
 import {SagaIterator} from "redux-saga";
-import {ERROR_ACTION_TYPE} from "./exception";
+import {ERROR_ACTION_TYPE} from "./error";
 
 export type ReducerHandler<S> = ((...args: any[]) => S) & {
     namespace: string;
