@@ -1,4 +1,4 @@
-import {callWithResult} from "call";
+import {call as callWithResult} from "call";
 
 test("callAJAX", () => {
     const ajax = (request: string): Promise<string> => Promise.resolve(request);

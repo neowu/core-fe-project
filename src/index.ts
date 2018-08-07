@@ -1,10 +1,10 @@
 import "@babel/polyfill";
 
-export {render, renderWithStartup, register} from "./app";
+export {render, register} from "./app";
 export {actionCreator} from "./action/creator";
-export {Handler, effect, appInitialized} from "./action/handler";
+export {Handler, effect} from "./action/handler";
 export {loading} from "./action/loading";
-export {callWithResult} from "./call";
+export {call} from "./call";
 export {ajax, APIException} from "./ajax/client";
 export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";

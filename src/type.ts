@@ -13,5 +13,5 @@ export interface App {
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly handlers: HandlerStore;
-    readonly namespaces: Set<string>;
+    readonly moduleLoaded: {[moduleName: string]: boolean};
 }

@@ -1,4 +1,5 @@
 import {LOCATION_CHANGE} from "connected-react-router";
+import ReactDOM from "react-dom";
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
 import {App} from "../type";
@@ -37,7 +38,6 @@ function reducerHandler<S extends object>(method: (...args: any[]) => S, handler
 function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHandler {
     const boundMethod: EffectHandler = method.bind(handler);
     boundMethod.loading = method.loading;
-    boundMethod.appInitialized = method.appInitialized;
     return boundMethod;
 }
 
@@ -63,6 +63,19 @@ function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
     if (listener.onLocationChanged) {
         const event: LocationChangedEvent = {location: app.history.location, action: "PUSH"};
         yield call(run, effectHandler(listener.onLocationChanged, handler), [event]); // history listener won't trigger on first refresh or on module loading, manual trigger once
+    }
+
+    // Remove global Startup overlay
+    app.moduleLoaded[handler.namespace] = true;
+    const everyModuleLoaded = Object.values(app.moduleLoaded).every(_ => _);
+    if (everyModuleLoaded) {
+        setTimeout(() => {
+            const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");
+            if (startupElement && startupElement.parentNode) {
+                ReactDOM.unmountComponentAtNode(startupElement);
+                startupElement.parentNode.removeChild(startupElement);
+            }
+        }, 10);
     }
 
     const onTick = listener.onTick as TickListener;

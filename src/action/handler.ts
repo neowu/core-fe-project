@@ -1,4 +1,3 @@
-import ReactDOM from "react-dom";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
@@ -41,11 +40,6 @@ export function effect(target: any, propertyKey: string, descriptor: TypedProper
     handler.effect = true;
 }
 
-export function appInitialized(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void {
-    const handler = descriptor.value;
-    handler.appInitialized = true;
-}
-
 export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     try {
         if (handler.loading) {
@@ -57,17 +51,6 @@ export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     } finally {
         if (handler.loading) {
             yield put(loadingAction(handler.loading, false));
-        }
-
-        if (handler.appInitialized) {
-            // Remove global Startup overlay
-            setTimeout(() => {
-                const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");
-                if (startupElement && startupElement.parentNode) {
-                    ReactDOM.unmountComponentAtNode(startupElement);
-                    startupElement.parentNode.removeChild(startupElement);
-                }
-            }, 10);
         }
     }
 }

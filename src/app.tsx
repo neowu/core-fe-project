@@ -20,14 +20,25 @@ import {Action, App} from "./type";
 console.time("[framework] initialized");
 const app = createApp();
 
-export function render(component: ComponentType<any>): void {
-    renderWithStartup(component, null);
-}
-
-export function renderWithStartup(component: ComponentType<any>, startupComponent: ReactElement<any> | null): void {
+export function render(component: ComponentType<any>, startupComponent: ReactElement<any> | null = null): void {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
+
+    const renderRoot = () => {
+        const WithRouterComponent = withRouter(component);
+        ReactDOM.render(
+            <Provider store={app.store}>
+                <ErrorBoundary>
+                    <ConnectedRouter history={app.history}>
+                        <WithRouterComponent />
+                    </ConnectedRouter>
+                </ErrorBoundary>
+            </Provider>,
+            rootElement
+        );
+        console.timeEnd("[framework] initialized");
+    };
 
     if (startupComponent) {
         const startupElement: HTMLDivElement = document.createElement("div");
@@ -41,21 +52,10 @@ export function renderWithStartup(component: ComponentType<any>, startupComponen
         startupElement.style.zIndex = "9999";
         document.body.appendChild(startupElement);
 
-        ReactDOM.render(startupComponent, startupElement);
+        ReactDOM.render(startupComponent, startupElement, renderRoot);
+    } else {
+        renderRoot();
     }
-
-    const WithRouterComponent = withRouter(component);
-    ReactDOM.render(
-        <Provider store={app.store}>
-            <ErrorBoundary>
-                <ConnectedRouter history={app.history}>
-                    <WithRouterComponent />
-                </ConnectedRouter>
-            </ErrorBoundary>
-        </Provider>,
-        rootElement
-    );
-    console.timeEnd("[framework] initialized");
 }
 
 function devtools(enhancer: StoreEnhancer): StoreEnhancer {
@@ -141,13 +141,15 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, handlers, namespaces: new Set<string>()};
+    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}};
 }
 
 export function register(handler: Handler<any>): void {
-    if (app.namespaces.has(handler.namespace)) {
+    if (app.moduleLoaded.hasOwnProperty(handler.namespace)) {
         throw new Error(`namespace is already registered, namespace=${handler.namespace}`);
     }
-    app.namespaces.add(handler.namespace);
+
+    app.moduleLoaded[handler.namespace] = false;
+
     return registerHandler(handler, app);
 }
