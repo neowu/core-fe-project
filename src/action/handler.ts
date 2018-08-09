@@ -1,7 +1,7 @@
-import {setStateAction, SetStateActionPayload} from "./setState";
+import {setStateAction} from "./setState";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
-import {put, PutEffect} from "redux-saga/effects";
+import {put} from "redux-saga/effects";
 import {initialState, State} from "../state";
 import {Action} from "../type";
 import {errorAction} from "./error";
