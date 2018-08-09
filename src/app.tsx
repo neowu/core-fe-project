@@ -36,8 +36,7 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
                 </ErrorBoundary>
             </Provider>,
             rootElement,
-            // Initialization usually takes around 120-150ms
-            () => console.timeEnd("[framework] initialized")
+            () => console.timeEnd("[framework] initialized") // Initialization usually takes around 120-150ms
         );
     };
 

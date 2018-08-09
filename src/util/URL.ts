@@ -9,7 +9,7 @@ export class URLImpl {
      *          name: "abc",
      *      }
      */
-    static parseQueryString(location: Location): {[name: string]: string} {
+    static queryString(location: Location): {[name: string]: string} {
         const queryString = location.search;
         const query = {};
         (queryString[0] === "?" ? queryString.substr(1) : queryString)
@@ -52,18 +52,11 @@ export class URLImpl {
     static startWithPath(location: Location, pathName: string): boolean {
         return location.pathname === `/${pathName}` || location.pathname.indexOf(`/${pathName}/`) === 0;
     }
-
-    /**
-     * Return protocol://domain(:port)
-     */
-    static domainWithProtocol(location: Location): string {
-        return location.origin;
-    }
 }
 
 export class URL {
     static queryString(): {[name: string]: string} {
-        return URLImpl.parseQueryString(location);
+        return URLImpl.queryString(location);
     }
 
     static path(pathSegmentName: string): string | null {
@@ -72,9 +65,5 @@ export class URL {
 
     static startWithPath(pathName: string): boolean {
         return URLImpl.startWithPath(location, pathName);
-    }
-
-    static domainWithProtocol(): string {
-        return URLImpl.domainWithProtocol(location);
     }
 }

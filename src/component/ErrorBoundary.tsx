@@ -19,9 +19,7 @@ interface State {
 }
 
 class Component extends React.PureComponent<Props, State> {
-    static defaultProps: Pick<Props, "render"> = {
-        render: exception => <h2>render failed: {exception.message}</h2>,
-    };
+    static defaultProps: Pick<Props, "render"> = {render: exception => <h2>render failed: {exception.message}</h2>};
     state: State = {};
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {

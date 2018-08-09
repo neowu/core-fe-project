@@ -9,12 +9,12 @@ test("queryString", () => {
     } as Location;
 
     location.search = "?test=foo%20bar";
-    expect(URLImpl.parseQueryString(location)).toEqual({
+    expect(URLImpl.queryString(location)).toEqual({
         test: "foo bar",
     });
 
     location.search = "?page=10&pageSize=30&showOldItem&name=abc";
-    expect(URLImpl.parseQueryString(location)).toEqual({
+    expect(URLImpl.queryString(location)).toEqual({
         page: "10",
         pageSize: "30",
         showOldItem: "",
@@ -22,7 +22,7 @@ test("queryString", () => {
     });
 
     location.search = "";
-    expect(URLImpl.parseQueryString(location)).toEqual({});
+    expect(URLImpl.queryString(location)).toEqual({});
 });
 
 test("path", () => {

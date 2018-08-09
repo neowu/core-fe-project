@@ -9,7 +9,7 @@ test("actionCreator", () => {
     const initialState = {
         name: "value",
         digit: 10,
-        isGood: true,
+        condition: true,
     };
 
     interface RootState extends State {
@@ -21,7 +21,7 @@ test("actionCreator", () => {
     class TestHandler extends Handler<typeof initialState, RootState> implements Listener {
         *effect1(name: string): SagaIterator {
             yield call(delay, 300);
-            yield this.setState({name, isGood: false});
+            yield this.setState({name, condition: false});
         }
 
         *effect2(): SagaIterator {
@@ -42,7 +42,6 @@ test("actionCreator", () => {
     }
 
     const actions = actionCreator(new TestHandler("test", initialState));
-
     const effect1 = actions.effect1("value");
     expect(effect1.type).toEqual("test/effect1");
     expect(effect1.payload).toEqual(["value"]);
