@@ -1,6 +1,7 @@
+import {setStateAction, SetStateActionPayload} from "./setState";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
-import {put} from "redux-saga/effects";
+import {put, PutEffect} from "redux-saga/effects";
 import {initialState, State} from "../state";
 import {Action} from "../type";
 import {errorAction} from "./error";
@@ -26,19 +27,18 @@ export class Handler<S extends object, R extends State = State> {
         return state as Readonly<R>;
     }
 
-    resetState(): S {
-        return this.initialState;
+    resetState(): PutEffect<Action<SetStateActionPayload>> {
+        return put(setStateAction(this.namespace, this.initialState));
+    }
+
+    setState(newState: Partial<S>): PutEffect<Action<SetStateActionPayload>> {
+        return put(setStateAction(this.namespace, newState));
     }
 }
 
 export const handlerListener = (store: Store<State, Action<any>>) => () => {
     state = store.getState();
 };
-
-export function effect(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void {
-    const handler = descriptor.value;
-    handler.effect = true;
-}
 
 export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     try {

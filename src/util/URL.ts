@@ -52,6 +52,13 @@ export class URLImpl {
     static startWithPath(location: Location, pathName: string): boolean {
         return location.pathname === `/${pathName}` || location.pathname.indexOf(`/${pathName}/`) === 0;
     }
+
+    /**
+     * Return protocol://domain(:port)
+     */
+    static domainWithProtocol(location: Location): string {
+        return location.origin;
+    }
 }
 
 export class URL {
@@ -65,5 +72,9 @@ export class URL {
 
     static startWithPath(pathName: string): boolean {
         return URLImpl.startWithPath(location, pathName);
+    }
+
+    static domainWithProtocol(): string {
+        return URLImpl.domainWithProtocol(location);
     }
 }

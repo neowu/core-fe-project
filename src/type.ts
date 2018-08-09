@@ -14,5 +14,4 @@ export interface App {
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly handlers: HandlerStore;
     readonly moduleLoaded: {[moduleName: string]: boolean};
-    startup: boolean | null;
 }

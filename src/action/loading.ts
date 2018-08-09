@@ -5,7 +5,7 @@ export interface LoadingState {
     [loading: string]: number; // use number to track loading status, because for global action type, there may be multiple effects listen to it, hide loading component when status reduce to 0
 }
 
-interface LoadingActionPayload {
+export interface LoadingActionPayload {
     loading: string;
     show: boolean;
 }

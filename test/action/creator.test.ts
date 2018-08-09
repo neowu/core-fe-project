@@ -1,12 +1,15 @@
 import {actionCreator} from "action/creator";
 import {Handler} from "action/handler";
-import {SagaIterator} from "redux-saga";
-import {put} from "redux-saga/effects";
+import {Listener} from "action/listener";
+import {SagaIterator, delay} from "redux-saga";
+import {put, call} from "redux-saga/effects";
 import {State} from "state";
 
 test("actionCreator", () => {
     const initialState = {
         name: "value",
+        digit: 10,
+        isGood: true,
     };
 
     interface RootState extends State {
@@ -15,34 +18,39 @@ test("actionCreator", () => {
         };
     }
 
-    class TestHandler extends Handler<typeof initialState, RootState> {
-        action1(name: string) {
-            return this.state;
+    class TestHandler extends Handler<typeof initialState, RootState> implements Listener {
+        *effect1(name: string): SagaIterator {
+            yield call(delay, 300);
+            yield this.setState({name, isGood: false});
         }
 
-        action2() {
-            return this.state;
+        *effect2(): SagaIterator {
+            const value = this.nonGenerator();
+            yield put(actions.effect1(value.toString()));
+            yield this.resetState();
         }
 
-        *action3(name: string): SagaIterator {
-            yield put(actions.action1(name));
+        // We cannot get actions.onInitialized
+        *onInitialized(): SagaIterator {
+            yield call(delay, 10);
         }
 
-        *action4(): SagaIterator {
-            yield put(actions.action2());
+        // Un-callable via actions.nonGenerator, but can be used in this.nonGenerator()
+        nonGenerator(): number {
+            return 10;
         }
     }
 
     const actions = actionCreator(new TestHandler("test", initialState));
-    const action1 = actions.action1("value");
-    expect(action1.type).toEqual("test/action1");
-    expect(action1.payload).toEqual(["value"]);
 
-    const action2 = actions.action2();
-    expect(action2.type).toEqual("test/action2");
-    expect(action2.payload).toEqual([]);
+    const effect1 = actions.effect1("value");
+    expect(effect1.type).toEqual("test/effect1");
+    expect(effect1.payload).toEqual(["value"]);
 
-    const resetAction = actions.resetState();
-    expect(resetAction.type).toEqual("test/resetState");
-    expect(resetAction.payload).toEqual([]);
+    const effect2 = actions.effect2();
+    expect(effect2.type).toEqual("test/effect2");
+    expect(effect2.payload).toEqual([]);
+
+    // The following code triggers error
+    // actions.nonGenerator();
 });

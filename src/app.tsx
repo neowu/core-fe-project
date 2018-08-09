@@ -9,10 +9,10 @@ import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/error";
 import {Handler, handlerListener, run} from "./action/handler";
-import {INIT_STATE_ACTION_TYPE, initStateReducer} from "./action/init";
-import {LOADING_ACTION_TYPE, loadingReducer} from "./action/loading";
+import {SET_STATE_ACTION_TYPE, setStateReducer, SetStateActionPayload} from "./action/setState";
+import {LOADING_ACTION_TYPE, LoadingActionPayload, loadingReducer} from "./action/loading";
 import {registerHandler} from "./action/register";
-import {HandlerStore, ReducerHandler} from "./action/store";
+import {HandlerStore} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {initialState, State} from "./state";
 import {Action, App} from "./type";
@@ -35,13 +35,13 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
                     </ConnectedRouter>
                 </ErrorBoundary>
             </Provider>,
-            rootElement
+            rootElement,
+            // Initialization usually takes around 120-150ms
+            () => console.timeEnd("[framework] initialized")
         );
-        console.timeEnd("[framework] initialized");
     };
 
     if (startupComponent) {
-        app.startup = true;
         const startupElement: HTMLDivElement = document.createElement("div");
         startupElement.id = "framework-startup-overlay";
         startupElement.style.position = "fixed";
@@ -99,26 +99,16 @@ function* saga(handlers: HandlerStore): SagaIterator {
     });
 }
 
-function rootReducer(reducers: {[actionType: string]: ReducerHandler<any>}): Reducer<State, Action<any>> {
-    return (state: State = initialState, action: Action<any>): State => {
-        const nextState: State = {...state};
-
+function rootReducer(): Reducer<State> {
+    return (state: State = initialState, action): State => {
         if (action.type === LOADING_ACTION_TYPE) {
-            nextState.loading = loadingReducer(nextState.loading, action);
+            const nextState: State = {...state};
+            nextState.loading = loadingReducer(nextState.loading, action as Action<LoadingActionPayload>);
             return nextState;
-        }
-
-        if (action.type === INIT_STATE_ACTION_TYPE) {
-            nextState.app = initStateReducer(nextState.app, action);
+        } else if (action.type === SET_STATE_ACTION_TYPE) {
+            const nextState: State = {...state};
+            nextState.app = setStateReducer(nextState.app, action as Action<SetStateActionPayload>);
             return nextState;
-        }
-
-        const handler = reducers[action.type];
-        if (handler) {
-            const nextAppState = {...nextState.app};
-            nextAppState[handler.namespace!] = handler(...action.payload);
-            nextState.app = nextAppState;
-            return nextState; // with our current design if action type is defined in handler, the state will always change
         }
 
         return state;
@@ -131,7 +121,7 @@ function createApp(): App {
     const history = createHistory();
     const handlers = new HandlerStore();
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer(handlers.reducers) as Reducer<State>);
+    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer());
     const store: Store<State, Action<any>> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     store.subscribe(handlerListener(store));
     sagaMiddleware.run(saga, handlers);
@@ -142,7 +132,7 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}, startup: null};
+    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}};
 }
 
 export function register(handler: Handler<any>): void {
@@ -151,6 +141,5 @@ export function register(handler: Handler<any>): void {
     }
 
     app.moduleLoaded[handler.namespace] = false;
-
     return registerHandler(handler, app);
 }
