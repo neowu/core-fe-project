@@ -15,7 +15,8 @@ export function setStateAction(namespace: string, state: object): Action<SetStat
     };
 }
 
-export function setStateReducer(state: State["app"] = {}, action: Action<SetStateActionPayload>): State["app"] {
-    const {namespace, state: initialState} = action.payload;
-    return {...state, [namespace]: initialState};
+type StateOfApp = State["app"];
+export function setStateReducer(prevState: StateOfApp = {}, action: Action<SetStateActionPayload>): StateOfApp {
+    const {namespace, state} = action.payload;
+    return {...prevState, [namespace]: {...prevState[namespace], ...state}};
 }
