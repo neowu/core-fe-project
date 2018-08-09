@@ -19,20 +19,20 @@ export class Handler<S extends object, R extends State = State> {
         this.initialState = initialState;
     }
 
-    get state(): Readonly<S> {
+    protected get state(): Readonly<S> {
         return state.app[this.namespace];
     }
 
-    get rootState(): Readonly<R> {
+    protected get rootState(): Readonly<R> {
         return state as Readonly<R>;
     }
 
-    resetState(): PutEffect<Action<SetStateActionPayload>> {
-        return put(setStateAction(this.namespace, this.initialState));
+    protected *resetState(): SagaIterator {
+        yield put(setStateAction(this.namespace, this.initialState));
     }
 
-    setState(newState: Partial<S>): PutEffect<Action<SetStateActionPayload>> {
-        return put(setStateAction(this.namespace, newState));
+    protected *setState(newState: Partial<S>): SagaIterator {
+        yield put(setStateAction(this.namespace, newState));
     }
 }
 

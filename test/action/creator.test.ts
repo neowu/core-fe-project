@@ -21,13 +21,13 @@ test("actionCreator", () => {
     class TestHandler extends Handler<typeof initialState, RootState> implements Listener {
         *effect1(name: string): SagaIterator {
             yield call(delay, 300);
-            yield this.setState({name, condition: false});
+            yield* this.setState({name, condition: false});
         }
 
         *effect2(): SagaIterator {
             const value = this.nonGenerator();
             yield put(actions.effect1(value.toString()));
-            yield this.resetState();
+            yield* this.resetState();
         }
 
         // We cannot get actions.onInitialized
