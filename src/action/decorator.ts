@@ -8,7 +8,11 @@ export function createEffectMethodDecorator<S extends State = State>(handler: (o
         const originalHandler: EffectHandler = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
             const rootState: S = (target as any).rootState;
-            yield* handler(originalHandler.bind(this, ...args), rootState);
+            if (rootState) {
+                yield* handler(originalHandler.bind(this, ...args), rootState);
+            } else {
+                throw new Error("method decorator must be applied on generator functions within ActionHandler");
+            }
         };
 
         return descriptor;
