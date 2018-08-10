@@ -42,15 +42,8 @@ export const handlerListener = (store: Store<State, Action<any>>) => () => {
 
 export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
     try {
-        if (handler.loading) {
-            yield put(loadingAction(handler.loading, true));
-        }
         yield* handler(...payload);
     } catch (error) {
         yield put(errorAction(error));
-    } finally {
-        if (handler.loading) {
-            yield put(loadingAction(handler.loading, false));
-        }
     }
 }

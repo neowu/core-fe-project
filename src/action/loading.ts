@@ -1,5 +1,6 @@
+import {createEffectMethodDecorator} from "./decorator";
+import {put} from "redux-saga/effects";
 import {Action} from "../type";
-import {EffectHandler} from "./store";
 
 export interface LoadingState {
     [loading: string]: number; // use number to track loading status, because for global action type, there may be multiple effects listen to it, hide loading component when status reduce to 0
@@ -28,9 +29,15 @@ export function loadingReducer(state: LoadingState = {}, action: Action<LoadingA
     };
 }
 
-export function loading(loading: string): MethodDecorator {
-    return (target, propertyKey, descriptor: TypedPropertyDescriptor<any>): void => {
-        const handler: EffectHandler = descriptor.value;
-        handler.loading = loading;
-    };
+// Decorated function must be a generator
+// Ref: https://github.com/Microsoft/TypeScript/issues/17936
+export function loading(loading: string) {
+    return createEffectMethodDecorator(function*(originalEffect) {
+        try {
+            yield put(loadingAction(loading, true));
+            yield* originalEffect();
+        } finally {
+            yield put(loadingAction(loading, false));
+        }
+    });
 }

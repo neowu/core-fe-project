@@ -29,7 +29,6 @@ export function keys(handler: Handler<any>): string[] {
 
 function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHandler {
     const boundMethod: EffectHandler = method.bind(handler);
-    boundMethod.loading = method.loading;
     return boundMethod;
 }
 
