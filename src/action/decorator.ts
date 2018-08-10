@@ -11,7 +11,7 @@ export function createEffectMethodDecorator<S extends State = State>(handler: (o
             if (rootState) {
                 yield* handler(originalHandler.bind(this, ...args), rootState);
             } else {
-                throw new Error("method decorator must be applied on generator functions within ActionHandler");
+                throw new Error("method decorator must be applied for ActionHandler generators");
             }
         };
 
