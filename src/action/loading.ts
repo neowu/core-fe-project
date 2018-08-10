@@ -1,4 +1,4 @@
-import {createEffectMethodDecorator} from "./decorator";
+import {EffectMethodDecorator, createEffectMethodDecorator} from "./decorator";
 import {put} from "redux-saga/effects";
 import {Action} from "../type";
 
@@ -31,7 +31,7 @@ export function loadingReducer(state: LoadingState = {}, action: Action<LoadingA
 
 // Decorated function must be a generator
 // Ref: https://github.com/Microsoft/TypeScript/issues/17936
-export function loading(loading: string) {
+export function loading(loading: string): EffectMethodDecorator {
     return createEffectMethodDecorator(function*(originalEffect) {
         try {
             yield put(loadingAction(loading, true));
