@@ -15,7 +15,7 @@
     "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@babel/core": "7.0.0-beta.56",
+    "@babel/core": "7.0.0-rc.1",
     "@types/jest": "23.3.1",
     "chalk": "2.4.1",
     "fs-extra": "7.0.0",
@@ -28,7 +28,7 @@
     "typescript": "3.0.1"
   },
   "dependencies": {
-    "@babel/polyfill": "7.0.0-beta.56",
+    "@babel/polyfill": "7.0.0-rc.1",
     "@types/node": "10.5.7",
     "@types/react": "16.4.8",
     "@types/react-dom": "16.0.7",
@@ -44,7 +44,7 @@
     "redux-saga": "0.16.0"
   },
   "peerDependencies": {
-    "@babel/polyfill": "7.0.0-beta.56",
+    "@babel/polyfill": "7.0.0-rc.1",
     "@types/node": "10.5.7",
     "@types/react": "16.4.8",
     "@types/react-dom": "16.0.7",
