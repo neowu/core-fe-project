@@ -9,9 +9,9 @@ export interface Action<P> extends ReduxAction<string> {
 }
 
 export interface App {
-    readonly store: Store<State, Action<any>>;
+    readonly store: Store<State>;
     readonly history: History;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly handlers: HandlerStore;
-    readonly moduleLoaded: {[moduleName: string]: boolean};
+    readonly modules: {[module: string]: boolean}; // whether module is loaded
 }

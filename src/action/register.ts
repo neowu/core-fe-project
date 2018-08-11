@@ -1,4 +1,3 @@
-import {setStateAction} from "./setState";
 import {LOCATION_CHANGE} from "connected-react-router";
 import ReactDOM from "react-dom";
 import {SagaIterator} from "redux-saga";
@@ -7,18 +6,18 @@ import {App} from "../type";
 import {ERROR_ACTION_TYPE} from "./error";
 import {Handler, run} from "./handler";
 import {Listener, LocationChangedEvent, tick, TickListener} from "./listener";
-import {EffectHandler} from "./store";
+import {setStateAction} from "./reducer";
 
 export function registerHandler(handler: Handler<any>, app: App) {
     keys(handler).forEach(actionType => {
         const method = handler[actionType];
-        const qualifiedActionType = `${handler.namespace}/${actionType}`;
-        app.handlers.effects[qualifiedActionType] = effectHandler(method, handler);
+        const qualifiedActionType = `${handler.module}/${actionType}`;
+        app.handlers.effects[qualifiedActionType] = method.bind(handler);
     });
 
     // Use "as any" to get private-readonly initialState
     const initialState = (handler as any).initialState;
-    app.store.dispatch(setStateAction(handler.namespace, initialState));
+    app.store.dispatch(setStateAction(handler.module, initialState));
     registerListener(handler, app);
 }
 
@@ -27,18 +26,13 @@ export function keys(handler: Handler<any>): string[] {
     return Object.keys(Object.getPrototypeOf(handler)).filter(key => key !== "constructor");
 }
 
-function effectHandler(method: EffectHandler, handler: Handler<any>): EffectHandler {
-    const boundMethod: EffectHandler = method.bind(handler);
-    return boundMethod;
-}
-
 function registerListener(handler: Handler<any>, app: App) {
     const listener = handler as Listener;
     if (listener.onLocationChanged) {
-        app.handlers.listenerEffects[LOCATION_CHANGE].push(effectHandler(listener.onLocationChanged, handler));
+        app.handlers.listenerEffects[LOCATION_CHANGE].push(listener.onLocationChanged.bind(handler));
     }
     if (listener.onError) {
-        app.handlers.listenerEffects[ERROR_ACTION_TYPE].push(effectHandler(listener.onError, handler));
+        app.handlers.listenerEffects[ERROR_ACTION_TYPE].push(listener.onError.bind(handler));
     }
 
     app.sagaMiddleware.run(initializeListener, handler, app);
@@ -48,17 +42,17 @@ function registerListener(handler: Handler<any>, app: App) {
 function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
     const listener = handler as Listener;
     if (listener.onInitialized) {
-        yield call(run, effectHandler(listener.onInitialized, handler), []);
+        yield call(run, listener.onInitialized.bind(handler), []);
     }
 
     if (listener.onLocationChanged) {
         const event: LocationChangedEvent = {location: app.history.location, action: "PUSH"};
-        yield call(run, effectHandler(listener.onLocationChanged, handler), [event]); // History listener won't trigger on first refresh or on module loading, manual trigger once
+        yield call(run, listener.onLocationChanged.bind(handler), [event]); // History listener won't trigger on first refresh or on module loading, manual trigger once
     }
 
     // Remove startup overlay
-    app.moduleLoaded[handler.namespace] = true;
-    if (Object.values(app.moduleLoaded).every(_ => _)) {
+    app.modules[handler.module] = true;
+    if (Object.values(app.modules).every(_ => _)) {
         setTimeout(() => {
             const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");
             if (startupElement && startupElement.parentNode) {
@@ -70,7 +64,7 @@ function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
 
     const onTick = listener.onTick as TickListener;
     if (onTick) {
-        const tickHandler = effectHandler(onTick, handler) as TickListener;
+        const tickHandler = onTick.bind(handler) as TickListener;
         tickHandler.interval = onTick.interval;
         yield* tick(tickHandler);
     }

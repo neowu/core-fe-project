@@ -1,26 +1,24 @@
-import {setStateAction} from "./setState";
+import {setStateAction} from "./reducer";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {initialState, State} from "../state";
-import {Action} from "../type";
 import {errorAction} from "./error";
-import {loadingAction} from "./loading";
 import {EffectHandler} from "./store";
 
 let state = initialState;
 
 export class Handler<S extends object, R extends State = State> {
-    readonly namespace: string;
+    readonly module: string;
     private readonly initialState: S;
 
-    public constructor(namespace: string, initialState: S) {
-        this.namespace = namespace;
+    public constructor(module: string, initialState: S) {
+        this.module = module;
         this.initialState = initialState;
     }
 
     protected get state(): Readonly<S> {
-        return state.app[this.namespace];
+        return state.app[this.module];
     }
 
     protected get rootState(): Readonly<R> {
@@ -28,15 +26,15 @@ export class Handler<S extends object, R extends State = State> {
     }
 
     protected *resetState(): SagaIterator {
-        yield put(setStateAction(this.namespace, this.initialState));
+        yield put(setStateAction(this.module, this.initialState));
     }
 
     protected *setState(newState: Partial<S>): SagaIterator {
-        yield put(setStateAction(this.namespace, newState));
+        yield put(setStateAction(this.module, newState));
     }
 }
 
-export const handlerListener = (store: Store<State, Action<any>>) => () => {
+export const handlerListener = (store: Store<State>) => () => {
     state = store.getState();
 };
 

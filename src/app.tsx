@@ -9,12 +9,11 @@ import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/error";
 import {Handler, handlerListener, run} from "./action/handler";
-import {SET_STATE_ACTION_TYPE, setStateReducer, SetStateActionPayload} from "./action/setState";
-import {LOADING_ACTION_TYPE, LoadingActionPayload, loadingReducer} from "./action/loading";
+import {rootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
 import {HandlerStore} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
-import {initialState, State} from "./state";
+import {State} from "./state";
 import {Action, App} from "./type";
 
 console.time("[framework] initialized");
@@ -98,30 +97,14 @@ function* saga(handlers: HandlerStore): SagaIterator {
     });
 }
 
-function rootReducer(): Reducer<State> {
-    return (state: State = initialState, action): State => {
-        if (action.type === LOADING_ACTION_TYPE) {
-            const nextState: State = {...state};
-            nextState.loading = loadingReducer(nextState.loading, action as Action<LoadingActionPayload>);
-            return nextState;
-        } else if (action.type === SET_STATE_ACTION_TYPE) {
-            const nextState: State = {...state};
-            nextState.app = setStateReducer(nextState.app, action as Action<SetStateActionPayload>);
-            return nextState;
-        }
-
-        return state;
-    };
-}
-
 function createApp(): App {
     console.info("[framework] initialize");
 
     const history = createHistory();
     const handlers = new HandlerStore();
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State, Action<any>> = connectRouter(history)(rootReducer());
-    const store: Store<State, Action<any>> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
+    const reducer: Reducer<State> = connectRouter(history)(rootReducer());
+    const store: Store<State> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
     store.subscribe(handlerListener(store));
     sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
@@ -131,14 +114,14 @@ function createApp(): App {
         store.dispatch(errorAction(error));
         return true;
     };
-    return {history, store, sagaMiddleware, handlers, moduleLoaded: {}};
+    return {history, store, sagaMiddleware, handlers, modules: {}};
 }
 
 export function register(handler: Handler<any>): void {
-    if (app.moduleLoaded.hasOwnProperty(handler.namespace)) {
-        throw new Error(`namespace is already registered, namespace=${handler.namespace}`);
+    if (app.modules.hasOwnProperty(handler.module)) {
+        throw new Error(`module is already registered, module=${handler.module}`);
     }
 
-    app.moduleLoaded[handler.namespace] = false;
+    app.modules[handler.module] = false;
     return registerHandler(handler, app);
 }

@@ -1,5 +1,8 @@
 import {RouterState} from "connected-react-router";
-import {LoadingState} from "./action/loading";
+
+export interface LoadingState {
+    [loading: string]: number; // use number to track loading status, because for global action type, there may be multiple effects listen to it, hide loading component when status reduce to 0
+}
 
 export interface State {
     router: RouterState | null;

@@ -18,7 +18,7 @@ export function actionCreator<H extends Handler<any>>(handler: H): ActionCreator
     const actionCreators = {};
 
     keys(handler).forEach(actionType => {
-        const qualifiedActionType = `${handler.namespace}/${actionType}`;
+        const qualifiedActionType = `${handler.module}/${actionType}`;
         actionCreators[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
     });
 
