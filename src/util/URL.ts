@@ -19,7 +19,6 @@ export class URLImpl {
                 const pair = item.split("=");
                 query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
             });
-
         return query;
     }
 
@@ -32,14 +31,13 @@ export class URLImpl {
      * (4) Input: "12", Output: null
      * (5) Input: <anything else>, Output: null
      */
-    static path(location: Location, pathSegmentName: string): string | null {
-        const currentPathSegments = location.pathname.split("/").filter(_ => _);
-        for (let i = 0; i < currentPathSegments.length; i += 2) {
-            if (pathSegmentName === currentPathSegments[i]) {
-                return currentPathSegments[i + 1] || "";
+    static path(location: Location, segment: string): string | null {
+        const segments = location.pathname.split("/").filter(_ => _);
+        for (let i = 0; i < segments.length; i += 2) {
+            if (segment === segments[i]) {
+                return segments[i + 1] || "";
             }
         }
-
         return null;
     }
 
@@ -59,11 +57,11 @@ export class URL {
         return URLImpl.queryString(location);
     }
 
-    static path(pathSegmentName: string): string | null {
-        return URLImpl.path(location, pathSegmentName);
+    static path(segment: string): string | null {
+        return URLImpl.path(location, segment);
     }
 
-    static startWithPath(pathName: string): boolean {
-        return URLImpl.startWithPath(location, pathName);
+    static startWithPath(segment: string): boolean {
+        return URLImpl.startWithPath(location, segment);
     }
 }

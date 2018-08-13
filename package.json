@@ -35,7 +35,7 @@
     "@types/react-redux": "6.0.6",
     "@types/react-router-dom": "4.3.0",
     "axios": "0.18.0",
-    "connected-react-router": "4.3.0",
+    "connected-react-router": "4.4.1",
     "react": "16.4.2",
     "react-dom": "16.4.2",
     "react-redux": "5.0.7",
