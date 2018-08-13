@@ -1,10 +1,10 @@
+import {EffectHandler} from "../type";
 import {setStateAction} from "./reducer";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {initialState, State} from "../state";
 import {errorAction} from "./error";
-import {EffectHandler} from "./store";
 
 let state = initialState;
 
@@ -34,7 +34,7 @@ export class Handler<S extends object, R extends State = State> {
     }
 }
 
-export const handlerListener = (store: Store<State>) => () => {
+export const storeListener = (store: Store<State>) => () => {
     state = store.getState();
 };
 

@@ -8,13 +8,12 @@ import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareA
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/error";
-import {Handler, handlerListener, run} from "./action/handler";
+import {Handler, storeListener, run} from "./action/handler";
 import {rootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
-import {HandlerStore} from "./action/store";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {State} from "./state";
-import {Action, App} from "./type";
+import {Action, App, Handlers} from "./type";
 
 console.time("[framework] initialized");
 const app = createApp();
@@ -71,17 +70,7 @@ function devtools(enhancer: StoreEnhancer): StoreEnhancer {
     return enhancer;
 }
 
-function errorMiddleware(): Middleware<{}, State, Dispatch<any>> {
-    return (store: MiddlewareAPI<Dispatch<any>, State>) => (next: Dispatch<Action<any>>) => (action: Action<any>): Action<any> => {
-        try {
-            return next(action);
-        } catch (error) {
-            return next(errorAction(error));
-        }
-    };
-}
-
-function* saga(handlers: HandlerStore): SagaIterator {
+function* saga(handlers: Handlers): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
         const listeners = handlers.listenerEffects[action.type];
         if (listeners) {
@@ -101,11 +90,11 @@ function createApp(): App {
     console.info("[framework] initialize");
 
     const history = createHistory();
-    const handlers = new HandlerStore();
+    const handlers = new Handlers();
     const sagaMiddleware = createSagaMiddleware();
     const reducer: Reducer<State> = connectRouter(history)(rootReducer());
-    const store: Store<State> = createStore(reducer, devtools(applyMiddleware(errorMiddleware(), routerMiddleware(history), sagaMiddleware)));
-    store.subscribe(handlerListener(store));
+    const store: Store<State> = createStore(reducer, devtools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
+    store.subscribe(storeListener(store));
     sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
