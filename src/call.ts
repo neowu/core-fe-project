@@ -5,21 +5,21 @@ interface CallWithResultEffect<R> extends CallEffect {
 }
 
 export const call = <R, P extends any[]>(func: (...args: P) => Promise<R>, ...args: P) => {
-    let response: R;
+    let result: R;
     const effect: CallWithResultEffect<R> = sagaCall.call(
         null,
         (...args: P) =>
-            func(...args).then(result => {
-                response = result;
-                return response;
+            func(...args).then(value => {
+                result = value;
+                return result;
             }),
         ...args
     );
     effect.result = () => {
-        if (response === undefined) {
-            throw new Error("response is undefined, please yield effect before calling response()");
+        if (result === undefined) {
+            throw new Error("result is undefined, please yield effect before calling result()");
         }
-        return response;
+        return result;
     };
     return effect;
 };
