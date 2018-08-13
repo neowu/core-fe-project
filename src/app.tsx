@@ -4,7 +4,7 @@ import React, {ComponentType, ReactElement} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {applyMiddleware, compose, createStore, Dispatch, Middleware, MiddlewareAPI, Reducer, Store, StoreEnhancer} from "redux";
+import {applyMiddleware, compose, createStore, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/error";
