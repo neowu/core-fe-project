@@ -8,12 +8,12 @@ import {applyMiddleware, compose, createStore, Reducer, Store, StoreEnhancer} fr
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {errorAction} from "./action/error";
-import {Handler, storeListener, run} from "./action/handler";
+import {Handler, storeListener, run, Handlers} from "./action/handler";
 import {rootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {State} from "./state";
-import {Action, App, Handlers} from "./type";
+import {Action, App} from "./type";
 
 console.time("[framework] initialized");
 const app = createApp();
@@ -72,7 +72,7 @@ function devtools(enhancer: StoreEnhancer): StoreEnhancer {
 
 function* saga(handlers: Handlers): SagaIterator {
     yield takeEvery("*", function*(action: Action<any>) {
-        const listeners = handlers.listenerEffects[action.type];
+        const listeners = handlers.listeners[action.type];
         if (listeners) {
             for (const listener of listeners) {
                 yield call(run, listener, action.payload);

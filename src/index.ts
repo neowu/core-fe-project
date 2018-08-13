@@ -2,11 +2,10 @@ import "@babel/polyfill";
 
 export {render, register} from "./app";
 export {actionCreator} from "./action/creator";
-export {effectDecorator} from "./action/decroator";
+export {handlerDecorator, loading} from "./action/decroator";
 export {Exception, NotFoundException} from "./exception";
 export {Handler} from "./action/handler";
 export {interval} from "./action/listener";
-export {loading} from "./action/loading";
 export {call} from "./call";
 export {ajax, APIException} from "./ajax/client";
 export {async} from "./component/async";

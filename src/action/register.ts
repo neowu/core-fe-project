@@ -29,10 +29,10 @@ export function keys(handler: Handler<any>): string[] {
 function registerListener(handler: Handler<any>, app: App) {
     const listener = handler as Listener;
     if (listener.onLocationChanged) {
-        app.handlers.listenerEffects[LOCATION_CHANGE].push(listener.onLocationChanged.bind(handler));
+        app.handlers.listeners[LOCATION_CHANGE].push(listener.onLocationChanged.bind(handler));
     }
     if (listener.onError) {
-        app.handlers.listenerEffects[ERROR_ACTION_TYPE].push(listener.onError.bind(handler));
+        app.handlers.listeners[ERROR_ACTION_TYPE].push(listener.onError.bind(handler));
     }
 
     app.sagaMiddleware.run(initializeListener, handler, app);

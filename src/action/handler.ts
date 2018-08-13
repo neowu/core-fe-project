@@ -1,10 +1,10 @@
-import {EffectHandler} from "../type";
+import {LOCATION_CHANGE} from "connected-react-router";
 import {setStateAction} from "./reducer";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {initialState, State} from "../state";
-import {errorAction} from "./error";
+import {ERROR_ACTION_TYPE, errorAction} from "./error";
 
 let state = initialState;
 
@@ -38,10 +38,20 @@ export const storeListener = (store: Store<State>) => () => {
     state = store.getState();
 };
 
-export function* run(handler: EffectHandler, payload: any[]): SagaIterator {
+export function* run(handler: ActionHandler, payload: any[]): SagaIterator {
     try {
         yield* handler(...payload);
     } catch (error) {
         yield put(errorAction(error));
     }
+}
+
+export type ActionHandler = (...args: any[]) => SagaIterator;
+
+export class Handlers {
+    readonly effects: {[actionType: string]: ActionHandler} = {};
+    readonly listeners: {[actionType: string]: ActionHandler[]} = {
+        [LOCATION_CHANGE]: [],
+        [ERROR_ACTION_TYPE]: [],
+    };
 }

@@ -1,7 +1,7 @@
 export class URLImpl {
     /**
-     * If current query string is ?page=10&pageSize=30&showOldItem&name=abc
-     * This function returns following object:
+     * if query string is ?page=10&pageSize=30&showOldItem&name=abc
+     * it returns following object:
      *      {
      *          page: "10",
      *          pageSize: "30",
@@ -9,7 +9,7 @@ export class URLImpl {
      *          name: "abc",
      *      }
      */
-    static queryString(location: Location): {[name: string]: string} {
+    static queryParams(location: Location): {[name: string]: string} {
         const queryString = location.search;
         const query = {};
         (queryString[0] === "?" ? queryString.substr(1) : queryString)
@@ -23,15 +23,15 @@ export class URLImpl {
     }
 
     /**
-     * If current path is /foo/12/bar/34/test/
-     * This function returns as following cases
+     * if path is /foo/12/bar/34/test/
+     * it returns as following:
      * (1) Input: "foo", Output: "12"
      * (2) Input: "bar", Output: "34"
      * (3) Input: "test", Output: ""
      * (4) Input: "12", Output: null
      * (5) Input: <anything else>, Output: null
      */
-    static path(location: Location, segment: string): string | null {
+    static pathParam(location: Location, segment: string): string | null {
         const segments = location.pathname.split("/").filter(_ => _);
         for (let i = 0; i < segments.length; i += 2) {
             if (segment === segments[i]) {
@@ -42,7 +42,7 @@ export class URLImpl {
     }
 
     /**
-     * When judging startWithPath("reg"), only following paths return true:
+     * with startWithPath("reg"), only following paths return true:
      *      /reg
      *      /reg/
      *      /reg/*
@@ -53,12 +53,12 @@ export class URLImpl {
 }
 
 export class URL {
-    static queryString(): {[name: string]: string} {
-        return URLImpl.queryString(location);
+    static queryParams(): {[name: string]: string} {
+        return URLImpl.queryParams(location);
     }
 
-    static path(segment: string): string | null {
-        return URLImpl.path(location, segment);
+    static pathParam(segment: string): string | null {
+        return URLImpl.pathParam(location, segment);
     }
 
     static startWithPath(segment: string): boolean {

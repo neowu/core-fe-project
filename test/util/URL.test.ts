@@ -1,6 +1,6 @@
 import {URLImpl} from "util/URL";
 
-test("queryString", () => {
+test("queryParams", () => {
     const location = {
         host: "127.0.0.1",
         search: "",
@@ -9,12 +9,12 @@ test("queryString", () => {
     } as Location;
 
     location.search = "?test=foo%20bar";
-    expect(URLImpl.queryString(location)).toEqual({
+    expect(URLImpl.queryParams(location)).toEqual({
         test: "foo bar",
     });
 
     location.search = "?page=10&pageSize=30&showOldItem&name=abc";
-    expect(URLImpl.queryString(location)).toEqual({
+    expect(URLImpl.queryParams(location)).toEqual({
         page: "10",
         pageSize: "30",
         showOldItem: "",
@@ -22,10 +22,10 @@ test("queryString", () => {
     });
 
     location.search = "";
-    expect(URLImpl.queryString(location)).toEqual({});
+    expect(URLImpl.queryParams(location)).toEqual({});
 });
 
-test("path", () => {
+test("pathParam", () => {
     const location = {
         host: "127.0.0.1",
         search: "",
@@ -34,28 +34,28 @@ test("path", () => {
     } as Location;
 
     location.pathname = "/foo/12/bar/34/test/";
-    expect(URLImpl.path(location, "foo")).toEqual("12");
-    expect(URLImpl.path(location, "12")).toEqual(null);
-    expect(URLImpl.path(location, "bar")).toEqual("34");
-    expect(URLImpl.path(location, "34")).toEqual(null);
-    expect(URLImpl.path(location, "test")).toEqual("");
-    expect(URLImpl.path(location, "other")).toEqual(null);
+    expect(URLImpl.pathParam(location, "foo")).toEqual("12");
+    expect(URLImpl.pathParam(location, "12")).toEqual(null);
+    expect(URLImpl.pathParam(location, "bar")).toEqual("34");
+    expect(URLImpl.pathParam(location, "34")).toEqual(null);
+    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "other")).toEqual(null);
 
     location.pathname = "/foo/12///bar/34/test";
-    expect(URLImpl.path(location, "foo")).toEqual("12");
-    expect(URLImpl.path(location, "12")).toEqual(null);
-    expect(URLImpl.path(location, "bar")).toEqual("34");
-    expect(URLImpl.path(location, "34")).toEqual(null);
-    expect(URLImpl.path(location, "test")).toEqual("");
-    expect(URLImpl.path(location, "other")).toEqual(null);
+    expect(URLImpl.pathParam(location, "foo")).toEqual("12");
+    expect(URLImpl.pathParam(location, "12")).toEqual(null);
+    expect(URLImpl.pathParam(location, "bar")).toEqual("34");
+    expect(URLImpl.pathParam(location, "34")).toEqual(null);
+    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "other")).toEqual(null);
 
     location.pathname = "/";
-    expect(URLImpl.path(location, "")).toEqual(null);
-    expect(URLImpl.path(location, "any")).toEqual(null);
+    expect(URLImpl.pathParam(location, "")).toEqual(null);
+    expect(URLImpl.pathParam(location, "any")).toEqual(null);
 
     location.pathname = "/test";
-    expect(URLImpl.path(location, "test")).toEqual("");
-    expect(URLImpl.path(location, "any")).toEqual(null);
+    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "any")).toEqual(null);
 });
 
 test("startWithPath", () => {
