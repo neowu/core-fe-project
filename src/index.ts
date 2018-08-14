@@ -2,7 +2,7 @@ import "@babel/polyfill";
 
 export {render, register} from "./app";
 export {actionCreator} from "./action/creator";
-export {handlerDecorator, loading} from "./action/decroator";
+export {handlerDecorator, loading} from "./action/decorator";
 export {Exception, NotFoundException} from "./exception";
 export {Handler} from "./action/handler";
 export {interval} from "./action/listener";
