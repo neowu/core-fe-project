@@ -7,8 +7,9 @@ import {withRouter} from "react-router-dom";
 import {applyMiddleware, compose, createStore, Reducer, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
+import {actionCreator, ActionCreators} from "./action/creator";
 import {errorAction} from "./action/error";
-import {Handler, storeListener, run, Handlers} from "./action/handler";
+import {Handler, Handlers, run, storeListener} from "./action/handler";
 import {rootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
@@ -106,11 +107,13 @@ function createApp(): App {
     return {history, store, sagaMiddleware, handlers, modules: {}};
 }
 
-export function register(handler: Handler<any>): void {
+export function register<H extends Handler<any>>(handler: H): ActionCreators<H> {
     if (app.modules.hasOwnProperty(handler.module)) {
         throw new Error(`module is already registered, module=${handler.module}`);
     }
 
     app.modules[handler.module] = false;
-    return registerHandler(handler, app);
+    registerHandler(handler, app);
+
+    return actionCreator(handler);
 }
