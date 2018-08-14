@@ -6,7 +6,7 @@ export {Exception, NotFoundException} from "./exception";
 export {Handler} from "./action/handler";
 export {interval} from "./action/listener";
 export {call} from "./call";
-export {ajax, APIException} from "./ajax/client";
+export {ajax, APIException} from "./ajax";
 export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";
 export {Loading} from "./component/Loading";
