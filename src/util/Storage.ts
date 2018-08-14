@@ -1,6 +1,6 @@
 export class Storage {
-    static set(key: string, data: any) {
-        if (data) {
+    static set<T>(key: string, data: T | null) {
+        if (data !== null) {
             localStorage.setItem(key, JSON.stringify(data));
         } else {
             localStorage.removeItem(key);
