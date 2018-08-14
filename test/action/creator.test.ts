@@ -26,7 +26,7 @@ test("actionCreator", () => {
 
         *effect2(): SagaIterator {
             const value = this.nonGenerator();
-            yield put(actions.effect1(value.toString()));
+            yield* this.effect1(value.toString());
             yield* this.resetState();
         }
 
@@ -36,7 +36,8 @@ test("actionCreator", () => {
         }
 
         // Un-callable via actions.nonGenerator, but can be used in this.nonGenerator()
-        nonGenerator(): number {
+        // Best Practice: Use private for such methods
+        private nonGenerator(): number {
             return 10;
         }
     }
