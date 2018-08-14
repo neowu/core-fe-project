@@ -5,16 +5,16 @@ import {call} from "redux-saga/effects";
 
 test("keys", () => {
     class TestHandler extends Handler<{}> {
-        *effect1(name: string): SagaIterator {
+        *action1(name: string): SagaIterator {
             yield call(delay, 300);
             yield* this.setState({name, condition: false});
         }
 
-        *effect2(): SagaIterator {
+        *action2(): SagaIterator {
             yield* this.resetState();
         }
     }
 
     const handlerKeys = keys(new TestHandler("test", {}));
-    expect(handlerKeys).toEqual(["effect1", "effect2"]);
+    expect(handlerKeys).toEqual(["action1", "action2"]);
 });
