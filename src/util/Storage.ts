@@ -7,13 +7,13 @@ export class Storage {
         }
     }
 
-    static get<T>(key: string): T | null {
+    static get<T>(key: string, fallbackValue: T | null = null): T | null {
         try {
             const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : null;
+            return data ? JSON.parse(data) : fallbackValue;
         } catch (e) {
             // In case fail to parse
-            return null;
+            return fallbackValue;
         }
     }
 

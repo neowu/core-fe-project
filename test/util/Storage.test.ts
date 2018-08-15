@@ -24,9 +24,11 @@ class MockLocalStorage {
 
 test("get", () => {
     expect(Storage.get("not_existed_key")).toEqual(null);
+    expect(Storage.get("not_existed_key", true)).toEqual(true);
 
     localStorage.setItem("key2", "invalidJSON");
     expect(Storage.get("key2")).toEqual(null);
+    expect(Storage.get("key2", "fallback")).toEqual("fallback");
 });
 
 test("set", () => {
