@@ -28,7 +28,7 @@ test("get", () => {
 
     localStorage.setItem("key2", "invalidJSON");
     expect(Storage.get("key2")).toEqual(null);
-    expect(Storage.get("key2", "fallback")).toEqual("fallback");
+    expect(Storage.get("key2", "default")).toEqual("default");
 });
 
 test("set", () => {
