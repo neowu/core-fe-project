@@ -5,6 +5,7 @@ import {Handlers} from "./action/handler";
 import {State} from "./state";
 
 export interface Action<P> extends ReduxAction<string> {
+    name?: string;
     payload: P;
 }
 

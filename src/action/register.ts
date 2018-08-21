@@ -17,7 +17,7 @@ export function registerHandler(handler: Handler<any>, app: App) {
 
     // Use "as any" to get private-readonly initialState
     const initialState = (handler as any).initialState;
-    app.store.dispatch(setStateAction(handler.module, initialState));
+    app.store.dispatch(setStateAction(handler.module, initialState, `${handler.module}/initState`));
     registerListener(handler, app);
 }
 

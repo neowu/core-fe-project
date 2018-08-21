@@ -2,16 +2,17 @@ import {Reducer} from "redux";
 import {initialState, LoadingState, State} from "../state";
 import {Action} from "../type";
 
-const SET_STATE_ACTION_TYPE: string = "@@framework/setState";
+const SET_STATE_ACTION: string = "@@framework/setState";
 
 interface SetStateActionPayload {
     module: string;
     state: any;
 }
 
-export function setStateAction(module: string, state: object): Action<SetStateActionPayload> {
+export function setStateAction(module: string, state: object, type: string): Action<SetStateActionPayload> {
     return {
-        type: SET_STATE_ACTION_TYPE,
+        type,
+        name: SET_STATE_ACTION,
         payload: {module, state},
     };
 }
@@ -26,11 +27,11 @@ interface LoadingActionPayload {
     show: boolean;
 }
 
-const LOADING_ACTION_TYPE = "@@framework/loading";
+const LOADING_ACTION = "@@framework/loading";
 
 export function loadingAction(loading: string, show: boolean): Action<LoadingActionPayload> {
     return {
-        type: LOADING_ACTION_TYPE,
+        type: LOADING_ACTION,
         payload: {loading, show},
     };
 }
@@ -46,13 +47,14 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
 
 export function rootReducer(): Reducer<State> {
     return (state: State = initialState, action): State => {
-        if (action.type === LOADING_ACTION_TYPE) {
-            const nextState: State = {...state};
-            nextState.loading = loadingReducer(nextState.loading, action as Action<LoadingActionPayload>);
-            return nextState;
-        } else if (action.type === SET_STATE_ACTION_TYPE) {
+        // use action.name for set state action, make type specifiable to make tracking/tooling easier
+        if (action.name === SET_STATE_ACTION) {
             const nextState: State = {...state};
             nextState.app = setStateReducer(nextState.app, action as Action<SetStateActionPayload>);
+            return nextState;
+        } else if (action.type === LOADING_ACTION) {
+            const nextState: State = {...state};
+            nextState.loading = loadingReducer(nextState.loading, action as Action<LoadingActionPayload>);
             return nextState;
         }
         return state;
