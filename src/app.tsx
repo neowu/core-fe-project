@@ -35,7 +35,10 @@ export function render(component: ComponentType<any>, startupComponent: ReactEle
                 </ErrorBoundary>
             </Provider>,
             rootElement,
-            () => console.timeEnd("[framework] initialized") // Initialization usually takes around 120-150ms
+            () => {
+                console.timeEnd("[framework] initialized"); // Initialization usually takes around 120-150ms
+                return; // not return console.timeEnd directly to let uglify drop console methods on prod build
+            }
         );
     };
 
