@@ -26,11 +26,11 @@ export class Handler<S extends object, R extends State = State> {
     }
 
     protected *resetState(): SagaIterator {
-        yield put(setStateAction(this.module, this.initialState, `${this.module}/resetState`));
+        yield put(setStateAction(this.module, this.initialState, `@@${this.module}/resetState`));
     }
 
     protected *setState(newState: Partial<S>, type: string = "setState"): SagaIterator {
-        yield put(setStateAction(this.module, newState, `${this.module}/${type}`));
+        yield put(setStateAction(this.module, newState, `@@${this.module}/${type}`));
     }
 }
 
