@@ -10,6 +10,7 @@ export {ajax, APIException} from "./ajax";
 export {async} from "./component/async";
 export {ErrorBoundary, ReactLifecycleException} from "./component/ErrorBoundary";
 export {Loading} from "./component/Loading";
+export {Clipboard} from "./util/Clipboard";
 export {Storage} from "./util/Storage";
 export {URL} from "./util/URL";
 
