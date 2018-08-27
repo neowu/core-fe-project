@@ -35,18 +35,19 @@ test("pathParam", () => {
 
     location.pathname = "/foo/12/bar/34/test/";
     expect(URLImpl.pathParam(location, "foo")).toEqual("12");
-    expect(URLImpl.pathParam(location, "12")).toEqual("bar");
     expect(URLImpl.pathParam(location, "bar")).toEqual("34");
-    expect(URLImpl.pathParam(location, "34")).toEqual("test");
-    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "test")).toEqual(null);
     expect(URLImpl.pathParam(location, "other")).toEqual(null);
 
     location.pathname = "/foo/12///bar/34/test";
     expect(URLImpl.pathParam(location, "foo")).toEqual("12");
-    expect(URLImpl.pathParam(location, "12")).toEqual("bar");
     expect(URLImpl.pathParam(location, "bar")).toEqual("34");
-    expect(URLImpl.pathParam(location, "34")).toEqual("test");
-    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "test")).toEqual(null);
+    expect(URLImpl.pathParam(location, "other")).toEqual(null);
+
+    location.pathname = "/foo/bar/005";
+    expect(URLImpl.pathParam(location, "bar")).toEqual("005");
+    expect(URLImpl.pathParam(location, "005")).toEqual(null);
     expect(URLImpl.pathParam(location, "other")).toEqual(null);
 
     location.pathname = "/";
@@ -54,7 +55,7 @@ test("pathParam", () => {
     expect(URLImpl.pathParam(location, "any")).toEqual(null);
 
     location.pathname = "/test";
-    expect(URLImpl.pathParam(location, "test")).toEqual("");
+    expect(URLImpl.pathParam(location, "test")).toEqual(null);
     expect(URLImpl.pathParam(location, "any")).toEqual(null);
 });
 

@@ -27,15 +27,14 @@ export class URLImpl {
      * it returns as following:
      * (1) Input: "foo", Output: "12"
      * (2) Input: "bar", Output: "34"
-     * (3) Input: "test", Output: ""
-     * (4) Input: "12", Output: bar
-     * (5) Input: <anything else>, Output: null
+     * (3) Input: "test", Output: null
+     * (5) Input: <something not in path segment>, Output: null
      */
     static pathParam(location: Location, segment: string): string | null {
         const segments = location.pathname.split("/").filter(_ => _);
         for (let i = 0; i < segments.length; i++) {
             if (segment === segments[i]) {
-                return segments[i + 1] || "";
+                return segments[i + 1] || null;
             }
         }
         return null;
