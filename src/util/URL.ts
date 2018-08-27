@@ -28,7 +28,7 @@ export class URLImpl {
      * (1) Input: "foo", Output: "12"
      * (2) Input: "bar", Output: "34"
      * (3) Input: "test", Output: null
-     * (5) Input: <something not in path segment>, Output: null
+     * (4) Input: <something not in path segment>, Output: null
      */
     static pathParam(location: Location, segment: string): string | null {
         const segments = location.pathname.split("/").filter(_ => _);
