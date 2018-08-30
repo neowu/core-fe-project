@@ -15,12 +15,19 @@ interface Props extends DispatchProp<any> {
 }
 
 interface State {
-    exception?: ReactLifecycleException;
+    exception: ReactLifecycleException | null;
 }
 
 class Component extends React.PureComponent<Props, State> {
     static defaultProps: Pick<Props, "render"> = {render: exception => <h2>render failed: {exception.message}</h2>};
-    state: State = {};
+    state: State = {exception: null};
+
+    componentDidUpdate(prevProps: Props) {
+        // Support page recovery
+        if (this.props.children !== prevProps.children) {
+            this.setState({exception: null});
+        }
+    }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         const exception = new ReactLifecycleException(error.message, error.stack!, errorInfo.componentStack);
