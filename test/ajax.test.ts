@@ -1,8 +1,26 @@
 import {json, url} from "ajax";
 
+test("json with supported date formats", () => {
+    expect(json('{"date": "2018-05-24T12:00:00.123456Z"}')).toEqual({date: new Date("2018-05-24T12:00:00.123456Z")});
+    expect(json('{"date": "2018-05-24T12:00:00.123Z"}')).toEqual({date: new Date("2018-05-24T12:00:00.123Z")});
+    expect(json('{"date": "2018-05-24T12:00:00Z"}')).toEqual({date: new Date("2018-05-24T12:00:00Z")});
+
+    expect(json('{"date": "2018-09-04T14:09:53.123"}')).toEqual({date: new Date("2018-09-04T14:09:53.123")});
+    expect(json('{"date": "2018-09-04T14:09:53"}')).toEqual({date: new Date("2018-09-04T14:09:53")});
+
+    expect(json('{"date": "2018-09-10T15:08:44.123456-04:00"}')).toEqual({date: new Date("2018-09-10T15:08:44.123456-04:00")});
+    expect(json('{"date": "2018-09-10T15:08:44-04:00"}')).toEqual({date: new Date("2018-09-10T15:08:44-04:00")});
+
+    expect(json('{"date": "2018-09-10"}')).toEqual({date: new Date("2018-09-10")});
+});
+
+test("json with not supported date formats", () => {
+    expect(json('{"date": "2018-09-10T15:08"}')).toEqual({date: "2018-09-10T15:08"});
+});
+
 test("json", () => {
-    expect(json('{"date": "2018-05-24T12:00:00.000Z"}')).toEqual({date: new Date("2018-05-24T12:00:00.000Z")});
-    expect(json('{"date": "2018-09-04T14:09:53Z","name":23}')).toEqual({date: new Date("2018-09-04T14:09:53Z"), name: 23});
+    expect(json('{"time": "14:09:53"}')).toEqual({time: "14:09:53"});
+    expect(json('{"key1": "value1", "key2": 2}')).toEqual({key1: "value1", key2: 2});
 });
 
 test("url", () => {

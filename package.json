@@ -1,13 +1,13 @@
 {
   "name": "core-fe",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neowu/frontend-framework.git"
+    "url": "https://github.com/neowu/core-fe-project.git"
   },
   "scripts": {
     "build": "node node/build.js",
@@ -19,7 +19,7 @@
     "@types/jest": "23.3.2",
     "chalk": "2.4.1",
     "fs-extra": "7.0.0",
-    "jest": "23.5.0",
+    "jest": "23.6.0",
     "prettier": "1.14.2",
     "ts-jest": "23.1.4",
     "ts-node": "7.0.1",
