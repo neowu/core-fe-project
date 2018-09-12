@@ -23,25 +23,25 @@ export function setStateReducer(state: State["app"] = {}, action: Action<SetStat
 }
 
 interface LoadingActionPayload {
-    loading: string;
+    identifier: string;
     show: boolean;
 }
 
 const LOADING_ACTION = "@@framework/loading";
 
-export function loadingAction(loading: string, show: boolean): Action<LoadingActionPayload> {
+export function loadingAction(identifier: string, show: boolean): Action<LoadingActionPayload> {
     return {
         type: LOADING_ACTION,
-        payload: {loading, show},
+        payload: {identifier, show},
     };
 }
 
 function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPayload>): LoadingState {
     const payload = action.payload;
-    const count = state[payload.loading] || 0;
+    const count = state[payload.identifier] || 0;
     return {
         ...state,
-        [payload.loading]: count + (payload.show ? 1 : -1),
+        [payload.identifier]: count + (payload.show ? 1 : -1),
     };
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@babel/core": "7.0.0",
+    "@babel/core": "7.0.1",
     "@types/jest": "23.3.2",
     "chalk": "2.4.1",
     "fs-extra": "7.0.0",

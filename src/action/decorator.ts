@@ -22,13 +22,13 @@ export function handlerDecorator<S extends State = State>(interceptor: HandlerIn
     };
 }
 
-export function loading(loading: string) {
+export function loading(identifier: string) {
     return handlerDecorator(function*(handler) {
         try {
-            yield put(loadingAction(loading, true));
+            yield put(loadingAction(identifier, true));
             yield* handler();
         } finally {
-            yield put(loadingAction(loading, false));
+            yield put(loadingAction(identifier, false));
         }
     });
 }

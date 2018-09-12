@@ -2,31 +2,29 @@ import React from "react";
 import {connect} from "react-redux";
 import {State} from "../state";
 
-interface OwnProps {
-    loading: string;
-    loadingComponent?: React.ReactNode;
-    render?: ((props: Props) => React.ReactNode);
+interface StateProps {
+    showLoadingComponent: boolean;
 }
 
-interface Props extends OwnProps {
-    show: boolean;
+interface OwnProps {
+    identifier: string;
+    loadingComponent?: React.ReactNode;
 }
+
+interface Props extends StateProps, OwnProps {}
 
 class Component extends React.PureComponent<Props> {
     render() {
-        const {show, loadingComponent, render} = this.props;
-        if (render) {
-            return render(this.props);
+        const {showLoadingComponent, loadingComponent} = this.props;
+        if (showLoadingComponent) {
+            return loadingComponent || null;
         }
-        if (show) {
-            return loadingComponent ? loadingComponent : null;
-        }
-        return this.props.children;
+        return this.props.children || null;
     }
 }
 
-const mapStateToProps = (state: State, props: OwnProps) => ({
-    show: state.loading[props.loading] > 0,
+const mapStateToProps = (state: State, props: OwnProps): StateProps => ({
+    showLoadingComponent: state.loading[props.identifier] > 0,
 });
 
 export const Loading = connect(mapStateToProps)(Component);
