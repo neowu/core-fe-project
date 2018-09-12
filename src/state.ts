@@ -15,3 +15,7 @@ export const initialState: State = {
     loading: {},
     app: {},
 };
+
+export function shouldShowLoading(state: State, identifier: string) {
+    return state.loading[identifier] > 0;
+}
