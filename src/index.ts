@@ -5,7 +5,7 @@ export {handlerDecorator, loading} from "./action/decorator";
 export {Exception, NotFoundException} from "./exception";
 export {Handler} from "./action/handler";
 export {interval} from "./action/listener";
-export {shouldShowLoading} from "./state";
+export {showLoading} from "./state";
 export {call} from "./call";
 export {ajax, APIException} from "./ajax";
 export {async} from "./component/async";
