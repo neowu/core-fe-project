@@ -10,6 +10,7 @@
     "declaration": true,
     "strict": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "importHelpers": true,
     "jsx": "react",
     "lib": ["dom", "es2017"],
