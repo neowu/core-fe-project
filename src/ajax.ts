@@ -23,7 +23,7 @@ axios.interceptors.response.use(
     }
 );
 
-const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\d(T[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-][01]\d:[0-5]\d)?)?$/;
+const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-][01]\d:[0-5]\d)$/; // ISO format (supported by Java ZonedDateTime)
 const parser = (key: any, value: any) => {
     if (typeof value === "string" && ISO_DATE_FORMAT.test(value)) {
         return new Date(value);
