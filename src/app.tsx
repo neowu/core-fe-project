@@ -1,10 +1,10 @@
 import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
 import createHistory from "history/createBrowserHistory";
-import React, {ComponentType, ReactElement} from "react";
+import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {applyMiddleware, compose, createStore, Reducer, Store, StoreEnhancer} from "redux";
+import {applyMiddleware, createStore, Reducer, Store} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {actionCreator, ActionCreators} from "./action/creator";
@@ -13,65 +13,37 @@ import {Handler, Handlers, run, storeListener} from "./action/handler";
 import {rootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
+import {composeWithDevTools} from "./devtools";
+import {completeInitialization, registerUserDefinedInitializationCallback} from "./initialization";
 import {State} from "./state";
 import {Action, App} from "./type";
 
-console.time("[framework] initialized");
+console.time("[framework] Initial Module Logic");
 const app = createApp();
 
-export function render(component: ComponentType<any>, startupComponent: ReactElement<any> | null = null): void {
+export function render(component: ComponentType<any>, onInitialized: null | (() => void) = null): void {
+    console.time("[framework] Initial UI Render");
+
     const rootElement: HTMLDivElement = document.createElement("div");
+    rootElement.style.transition = "all 150ms ease-in 100ms";
+    rootElement.style.opacity = "0";
+    rootElement.style.transform = "translateY(-10px) scale(0.98)";
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
+    registerUserDefinedInitializationCallback(onInitialized);
 
-    const renderApp = () => {
-        const WithRouterComponent = withRouter(component);
-        ReactDOM.render(
-            <Provider store={app.store}>
-                <ErrorBoundary>
-                    <ConnectedRouter history={app.history}>
-                        <WithRouterComponent />
-                    </ConnectedRouter>
-                </ErrorBoundary>
-            </Provider>,
-            rootElement,
-            () => {
-                console.timeEnd("[framework] initialized"); // Initialization usually takes around 120-150ms
-                return; // not return console.timeEnd directly to let uglify drop console methods on prod build
-            }
-        );
-    };
-
-    if (startupComponent) {
-        const startupElement: HTMLDivElement = document.createElement("div");
-        startupElement.id = "framework-startup-overlay";
-        startupElement.style.position = "fixed";
-        startupElement.style.top = "0";
-        startupElement.style.left = "0";
-        startupElement.style.backgroundColor = "#fff";
-        startupElement.style.width = "100%";
-        startupElement.style.height = "100%";
-        startupElement.style.zIndex = "9999";
-        document.body.appendChild(startupElement);
-
-        ReactDOM.render(startupComponent, startupElement, renderApp);
-    } else {
-        renderApp();
-    }
-}
-
-function devtools(enhancer: StoreEnhancer): StoreEnhancer {
-    const production = process.env.NODE_ENV === "production";
-    if (!production) {
-        const extension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
-        if (extension) {
-            return compose(
-                enhancer,
-                extension({})
-            );
-        }
-    }
-    return enhancer;
+    const WithRouterComponent = withRouter(component);
+    ReactDOM.render(
+        <Provider store={app.store}>
+            <ErrorBoundary>
+                <ConnectedRouter history={app.history}>
+                    <WithRouterComponent />
+                </ConnectedRouter>
+            </ErrorBoundary>
+        </Provider>,
+        rootElement,
+        () => completeInitialization(true)
+    );
 }
 
 function* saga(handlers: Handlers): SagaIterator {
@@ -91,13 +63,11 @@ function* saga(handlers: Handlers): SagaIterator {
 }
 
 function createApp(): App {
-    console.info("[framework] initialize");
-
     const history = createHistory();
     const handlers = new Handlers();
     const sagaMiddleware = createSagaMiddleware();
     const reducer: Reducer<State> = connectRouter(history)(rootReducer());
-    const store: Store<State> = createStore(reducer, devtools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
+    const store: Store<State> = createStore(reducer, composeWithDevTools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
     store.subscribe(storeListener(store));
     sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {

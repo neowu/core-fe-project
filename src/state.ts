@@ -5,12 +5,14 @@ export interface LoadingState {
 }
 
 export interface State {
+    shouldLogToReduxDevTools: boolean;
     router: RouterState | null;
     loading: LoadingState;
     app: {};
 }
 
 export const initialState: State = {
+    shouldLogToReduxDevTools: true,
     router: null,
     loading: {},
     app: {},

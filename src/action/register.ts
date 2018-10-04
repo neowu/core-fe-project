@@ -1,7 +1,7 @@
 import {LOCATION_CHANGE} from "connected-react-router";
-import ReactDOM from "react-dom";
 import {SagaIterator} from "redux-saga";
 import {call} from "redux-saga/effects";
+import {completeInitialization} from "../initialization";
 import {App} from "../type";
 import {ERROR_ACTION_TYPE} from "./error";
 import {Handler, run} from "./handler";
@@ -50,16 +50,9 @@ function* initializeListener(handler: Handler<any>, app: App): SagaIterator {
         yield call(run, listener.onLocationChanged.bind(handler), [event]); // History listener won't trigger on first refresh or on module loading, manual trigger once
     }
 
-    // Remove startup overlay
     app.modules[handler.module] = true;
     if (Object.values(app.modules).every(_ => _)) {
-        setTimeout(() => {
-            const startupElement: HTMLElement | null = document.getElementById("framework-startup-overlay");
-            if (startupElement && startupElement.parentNode) {
-                ReactDOM.unmountComponentAtNode(startupElement); // Remove Virtual-DOM from React
-                startupElement.parentNode.removeChild(startupElement);
-            }
-        }, 10);
+        completeInitialization(false);
     }
 
     const onTick = listener.onTick as TickListener;
