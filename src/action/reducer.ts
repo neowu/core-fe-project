@@ -29,7 +29,7 @@ interface LoadingActionPayload {
     show: boolean;
 }
 
-const LOADING_ACTION = "@@framework/loading";
+export const LOADING_ACTION = "@@framework/loading";
 
 export function loadingAction(identifier: string, show: boolean): Action<LoadingActionPayload> {
     return {

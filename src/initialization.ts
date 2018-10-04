@@ -28,7 +28,7 @@ export function completeInitialization(isRenderCompleted: boolean) {
             initializationInfo.userDefinedInitializationCallback();
         }
         setTimeout(() => {
-            // Separate DOM update into another queue, in case DOM manipulation (in callback) suspends the transition
+            // Separate DOM update into another queue, in case callback execution suspends CSS transition
             const rootElement = document.getElementById("framework-app-root")!;
             rootElement.style.transform = "none";
             rootElement.style.opacity = "1";
