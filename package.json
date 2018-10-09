@@ -16,12 +16,12 @@
   },
   "devDependencies": {
     "@babel/core": "7.1.2",
-    "@types/jest": "23.3.3",
+    "@types/jest": "23.3.4",
     "chalk": "2.4.1",
     "fs-extra": "7.0.0",
     "jest": "23.6.0",
     "prettier": "1.14.3",
-    "ts-jest": "23.10.3",
+    "ts-jest": "23.10.4",
     "ts-node": "7.0.1",
     "tslint": "5.11.0",
     "tslint-react": "3.6.0",
@@ -29,9 +29,9 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.0.0",
-    "@types/node": "^10.11.4",
-    "@types/react": "^16.4.14",
-    "@types/react-dom": "^16.0.8",
+    "@types/node": "^10.11.5",
+    "@types/react": "^16.4.16",
+    "@types/react-dom": "^16.0.9",
     "@types/react-redux": "^6.0.9",
     "@types/react-router-dom": "^4.3.1",
     "axios": "0.18.0",
@@ -41,13 +41,13 @@
     "react-redux": "5.0.7",
     "react-router-dom": "4.3.1",
     "redux": "4.0.0",
-    "redux-saga": "0.16.0"
+    "redux-saga": "0.16.1"
   },
   "peerDependencies": {
     "@babel/polyfill": "7.0.0",
-    "@types/node": "^10.11.4",
-    "@types/react": "^16.4.14",
-    "@types/react-dom": "^16.0.8",
+    "@types/node": "^10.11.5",
+    "@types/react": "^16.4.16",
+    "@types/react-dom": "^16.0.9",
     "@types/react-redux": "^6.0.9",
     "@types/react-router-dom": "^4.3.1",
     "axios": "0.18.0",
@@ -57,6 +57,6 @@
     "react-redux": "5.0.7",
     "react-router-dom": "4.3.1",
     "redux": "4.0.0",
-    "redux-saga": "0.16.0"
+    "redux-saga": "0.16.1"
   }
 }
