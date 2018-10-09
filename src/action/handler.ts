@@ -42,6 +42,10 @@ export function* run(handler: ActionHandler, payload: any[]): SagaIterator {
     try {
         yield* handler(...payload);
     } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+            console.error("Redux Saga Error");
+            console.error(error);
+        }
         yield put(errorAction(error));
     }
 }

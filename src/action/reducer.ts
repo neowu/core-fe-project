@@ -47,20 +47,6 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
     };
 }
 
-// For DevToolsLog Action (to update state.shouldLogToReduxDevTools)
-interface DevToolsLogActionPayload {
-    shouldLog: boolean;
-}
-
-export const DEV_TOOLS_LOG_ACTION = "@@framework/devToolsLog";
-
-export function devToolsLogAction(shouldLog: boolean): Action<DevToolsLogActionPayload> {
-    return {
-        type: DEV_TOOLS_LOG_ACTION,
-        payload: {shouldLog},
-    };
-}
-
 // Root Reducer
 export function rootReducer(): Reducer<State> {
     return (state: State = initialState, action): State => {
@@ -72,10 +58,6 @@ export function rootReducer(): Reducer<State> {
         } else if (action.type === LOADING_ACTION) {
             const nextState: State = {...state};
             nextState.loading = loadingReducer(nextState.loading, action as Action<LoadingActionPayload>);
-            return nextState;
-        } else if (action.type === DEV_TOOLS_LOG_ACTION) {
-            const a = action as Action<DevToolsLogActionPayload>;
-            const nextState: State = {...state, shouldLogToReduxDevTools: a.payload.shouldLog};
             return nextState;
         }
         return state;

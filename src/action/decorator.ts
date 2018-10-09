@@ -2,7 +2,7 @@ import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {State} from "../state";
 import {ActionHandler} from "./handler";
-import {devToolsLogAction, loadingAction} from "./reducer";
+import {loadingAction} from "./reducer";
 
 type HandlerDecorator = (target: object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<ActionHandler>) => TypedPropertyDescriptor<ActionHandler>;
 type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) => SagaIterator;
@@ -29,17 +29,6 @@ export function loading(identifier: string) {
             yield* handler();
         } finally {
             yield put(loadingAction(identifier, false));
-        }
-    });
-}
-
-export function noReduxDevToolsLog() {
-    return handlerDecorator(function*(handler) {
-        try {
-            yield put(devToolsLogAction(false));
-            yield* handler();
-        } finally {
-            yield put(devToolsLogAction(true));
         }
     });
 }

@@ -71,6 +71,17 @@ function createApp(): App {
     store.subscribe(storeListener(store));
     sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
+        if (process.env.NODE_ENV === "development") {
+            console.error("Window Global Error");
+            if (error) {
+                console.error(error);
+            }
+            console.error(`Message: ${message.toString()}`);
+            if (source && line && column) {
+                console.error(`Source: ${source} (${line}, ${column})`);
+            }
+        }
+
         if (!error) {
             error = new Error(message.toString());
         }

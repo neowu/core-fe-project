@@ -1,7 +1,7 @@
 import "@babel/polyfill";
 
 export {render, register} from "./app";
-export {handlerDecorator, loading, noReduxDevToolsLog} from "./action/decorator";
+export {handlerDecorator, loading} from "./action/decorator";
 export {Exception, NotFoundException} from "./exception";
 export {Handler} from "./action/handler";
 export {interval} from "./action/listener";

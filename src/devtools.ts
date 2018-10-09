@@ -1,7 +1,5 @@
 import {compose, StoreEnhancer} from "redux";
-import {DEV_TOOLS_LOG_ACTION, LOADING_ACTION} from "./action/reducer";
-import {State} from "./state";
-import {Action} from "./type";
+import {LOADING_ACTION} from "./action/reducer";
 
 export function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
     let composeEnhancers = compose;
@@ -11,8 +9,7 @@ export function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
         if (extension) {
             composeEnhancers = extension({
                 // Ref: https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
-                actionsBlacklist: [DEV_TOOLS_LOG_ACTION, LOADING_ACTION],
-                predicate: (state: State, action: Action<any>) => state.shouldLogToReduxDevTools,
+                actionsBlacklist: [LOADING_ACTION],
             });
         }
     }
