@@ -1,3 +1,4 @@
+import {LOCATION_CHANGE, LocationChangeAction, RouterState} from "connected-react-router";
 import {Reducer} from "redux";
 import {initialState, LoadingState, State} from "../state";
 import {Action} from "../type";
@@ -48,10 +49,14 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
 }
 
 // Root Reducer
-export function rootReducer(): Reducer<State> {
+export function rootReducer(routerReducer: Reducer<RouterState, LocationChangeAction>): Reducer<State> {
     return (state: State = initialState, action): State => {
-        // use action.name for set state action, make type specifiable to make tracking/tooling easier
-        if (action.name === SET_STATE_ACTION) {
+        if (action.type === LOCATION_CHANGE) {
+            const nextState: State = {...state};
+            nextState.router = routerReducer(nextState.router, action as LocationChangeAction);
+            return nextState;
+        } else if (action.name === SET_STATE_ACTION) {
+            // use action.name for set state action, make type specifiable to make tracking/tooling easier
             const nextState: State = {...state};
             nextState.app = setStateReducer(nextState.app, action as Action<SetStateActionPayload>);
             return nextState;

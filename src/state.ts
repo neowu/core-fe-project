@@ -5,13 +5,13 @@ export interface LoadingState {
 }
 
 export interface State {
-    router: RouterState | null;
+    router: RouterState | undefined;
     loading: LoadingState;
     app: {};
 }
 
 export const initialState: State = {
-    router: null,
+    router: undefined,
     loading: {},
     app: {},
 };

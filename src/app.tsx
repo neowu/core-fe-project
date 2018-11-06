@@ -66,7 +66,7 @@ function createApp(): App {
     const history = createHistory();
     const handlers = new Handlers();
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State> = connectRouter(history)(rootReducer());
+    const reducer: Reducer<State> = rootReducer(connectRouter(history));
     const store: Store<State> = createStore(reducer, composeWithDevTools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
     store.subscribe(storeListener(store));
     sagaMiddleware.run(saga, handlers);
