@@ -9,6 +9,7 @@
     "inlineSources": true,
     "declaration": true,
     "strict": true,
+    "strictBindCallApply": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
