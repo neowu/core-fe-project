@@ -5,16 +5,10 @@ export interface LoadingState {
 }
 
 export interface State {
-    router: RouterState | undefined;
+    router: RouterState;
     loading: LoadingState;
     app: {};
 }
-
-export const initialState: State = {
-    router: undefined,
-    loading: {},
-    app: {},
-};
 
 export function showLoading(state: State, identifier: string) {
     return state.loading[identifier] > 0;

@@ -3,10 +3,10 @@ import {setStateAction} from "./reducer";
 import {Store} from "redux";
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
-import {initialState, State} from "../state";
+import {State} from "../state";
 import {ERROR_ACTION_TYPE, errorAction} from "./error";
 
-let state = initialState;
+let state: State = {app: {}, loading: {}, router: {} as any};
 
 export class Handler<S extends object, R extends State = State> {
     readonly module: string;

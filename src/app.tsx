@@ -1,16 +1,16 @@
 import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
-import createHistory from "history/createBrowserHistory";
+import {createBrowserHistory} from "history";
 import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router-dom";
-import {applyMiddleware, createStore, Reducer, Store} from "redux";
+import {applyMiddleware, createStore, Store} from "redux";
 import createSagaMiddleware, {SagaIterator} from "redux-saga";
 import {call, takeEvery} from "redux-saga/effects";
 import {actionCreator, ActionCreators} from "./action/creator";
 import {errorAction} from "./action/error";
 import {Handler, Handlers, run, storeListener} from "./action/handler";
-import {rootReducer} from "./action/reducer";
+import {createRootReducer} from "./action/reducer";
 import {registerHandler} from "./action/register";
 import {ErrorBoundary} from "./component/ErrorBoundary";
 import {composeWithDevTools} from "./devtools";
@@ -63,11 +63,10 @@ function* saga(handlers: Handlers): SagaIterator {
 }
 
 function createApp(): App {
-    const history = createHistory();
+    const history = createBrowserHistory();
     const handlers = new Handlers();
     const sagaMiddleware = createSagaMiddleware();
-    const reducer: Reducer<State> = rootReducer(connectRouter(history));
-    const store: Store<State> = createStore(reducer, composeWithDevTools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
+    const store: Store<State> = createStore(createRootReducer(connectRouter(history)), composeWithDevTools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
     store.subscribe(storeListener(store));
     sagaMiddleware.run(saga, handlers);
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
