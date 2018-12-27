@@ -1,4 +1,4 @@
-import {CALL_HISTORY_METHOD, connectRouter, LOCATION_CHANGE, LocationChangeAction, RouterState} from "connected-react-router";
+import {LocationChangeAction, RouterState} from "connected-react-router";
 import {combineReducers, Reducer} from "redux";
 import {LoadingState, State} from "../state";
 import {Action} from "../type";
@@ -20,7 +20,7 @@ export function setStateAction(module: string, state: object, type: string): Act
 }
 
 export function setStateReducer(state: State["app"] = {}, action: Action<any>): State["app"] {
-    // use action.name to determine the type of action, leave action.type customizable in order to make redux chrome plugin more dev friendly
+    // Use action.name to determine the type of action, leave action.type customizable in order to make redux chrome plugin more dev friendly
     if (action.name === SET_STATE_ACTION) {
         const {module, state: moduleState} = action.payload as SetStateActionPayload;
         return {...state, [module]: {...state[module], ...moduleState}};
