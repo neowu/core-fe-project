@@ -7,6 +7,12 @@ export class APIException extends Exception {
     }
 }
 
+export class APIErrorMessageException extends Exception {
+    constructor(message: string, public responseData: object) {
+        super(message);
+    }
+}
+
 function handleError(error: AxiosError) {
     const httpErrorCode = error.response ? error.response.status : 0;
     const responseData = error.response ? error.response.data : "";
@@ -31,14 +37,18 @@ const parser = (key: any, value: any) => {
     return value;
 };
 
-export function json(data: string): object {
+export function json(data: string) {
     return JSON.parse(data, parser);
 }
 
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
-        return json(data);
+        const jsonData = json(data);
+        if (jsonData.success === false && typeof jsonData.errorMessage === "string") {
+            throw new APIErrorMessageException(jsonData.errorMessage, jsonData);
+        }
+        return jsonData;
     }
     return data;
 };
