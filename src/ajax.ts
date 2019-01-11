@@ -7,12 +7,6 @@ export class APIException extends Exception {
     }
 }
 
-export class APIErrorMessageException extends Exception {
-    constructor(message: string, public responseData: object) {
-        super(message);
-    }
-}
-
 function handleError(error: AxiosError) {
     const httpErrorCode = error.response ? error.response.status : 0;
     const responseData = error.response ? error.response.data : "";
@@ -44,13 +38,7 @@ export function json(data: string) {
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
-        // TODO: this is a step backward, because it introduces parallel break mechanism to skip current flow
-        //  the reason server returns 200+success=false is only when client wants to do something if it failed, e.g. highlight error input w/ message or do something else
-        //  if client wants to break, we should throw exception on server side in first place, it will make both client and server simpler and achieve same goal
         const jsonData = json(data);
-        if (jsonData.success === false && typeof jsonData.errorMessage === "string") {
-            throw new APIErrorMessageException(jsonData.errorMessage, jsonData);
-        }
         return jsonData;
     }
     return data;
