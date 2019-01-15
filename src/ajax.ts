@@ -38,8 +38,7 @@ export function json(data: string) {
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
-        const jsonData = json(data);
-        return jsonData;
+        return json(data);
     }
     return data;
 };
