@@ -1,13 +1,12 @@
 import {actionCreator} from "action/creator";
 import {Handler} from "action/handler";
 import {Listener} from "action/listener";
-import {delay} from "redux-saga";
-import {call} from "redux-saga/effects";
+import {delay} from "redux-saga/effects";
 
 test("actionCreator", () => {
     class TestHandler extends Handler<{}> implements Listener {
         *action1(name: string) {
-            yield call(delay, 300);
+            yield delay(300);
         }
 
         *action2() {
@@ -18,7 +17,7 @@ test("actionCreator", () => {
 
         // We cannot get actions.onInitialized
         *onInitialized() {
-            yield call(delay, 10);
+            yield delay(10);
         }
 
         // Un-callable via actions.nonGenerator, but can be used in this.nonGenerator()

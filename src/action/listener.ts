@@ -1,6 +1,6 @@
 import {Action as HistoryAction, Location} from "history";
-import {delay, SagaIterator} from "redux-saga";
-import {call} from "redux-saga/effects";
+import {SagaIterator} from "redux-saga";
+import {call, delay} from "redux-saga/effects";
 import {Exception} from "../exception";
 import {run} from "./handler";
 
@@ -34,6 +34,6 @@ export function* tick(onTick: TickListener): SagaIterator {
     while (true) {
         // use call instead of fork, to delay next tick execution if onTick() took long. usually, it will not happen! Because we only put(action) within most onTick(), which is a non-blocking effect.
         yield call(run, onTick, []);
-        yield call(delay, (onTick.interval || 1) * 1000);
+        yield delay((onTick.interval || 1) * 1000);
     }
 }
