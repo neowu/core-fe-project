@@ -20,9 +20,9 @@
     "chalk": "2.4.2",
     "fs-extra": "7.0.1",
     "jest": "23.6.0",
-    "prettier": "1.16.0",
+    "prettier": "1.16.1",
     "ts-jest": "23.10.5",
-    "ts-node": "7.0.1",
+    "ts-node": "8.0.1",
     "tslint": "5.12.1",
     "tslint-react": "3.6.0",
     "typescript": "3.2.4"
