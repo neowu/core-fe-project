@@ -1,4 +1,4 @@
-import {call} from "call";
+import {call} from "util/sagaCall";
 
 test("call", () => {
     const promise = (request: string): Promise<string> => Promise.resolve(request);

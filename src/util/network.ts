@@ -1,19 +1,16 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
-import {Exception} from "./exception";
-
-export class APIException extends Exception {
-    constructor(message: string, public statusCode: number | null, public requestURL: string, public responseData: object | null) {
-        super(message);
-    }
-}
+import {APIException, NetworkConnectionException} from "../exception";
 
 function handleError(error: AxiosError) {
-    const httpErrorCode = error.response ? error.response.status : 0;
-    const responseData = error.response ? error.response.data : "";
-
-    // try to get server errorMessage from response
-    const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${error.config.url}`;
-    throw new APIException(errorMessage, httpErrorCode, error.config.url!, responseData);
+    const url = error.config.url!;
+    if (error.response) {
+        // Try to get server errorMessage from response
+        const responseData = error.response.data;
+        const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${error.config.url}`;
+        throw new APIException(errorMessage, error.response.status, url, responseData);
+    } else {
+        throw new NetworkConnectionException(url);
+    }
 }
 
 axios.interceptors.response.use(
@@ -23,7 +20,8 @@ axios.interceptors.response.use(
     }
 );
 
-const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-][01]\d:[0-5]\d)$/; // ISO format (supported by Java ZonedDateTime)
+// ISO format (supported by Java ZonedDateTime)
+const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-][01]\d:[0-5]\d)$/;
 const parser = (key: any, value: any) => {
     if (typeof value === "string" && ISO_DATE_FORMAT.test(value)) {
         return new Date(value);

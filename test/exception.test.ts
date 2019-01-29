@@ -1,10 +1,7 @@
-import {errorAction} from "action/error";
-import {NotFoundException, RuntimeException} from "exception";
+import {RuntimeException} from "exception";
+import {errorAction} from "reducer";
 
 test("errorAction", () => {
-    const notFoundException = new NotFoundException();
-    expect(errorAction(notFoundException)).toEqual({payload: notFoundException, type: "@@framework/error"});
-
     const errorMessage = "runtime error message";
     const error = new Error(errorMessage);
     expect(errorAction(error)).toEqual({payload: new RuntimeException(errorMessage, error), type: "@@framework/error"});

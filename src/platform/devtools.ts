@@ -1,5 +1,5 @@
 import {compose, StoreEnhancer} from "redux";
-import {LOADING_ACTION} from "./action/reducer";
+import {LOADING_ACTION} from "../reducer";
 
 export function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
     let composeEnhancers = compose;
