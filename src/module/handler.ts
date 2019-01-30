@@ -6,17 +6,13 @@ import {app} from "../app";
 import {Exception} from "../exception";
 import {setStateAction, State} from "../reducer";
 
-export class ModuleHandler<ModuleState extends {}, HistoryState extends {} = {}, RootState extends State = State> {
-    readonly module: string;
-    private readonly initialState: ModuleState;
-
-    public constructor(module: string, initialState: ModuleState) {
-        this.module = module;
-        this.initialState = initialState;
+export class Module<ModuleState extends {}, HistoryState extends {} = {}, RootState extends State = State> {
+    public constructor(public name: string, private initialState: ModuleState) {
+        app.store.dispatch(setStateAction(name, initialState, `@@${name}/@@INIT`));
     }
 
     protected get state(): Readonly<ModuleState> {
-        return this.rootState.app[this.module];
+        return this.rootState.app[this.name];
     }
 
     protected get rootState(): Readonly<RootState> {
@@ -24,7 +20,7 @@ export class ModuleHandler<ModuleState extends {}, HistoryState extends {} = {},
     }
 
     protected *setState(newState: Partial<ModuleState>): SagaIterator {
-        yield put(setStateAction(this.module, newState, `@@${this.module}/setState[${Object.keys(newState).join(",")}]`));
+        yield put(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
     protected *setHistory(urlOrState: HistoryState | string, usePush: boolean = true): SagaIterator {

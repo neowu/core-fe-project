@@ -2,40 +2,34 @@ import React from "react";
 import {SagaIterator, Task} from "redux-saga";
 import {app} from "../app";
 import {Action, setStateAction} from "../reducer";
-import {ErrorListener, ModuleHandler, ModuleLifecycleListener} from "./handler";
+import {ErrorListener, Module, ModuleLifecycleListener} from "./handler";
 import {lifecycleSaga} from "./saga";
 
 type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
 type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ErrorListener>];
 type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
-export function register<P extends {}, H extends ModuleHandler<any>>(handler: H, ModuleEntryComponent: React.ComponentType<P>): {actions: ActionCreators<H>; MainComponent: React.ComponentType<P>} {
-    const moduleName = handler.module;
+export function register<P extends {}, M extends Module<any>>(module: M, ModuleEntryComponent: React.ComponentType<P>): {actions: ActionCreators<M>; MainComponent: React.ComponentType<P>} {
+    const moduleName = module.name;
     if (app.modules.hasOwnProperty(moduleName)) {
         throw new Error(`module [${moduleName}] already registered`);
     }
 
-    const keys = getKeys(handler);
+    const keys = getKeys(module);
 
     // Check if supports ErrorHandler
-    if ("onError" in handler) {
-        app.errorHandlers.push(((handler as any) as ErrorListener).onError.bind(handler));
+    if ("onError" in module) {
+        app.errorHandlers.push(((module as any) as ErrorListener).onError.bind(module));
     }
 
     // Transform every method into ActionCreator
     const actions: any = {};
     keys.forEach(actionType => {
-        const method = handler[actionType];
+        const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
-        app.actionHandlers[qualifiedActionType] = method.bind(handler);
+        app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
-
-    // Use "as any" to get private-readonly initialState
-    // InitState (Redux) must be called on registration, otherwise, mapStateToProps in MainComponent will fail
-    const lifecycleListener = handler as ModuleLifecycleListener<any>;
-    const initialState = (handler as any).initialState;
-    app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/initState(register)`));
 
     // Hook ModuleLifecycle into entry component
     class MainComponent extends React.PureComponent<P> {
@@ -45,7 +39,7 @@ export function register<P extends {}, H extends ModuleHandler<any>>(handler: H,
         constructor(props: P) {
             super(props);
             app.modules[moduleName] = false;
-            this.lifecycleSagaTask = app.sagaMiddleware.run(lifecycleSaga, props, lifecycleListener, moduleName);
+            this.lifecycleSagaTask = app.sagaMiddleware.run(lifecycleSaga, props, module as ModuleLifecycleListener<any>, moduleName);
             console.info(`Module [${moduleName}] entered`);
         }
 
@@ -60,15 +54,15 @@ export function register<P extends {}, H extends ModuleHandler<any>>(handler: H,
         }
 
         componentWillUnmount() {
-            if (lifecycleListener.onLeave) {
+            if (actions.onLeave) {
                 app.store.dispatch(actions.onLeave());
             }
 
-            if ((handler as any).retainStateOnLeave) {
+            if ((module as any).retainStateOnLeave) {
                 console.info(`Module [${moduleName}] exiting ...`);
             } else {
                 console.info(`Module [${moduleName}] exiting, cleaning states ...`);
-                app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/resetState(unmount)`));
+                app.store.dispatch(setStateAction(moduleName, (module as any).initialState, `@@${moduleName}/@@RESET`));
             }
 
             this.lifecycleSagaTask.cancel();
@@ -79,10 +73,10 @@ export function register<P extends {}, H extends ModuleHandler<any>>(handler: H,
         }
     }
 
-    return {actions: actions as ActionCreators<H>, MainComponent};
+    return {actions: actions as ActionCreators<M>, MainComponent};
 }
 
-export function getKeys<H extends ModuleHandler<any>>(handler: H) {
+export function getKeys<H extends Module<any>>(handler: H) {
     // Do not use Object.keys(Object.getPrototypeOf(handler)), because class methods are not enumerable
     const keys: string[] = [];
     for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(handler))) {
