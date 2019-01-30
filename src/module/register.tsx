@@ -76,11 +76,11 @@ export function register<P extends {}, M extends Module<any>>(module: M, ModuleE
     return {actions: actions as ActionCreators<M>, MainComponent};
 }
 
-export function getKeys<H extends Module<any>>(handler: H) {
-    // Do not use Object.keys(Object.getPrototypeOf(handler)), because class methods are not enumerable
+export function getKeys<M extends Module<any>>(module: M) {
+    // Do not use Object.keys(Object.getPrototypeOf(module)), because class methods are not enumerable
     const keys: string[] = [];
-    for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(handler))) {
-        if (handler[propertyName] instanceof Function && propertyName !== "constructor") {
+    for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(module))) {
+        if (module[propertyName] instanceof Function && propertyName !== "constructor") {
             keys.push(propertyName);
         }
     }
