@@ -7,7 +7,7 @@ import {Exception} from "../exception";
 import {setStateAction, State} from "../reducer";
 
 export class Module<ModuleState extends {}, HistoryState extends {} = {}, RootState extends State = State> {
-    public constructor(public name: string, private initialState: ModuleState) {
+    public constructor(public readonly name: string, private readonly initialState: ModuleState) {
         app.store.dispatch(setStateAction(name, initialState, `@@${name}/@@INIT`));
     }
 
