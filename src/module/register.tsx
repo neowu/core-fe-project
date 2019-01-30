@@ -1,16 +1,15 @@
 import React from "react";
 import {SagaIterator, Task} from "redux-saga";
 import {app} from "../app";
-import {ErrorListener} from "../exception";
 import {Action, setStateAction} from "../reducer";
-import {Handler, ModuleLifecycleListener} from "./handler";
+import {ErrorListener, ModuleHandler, ModuleLifecycleListener} from "./handler";
 import {lifecycleSaga} from "./saga";
 
 type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
-type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener<any> | keyof ErrorListener>];
+type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ErrorListener>];
 type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
-export function register<P extends {}, H extends Handler<any>>(handler: H, ModuleEntryComponent: React.ComponentType<P>): {actions: ActionCreators<H>; MainComponent: React.ComponentType<P>} {
+export function register<P extends {}, H extends ModuleHandler<any>>(handler: H, ModuleEntryComponent: React.ComponentType<P>): {actions: ActionCreators<H>; MainComponent: React.ComponentType<P>} {
     const moduleName = handler.module;
     if (app.modules.hasOwnProperty(moduleName)) {
         throw new Error(`module [${moduleName}] already registered`);
@@ -83,7 +82,7 @@ export function register<P extends {}, H extends Handler<any>>(handler: H, Modul
     return {actions: actions as ActionCreators<H>, MainComponent};
 }
 
-export function getKeys<H extends Handler<any>>(handler: H) {
+export function getKeys<H extends ModuleHandler<any>>(handler: H) {
     // Do not use Object.keys(Object.getPrototypeOf(handler)), because class methods are not enumerable
     const keys: string[] = [];
     for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(handler))) {

@@ -1,6 +1,3 @@
-import {SagaIterator} from "redux-saga";
-
-// Common exception definition
 export abstract class Exception {
     protected constructor(public message: string) {}
 }
@@ -21,11 +18,4 @@ export class RuntimeException extends Exception {
     constructor(message: string, public errorObject: any) {
         super(message);
     }
-}
-
-// Error handler interface
-export type ErrorHandler = (error: Exception) => SagaIterator;
-
-export interface ErrorListener {
-    onError: ErrorHandler;
 }
