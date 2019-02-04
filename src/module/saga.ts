@@ -22,7 +22,10 @@ export function* rootSaga() {
 }
 
 export function* lifecycleSaga(props: any, lifecycleListener: ModuleLifecycleListener<any>, moduleName: string) {
-    // Try to analyze props to see if it is a Route component
+    if (lifecycleListener.onRegister) {
+        yield* runSafely(lifecycleListener.onRegister.bind(lifecycleListener));
+    }
+
     if (lifecycleListener.onEnter) {
         if (props.match && props.location) {
             // Safely suppose this component is connected to <Route>

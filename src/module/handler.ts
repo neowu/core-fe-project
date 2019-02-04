@@ -36,6 +36,7 @@ export class Module<ModuleState extends {}, HistoryState extends {} = {}, RootSt
 export type ActionHandler = (...args: any[]) => SagaIterator;
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
+    onRegister?(): SagaIterator;
     onEnter?(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator;
     onLeave?(): SagaIterator;
     onTick?(): SagaIterator;
