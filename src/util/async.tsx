@@ -2,7 +2,7 @@ import React from "react";
 
 type ReactComponentKeyOf<T> = {[P in keyof T]: T[P] extends React.ComponentType<any> ? P : never}[keyof T];
 
-export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, loadingComponent: React.ReactNode = null): React.ComponentType<{}> {
+export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, loadingComponent: React.ReactNode = null): T[K] {
     interface State {
         Component: React.ComponentType<any> | null;
     }
@@ -24,5 +24,5 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             const {Component} = this.state;
             return Component ? <Component {...this.props} /> : loadingComponent;
         }
-    };
+    } as any;
 }
