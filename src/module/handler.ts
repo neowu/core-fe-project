@@ -6,9 +6,40 @@ import {app} from "../app";
 import {Exception} from "../exception";
 import {setStateAction, State} from "../reducer";
 
-export class Module<ModuleState extends {}, HistoryState extends {} = {}, RootState extends State = State> {
+export interface LifecycleDecoratorFlag {
+    isLifecycle?: boolean;
+}
+
+export interface TickIntervalDecoratorFlag {
+    tickInterval?: number;
+}
+
+export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
+    onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
+    onEnter: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
+    onLeave: (() => SagaIterator) & LifecycleDecoratorFlag;
+    onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
+}
+
+export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     public constructor(public readonly name: string, private readonly initialState: ModuleState) {
         app.store.dispatch(setStateAction(name, initialState, `@@${name}/@@INIT`));
+    }
+
+    *onRegister(): SagaIterator {
+        // To be overrode
+    }
+
+    *onEnter(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator {
+        // To be overrode
+    }
+
+    *onLeave(): SagaIterator {
+        // To be overrode
+    }
+
+    *onTick(): SagaIterator {
+        // To be overrode
     }
 
     protected get state(): Readonly<ModuleState> {
@@ -34,13 +65,6 @@ export class Module<ModuleState extends {}, HistoryState extends {} = {}, RootSt
 }
 
 export type ActionHandler = (...args: any[]) => SagaIterator;
-
-export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
-    onRegister?(): SagaIterator;
-    onEnter?(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator;
-    onLeave?(): SagaIterator;
-    onTick?(): SagaIterator;
-}
 
 export type ErrorHandler = (error: Exception) => SagaIterator;
 

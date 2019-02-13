@@ -15,9 +15,7 @@ interface InitialRenderConfig {
     onInitialized?: () => void;
 }
 
-export function renderDOMApp(config: InitialRenderConfig): void {
-    console.time("[framework] Initial UI Render");
-
+export function renderApp(config: InitialRenderConfig): void {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -25,7 +23,6 @@ export function renderDOMApp(config: InitialRenderConfig): void {
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    // TODO
     onInitialized = config.onInitialized || null;
 
     const AppMainComponent = config.componentType;
@@ -68,10 +65,8 @@ export function completeInitialization(isRenderCompleted: boolean) {
 
     if (isRenderCompleted) {
         initialModuleRenderCompleted = true;
-        console.timeEnd("[framework] Initial UI Render");
     } else {
         initialModuleLogicCompleted = true;
-        console.timeEnd("[framework] Initial Module Logic");
     }
 
     if (initialModuleLogicCompleted && initialModuleRenderCompleted) {

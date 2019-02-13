@@ -22,11 +22,11 @@ export function* rootSaga() {
 }
 
 export function* lifecycleSaga(props: any, lifecycleListener: ModuleLifecycleListener<any>, moduleName: string) {
-    if (lifecycleListener.onRegister) {
+    if (lifecycleListener.onRegister.isLifecycle) {
         yield* runSafely(lifecycleListener.onRegister.bind(lifecycleListener));
     }
 
-    if (lifecycleListener.onEnter) {
+    if (lifecycleListener.onEnter.isLifecycle) {
         if (props.match && props.location) {
             // Safely suppose this component is connected to <Route>
             yield* runSafely(lifecycleListener.onEnter.bind(lifecycleListener), props.match.params, props.location);
@@ -40,8 +40,8 @@ export function* lifecycleSaga(props: any, lifecycleListener: ModuleLifecycleLis
         completeInitialization(false);
     }
 
-    if (lifecycleListener.onTick) {
-        const tickIntervalInMillisecond = ((lifecycleListener.onTick as any).tickInterval || 5) * 1000;
+    if (lifecycleListener.onTick.isLifecycle) {
+        const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
         const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
         while (true) {
             yield* runSafely(boundTicker);
