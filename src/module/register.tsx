@@ -9,7 +9,7 @@ type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args
 type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
 type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
-interface AttachLifecycleConfig {
+interface AttachLifecycleOption {
     retainStateOnLeave?: boolean;
 }
 
@@ -20,7 +20,7 @@ class ModuleProxy<M extends Module<any>> {
         return this.actions;
     }
 
-    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>, config: AttachLifecycleConfig = {}): React.ComponentType<P> {
+    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>, config: AttachLifecycleOption = {}): React.ComponentType<P> {
         const moduleName = this.module.name;
         const initialState = (this.module as any).initialState;
         const lifecycleListener = this.module as ModuleLifecycleListener;
