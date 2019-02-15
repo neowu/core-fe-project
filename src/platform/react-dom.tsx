@@ -2,6 +2,7 @@ import {ConnectedRouter} from "connected-react-router";
 import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
+import {withRouter} from "react-router";
 import {app} from "../app";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
@@ -11,7 +12,7 @@ let initialModuleLogicCompleted = false;
 let onInitialized: null | (() => void) = null;
 
 interface InitialRenderConfig {
-    componentType: ComponentType<{}>;
+    componentType: ComponentType<any>;
     onInitialized?: () => void;
 }
 
@@ -25,7 +26,7 @@ export function renderApp(config: InitialRenderConfig): void {
 
     onInitialized = config.onInitialized || null;
 
-    const AppMainComponent = config.componentType;
+    const AppMainComponent = withRouter(config.componentType);
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
