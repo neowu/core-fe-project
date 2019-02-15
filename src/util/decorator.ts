@@ -1,11 +1,6 @@
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
-import {
-    ActionHandler,
-    LifecycleDecoratorFlag,
-    ModuleLifecycleListener,
-    TickIntervalDecoratorFlag
-} from "../module/handler";
+import {ActionHandler, LifecycleDecoratorFlag, ModuleLifecycleListener, TickIntervalDecoratorFlag} from "../module/handler";
 import {loadingAction, State} from "../reducer";
 
 /**
