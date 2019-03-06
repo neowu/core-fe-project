@@ -10,9 +10,15 @@ test("json with supported date formats", () => {
 
 test("json with not supported date formats", () => {
     expect(json('{"date": "2018-09-10T15:08"}')).toEqual({date: "2018-09-10T15:08"});
-    expect(json('{"date": "2018-09-10"}')).toEqual({date: "2018-09-10"});
     expect(json('{"date": "2018-09-04T14:09:53.123"}')).toEqual({date: "2018-09-04T14:09:53.123"});
     expect(json('{"date": "2018-09-04T14:09:53"}')).toEqual({date: "2018-09-04T14:09:53"});
+
+    /**
+     * Simple date (corresponding to Java LocalDate) should not be transformed as Date.
+     * Because if Java LocalDate is transformed to JS Date, UTC time will be appended.
+     * Then the browser will show the date in its local time, which may lead to one-day difference.
+     */
+    expect(json('{"date": "2018-09-10"}')).toEqual({date: "2018-09-10"});
 });
 
 test("json", () => {
