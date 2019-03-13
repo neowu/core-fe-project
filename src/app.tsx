@@ -1,30 +1,41 @@
-import {connectRouter, routerMiddleware} from "connected-react-router";
-import {createBrowserHistory, History} from "history";
 import React from "react";
-import {applyMiddleware, createStore, Store} from "redux";
+import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {ActionHandler, ErrorHandler} from "./module/handler";
-import {rootSaga} from "./module/saga";
-import {composeWithDevTools} from "./platform/devtools";
-import {rootReducer, State} from "./reducer";
+import {EventLogger} from "./EventLogger";
+import {ActionHandler, ErrorHandler} from "./handler";
+import {LOADING_ACTION, rootReducer, State} from "./reducer";
+import {rootSaga} from "./saga";
 
 interface App {
     readonly store: Store<State>;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly actionHandlers: {[actionType: string]: ActionHandler};
-    readonly errorHandlers: ErrorHandler[];
-    readonly history: History;
-    readonly modules: {[module: string]: boolean}; // whether module is loaded
+    readonly eventLogger: EventLogger;
+    errorHandler: ErrorHandler | null;
+}
+
+function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
+    let composeEnhancers = compose;
+    const production = process.env.NODE_ENV === "production";
+    if (!production) {
+        const extension = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
+        if (extension) {
+            composeEnhancers = extension({
+                // Ref: https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
+                actionsBlacklist: [LOADING_ACTION],
+            });
+        }
+    }
+    return composeEnhancers(enhancer);
 }
 
 function createApp(): App {
-    const history = createBrowserHistory();
+    const eventLogger = new EventLogger();
     const sagaMiddleware = createSagaMiddleware();
-    const store: Store<State> = createStore(rootReducer(connectRouter(history)), composeWithDevTools(applyMiddleware(routerMiddleware(history), sagaMiddleware)));
+    const store: Store<State> = createStore(rootReducer(), composeWithDevTools(applyMiddleware(sagaMiddleware)));
     const actionHandlers: {[actionType: string]: ActionHandler} = {};
-    const errorHandlers: ErrorHandler[] = [];
     sagaMiddleware.run(rootSaga);
-    return {store, sagaMiddleware, actionHandlers, errorHandlers, history, modules: {}};
+    return {store, sagaMiddleware, actionHandlers, eventLogger, errorHandler: null};
 }
 
 export const app = createApp();

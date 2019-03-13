@@ -1,44 +1,60 @@
-import {ConnectedRouter} from "connected-react-router";
 import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router";
+import {Router} from "react-router-dom";
 import {app} from "../app";
+import {ErrorBoundary} from "../ErrorBoundary";
+import {ErrorListener, Module} from "../handler";
 import {errorAction} from "../reducer";
-import {ErrorBoundary} from "../util/ErrorBoundary";
+import {browserHistory} from "./route";
 
-let initialModuleRenderCompleted = false;
-let initialModuleLogicCompleted = false;
-let onInitialized: null | (() => void) = null;
+type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
 
-interface InitialRenderConfig {
+interface AppOption {
     componentType: ComponentType<any>;
+    errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
+    eventLoggerContext?: {[key: string]: string | (() => string)};
 }
 
-export function renderApp(config: InitialRenderConfig): void {
+export function startApp(config: AppOption): void {
+    renderDOM(config.componentType, config.onInitialized);
+    setupGlobalErrorHandler(config.errorHandlerModule);
+    setupEventLoggerContext(config.eventLoggerContext);
+}
+
+function renderDOM(AppComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
-    rootElement.style.transform = "translateY(-10px) scale(0.98)";
+    rootElement.style.transform = "translateY(-10px) scale(0.96)";
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    onInitialized = config.onInitialized || null;
-
-    const AppMainComponent = withRouter(config.componentType);
+    const RoutedAppComponent = withRouter(AppComponent);
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
-                <ConnectedRouter history={app.history}>
-                    <AppMainComponent />
-                </ConnectedRouter>
+                <Router history={browserHistory}>
+                    <RoutedAppComponent />
+                </Router>
             </ErrorBoundary>
         </Provider>,
         rootElement,
-        () => completeInitialization(true)
+        () => {
+            onInitialized();
+            setTimeout(() => {
+                // To make the rendering effect smooth
+                const rootElement = document.getElementById("framework-app-root")!;
+                rootElement.style.transform = "none";
+                rootElement.style.opacity = "1";
+            }, 100);
+        }
     );
+}
 
+function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (process.env.NODE_ENV === "development") {
             console.error("window global error");
@@ -57,28 +73,11 @@ export function renderApp(config: InitialRenderConfig): void {
         app.store.dispatch(errorAction(error));
         return true;
     };
+
+    const errorHandler = new ErrorHandlerModule("error-handler", {});
+    app.errorHandler = errorHandler.onError.bind(errorHandler);
 }
 
-export function completeInitialization(isRenderCompleted: boolean) {
-    if ((!isRenderCompleted && initialModuleLogicCompleted) || (isRenderCompleted && initialModuleRenderCompleted)) {
-        return;
-    }
-
-    if (isRenderCompleted) {
-        initialModuleRenderCompleted = true;
-    } else {
-        initialModuleLogicCompleted = true;
-    }
-
-    if (initialModuleLogicCompleted && initialModuleRenderCompleted) {
-        if (onInitialized) {
-            onInitialized();
-        }
-        setTimeout(() => {
-            // Separate DOM update into another queue, in case callback execution suspends CSS transition
-            const rootElement = document.getElementById("framework-app-root")!;
-            rootElement.style.transform = "none";
-            rootElement.style.opacity = "1";
-        }, 0);
-    }
+function setupEventLoggerContext(context: {[key: string]: string | (() => string)} = {}) {
+    app.eventLogger.setContext(context);
 }

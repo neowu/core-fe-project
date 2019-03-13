@@ -1,6 +1,5 @@
-import {LocationChangeAction, RouterState} from "connected-react-router";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
-import {Exception, RuntimeException} from "./exception";
+import {Exception, RuntimeException} from "./Exception";
 
 // Redux State
 interface LoadingState {
@@ -10,7 +9,6 @@ interface LoadingState {
 export interface State {
     loading: LoadingState;
     app: {};
-    router: RouterState;
 }
 
 // Redux Action
@@ -83,9 +81,8 @@ export function errorAction(error: any): Action<Exception> {
 }
 
 // Root Reducer
-export function rootReducer(routerReducer: Reducer<RouterState, LocationChangeAction>): Reducer<State> {
+export function rootReducer(): Reducer<State> {
     return combineReducers<State>({
-        router: routerReducer,
         loading: loadingReducer,
         app: setStateReducer,
     });

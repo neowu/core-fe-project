@@ -1,13 +1,7 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
-import {Exception} from "../exception";
-import {errorAction} from "../reducer";
-
-export class ReactLifecycleException extends Exception {
-    constructor(public message: string, public stack: string | null, public componentStack: string) {
-        super(message);
-    }
-}
+import {ReactLifecycleException} from "./Exception";
+import {errorAction} from "./reducer";
 
 interface Props extends DispatchProp<any> {
     render: (exception: ReactLifecycleException) => React.ReactNode;
@@ -19,7 +13,7 @@ interface State {
 }
 
 class Component extends React.PureComponent<Props, State> {
-    static defaultProps: Pick<Props, "render"> = {render: exception => <h2>render failed: {exception.message}</h2>};
+    static defaultProps: Pick<Props, "render"> = {render: () => null};
     state: State = {exception: null};
 
     componentDidUpdate(prevProps: Props) {
@@ -31,12 +25,11 @@ class Component extends React.PureComponent<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         if (process.env.NODE_ENV === "development") {
-            console.error("React Lifecycle Error");
             console.error(error);
-            console.error("Stack", errorInfo.componentStack);
+            console.error("React Component Stack", errorInfo.componentStack);
         }
 
-        const exception = new ReactLifecycleException(error.message, error.stack!, errorInfo.componentStack);
+        const exception = new ReactLifecycleException(error.message, errorInfo.componentStack);
         this.props.dispatch(errorAction(exception));
         this.setState({exception});
     }

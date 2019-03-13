@@ -1,14 +1,15 @@
 import "@babel/polyfill";
 
-export {renderApp} from "./platform/react-dom";
-export {Module, ErrorListener} from "./module/handler";
-export {register} from "./module/register";
+export {startApp} from "./platform/react-dom";
+export {ajax} from "./platform/network";
 
 export {async} from "./util/async";
-export {createActionHandlerDecorator, Loading, Interval, Lifecycle} from "./util/decorator";
-export {ErrorBoundary, ReactLifecycleException} from "./util/ErrorBoundary";
-export {ajax} from "./util/network";
 export {call} from "./util/sagaCall";
 
-export {Exception, APIException, NetworkConnectionException, RuntimeException} from "./exception";
+export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log} from "./decorator";
+export {LogEvent} from "./EventLogger";
+export {ErrorBoundary} from "./ErrorBoundary";
+export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, State} from "./reducer";
+export {Module, ErrorListener} from "./handler";
+export {register} from "./module";

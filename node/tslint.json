@@ -12,6 +12,7 @@
     "member-access": false,
     "member-ordering": false,
     "no-console": [true, "log"],
+    "no-empty": false,
     "no-empty-interface": false,
     "no-shadowed-variable": false,
     "no-var-requires": false,

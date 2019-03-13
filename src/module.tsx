@@ -1,8 +1,8 @@
 import React from "react";
 import {SagaIterator, Task} from "redux-saga";
-import {app} from "../app";
-import {Action, setStateAction} from "../reducer";
+import {app} from "./app";
 import {ErrorListener, Module, ModuleLifecycleListener} from "./handler";
+import {Action, setStateAction} from "./reducer";
 import {lifecycleSaga} from "./saga";
 
 type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
@@ -32,30 +32,31 @@ class ModuleProxy<M extends Module<any>> {
 
             constructor(props: P) {
                 super(props);
-                app.modules[moduleName] = false;
-                this.lifecycleSagaTask = app.sagaMiddleware.run(lifecycleSaga, props, lifecycleListener, moduleName);
+                this.lifecycleSagaTask = app.sagaMiddleware.run(lifecycleSaga, props, lifecycleListener);
+                console.info(`Module [${moduleName}] attached component initially rendered`);
             }
 
             componentDidUpdate(prevProps: Readonly<P>) {
                 const prevLocation = (prevProps as any).location;
                 const currentLocation = (this.props as any).location;
                 const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
-                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onEnter.isLifecycle) {
+                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger if current component is connected to <Route>
-                    app.store.dispatch(actions.onEnter(currentRouteParams, currentLocation));
+                    app.store.dispatch(actions.onRender(currentRouteParams, currentLocation));
                 }
             }
 
             componentWillUnmount() {
-                if (lifecycleListener.onLeave.isLifecycle) {
+                if (lifecycleListener.onDestroy.isLifecycle) {
                     app.store.dispatch(actions.onLeave());
                 }
 
                 if (!config.retainStateOnLeave) {
-                    app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@RESET`));
+                    app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
                 }
 
                 this.lifecycleSagaTask.cancel();
+                console.info(`Module [${moduleName}] attached component destroyed`);
             }
 
             render() {
@@ -67,16 +68,7 @@ class ModuleProxy<M extends Module<any>> {
 
 export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const moduleName = module.name;
-    if (app.modules.hasOwnProperty(moduleName)) {
-        throw new Error(`module [${moduleName}] already registered`);
-    }
-
     const keys = getKeys(module);
-
-    // Check if supports ErrorHandler
-    if ("onError" in module) {
-        app.errorHandlers.push(((module as any) as ErrorListener).onError.bind(module));
-    }
 
     // Transform every method into ActionCreator
     const actions: any = {};

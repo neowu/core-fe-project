@@ -19,3 +19,9 @@ export class RuntimeException extends Exception {
         super(message);
     }
 }
+
+export class ReactLifecycleException extends Exception {
+    constructor(public message: string, public componentStack: string) {
+        super(message);
+    }
+}

@@ -1,4 +1,4 @@
-import {RuntimeException} from "exception";
+import {RuntimeException} from "Exception";
 import {errorAction} from "reducer";
 
 test("errorAction", () => {

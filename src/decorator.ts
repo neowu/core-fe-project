@@ -1,7 +1,8 @@
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
-import {ActionHandler, LifecycleDecoratorFlag, ModuleLifecycleListener, TickIntervalDecoratorFlag} from "../module/handler";
-import {loadingAction, State} from "../reducer";
+import {app} from "./app";
+import {ActionHandler, LifecycleDecoratorFlag, ModuleLifecycleListener, TickIntervalDecoratorFlag} from "./handler";
+import {loadingAction, State} from "./reducer";
 
 /**
  * Decorator type declaration, required by TypeScript
@@ -18,7 +19,7 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
     return (target, propertyKey, descriptor) => {
         const handler = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            const rootState: S = (target as any).rootState;
+            const rootState: S = app.store.getState() as S;
             if (rootState) {
                 yield* interceptor(handler.bind(this, ...args), rootState);
             } else {
@@ -39,6 +40,17 @@ export function Loading(identifier: string = "global"): HandlerDecorator {
             yield* handler();
         } finally {
             yield put(loadingAction(identifier, false));
+        }
+    });
+}
+
+export function Log(type: string): HandlerDecorator {
+    return createActionHandlerDecorator(function*(handler) {
+        const onLogEnd = app.eventLogger.log(type);
+        try {
+            yield* handler();
+        } finally {
+            onLogEnd();
         }
     });
 }
