@@ -5,6 +5,7 @@ import {delay, put} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, ActionHandler} from "../module";
 import {errorAction, setStateAction} from "../reducer";
+import {browserHistory} from "./browserHistory";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 interface AttachLifecycleOption {
@@ -57,21 +58,18 @@ export class ModuleProxy<M extends Module<any>> {
                 console.info(`Module [${moduleName}] attached component destroyed`);
             }
 
-            render() {
-                return <ComponentType {...this.props} />;
-            }
-
             private *lifecycleSaga(): SagaIterator {
+                const props = this.props as (RouteComponentProps | {});
+
                 if (lifecycleListener.onRegister.isLifecycle) {
                     yield* runSafely(lifecycleListener.onRegister.bind(lifecycleListener));
                 }
 
                 if (lifecycleListener.onRender.isLifecycle) {
-                    if ("match" in this.props && "location" in this.props) {
-                        const props = (this.props as any) as RouteComponentProps;
+                    if ("match" in props && "location" in props) {
                         yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
                     } else {
-                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
+                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, browserHistory);
                     }
                 }
 
@@ -83,6 +81,10 @@ export class ModuleProxy<M extends Module<any>> {
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
+            }
+
+            render() {
+                return <ComponentType {...this.props} />;
             }
         };
     }

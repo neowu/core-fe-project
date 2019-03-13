@@ -7,6 +7,7 @@ import {app} from "../app";
 import {ErrorBoundary} from "../ErrorBoundary";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
+import {browserHistory} from "./browserHistory";
 import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
@@ -36,7 +37,7 @@ function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
-                <Router history={app.browserHistory}>
+                <Router history={browserHistory}>
                     <RoutedEntryComponent />
                 </Router>
             </ErrorBoundary>

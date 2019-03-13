@@ -1,10 +1,10 @@
 import "@babel/polyfill";
 
 export {startApp} from "./platform/react-dom";
-export {ajax} from "./platform/network";
 export {Module} from "./platform/Module";
 
 export {async} from "./util/async";
+export {ajax} from "./util/network";
 export {call} from "./util/sagaCall";
 
 export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log} from "./decorator";

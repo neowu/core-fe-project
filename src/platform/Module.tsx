@@ -4,6 +4,7 @@ import {app} from "../app";
 import {EventLogger} from "../EventLogger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
+import {browserHistory} from "./browserHistory";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
     onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
@@ -69,16 +70,16 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
     protected setHistory(urlOrState: HistoryState | string, usePush: boolean = true) {
         if (typeof urlOrState === "string") {
             if (usePush) {
-                app.browserHistory.push(urlOrState);
+                browserHistory.push(urlOrState);
             } else {
-                app.browserHistory.replace(urlOrState);
+                browserHistory.replace(urlOrState);
             }
         } else {
             const currentURL = location.pathname + location.search;
             if (usePush) {
-                app.browserHistory.push(currentURL, urlOrState);
+                browserHistory.push(currentURL, urlOrState);
             } else {
-                app.browserHistory.replace(currentURL, urlOrState);
+                browserHistory.replace(currentURL, urlOrState);
             }
         }
     }
