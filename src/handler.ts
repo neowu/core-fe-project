@@ -1,7 +1,7 @@
-import {EventLogger} from "EventLogger";
 import {Location} from "history";
 import {SagaIterator} from "redux-saga";
 import {app} from "./app";
+import {EventLogger} from "./EventLogger";
 import {Exception} from "./Exception";
 import {browserHistory} from "./platform/route";
 import {setStateAction, State} from "./reducer";
