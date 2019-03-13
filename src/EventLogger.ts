@@ -53,8 +53,8 @@ export class EventLogger {
 
     private appendLog(type: string, extraContext: {[key: string]: string}, errorMessage?: string): () => void {
         const completeContext = {...extraContext};
-        Object.entries(this.environmentContext).map(([a, b]) => {
-            completeContext[a] = typeof b === "string" ? b : b();
+        Object.entries(this.environmentContext).map(([key, value]) => {
+            completeContext[key] = typeof value === "string" ? value : value();
         });
 
         const event: LogEvent = {
