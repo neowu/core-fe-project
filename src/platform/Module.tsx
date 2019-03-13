@@ -15,12 +15,7 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryStat
 
 // TODO: need to merge RouteParam & HistoryState?
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
-    public constructor(public readonly name: string, private readonly initialState: ModuleState) {
-        if (!app.store.getState().app[name]) {
-            app.store.dispatch(setStateAction(name, initialState, `@@${name}/@@init`));
-            console.info(`Module [${name}] registered`);
-        }
-    }
+    public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
 
     *onRegister(): SagaIterator {
         /**

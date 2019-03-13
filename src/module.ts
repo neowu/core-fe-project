@@ -3,7 +3,7 @@ import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action} from "./reducer";
+import {Action, setStateAction} from "./reducer";
 
 export interface LifecycleDecoratorFlag {
     isLifecycle?: boolean;
@@ -27,11 +27,16 @@ export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H
 
 export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const moduleName = module.name;
-    const keys = getKeys(module);
+    if (!app.store.getState().app[moduleName]) {
+        // To get private property
+        const initialState = (module as any).initialState;
+        app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@init`));
+        console.info(`Module [${moduleName}] registered`);
+    }
 
     // Transform every method into ActionCreator
     const actions: any = {};
-    keys.forEach(actionType => {
+    getKeys(module).forEach(actionType => {
         const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});

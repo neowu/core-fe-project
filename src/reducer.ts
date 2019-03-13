@@ -74,7 +74,7 @@ export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
 export function errorAction(error: any): Action<Exception> {
     if (process.env.NODE_ENV === "development") {
-        console.error(error);
+        console.warn("Error Caught:", error);
     }
 
     const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
