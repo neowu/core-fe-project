@@ -73,6 +73,10 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
 export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
 export function errorAction(error: any): Action<Exception> {
+    if (process.env.NODE_ENV === "development") {
+        console.error(error);
+    }
+
     const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
     return {
         type: ERROR_ACTION_TYPE,

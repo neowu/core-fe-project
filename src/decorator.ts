@@ -1,7 +1,8 @@
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {app} from "./app";
-import {ActionHandler, LifecycleDecoratorFlag, ModuleLifecycleListener, TickIntervalDecoratorFlag} from "./handler";
+import {ActionHandler, LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "./module";
+import {ModuleLifecycleListener} from "./platform/Module";
 import {loadingAction, State} from "./reducer";
 
 /**
@@ -10,6 +11,7 @@ import {loadingAction, State} from "./reducer";
 type HandlerDecorator = (target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<ActionHandler>) => TypedPropertyDescriptor<ActionHandler>;
 type LifecycleHandlerDecorator = (target: object, propertyKey: keyof ModuleLifecycleListener, descriptor: TypedPropertyDescriptor<ActionHandler & LifecycleDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor: TypedPropertyDescriptor<ActionHandler & TickIntervalDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
+
 type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) => SagaIterator;
 
 /**
@@ -17,14 +19,10 @@ type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) =>
  */
 export function createActionHandlerDecorator<S extends State = State>(interceptor: HandlerInterceptor<S>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
-        const handler = descriptor.value!;
+        const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
             const rootState: S = app.store.getState() as S;
-            if (rootState) {
-                yield* interceptor(handler.bind(this, ...args), rootState);
-            } else {
-                throw new Error("decorator must be applied to handler method");
-            }
+            yield* interceptor(fn.bind(this, ...args), rootState);
         };
         return descriptor;
     };

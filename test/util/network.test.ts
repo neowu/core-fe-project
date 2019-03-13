@@ -1,4 +1,4 @@
-import {json, url} from "platform/network";
+import {json, url} from "../../src/platform/network";
 
 test("json with supported date formats", () => {
     expect(json('{"date": "2018-05-24T12:00:00.123456Z"}')).toEqual({date: new Date("2018-05-24T12:00:00.123456Z")});

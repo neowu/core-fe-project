@@ -1,18 +1,9 @@
 import {Location} from "history";
 import {SagaIterator} from "redux-saga";
-import {app} from "./app";
-import {EventLogger} from "./EventLogger";
-import {Exception} from "./Exception";
-import {browserHistory} from "./platform/route";
-import {setStateAction, State} from "./reducer";
-
-export interface LifecycleDecoratorFlag {
-    isLifecycle?: boolean;
-}
-
-export interface TickIntervalDecoratorFlag {
-    tickInterval?: number;
-}
+import {app} from "../app";
+import {EventLogger} from "../EventLogger";
+import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
+import {setStateAction, State} from "../reducer";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
     onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
@@ -78,25 +69,17 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
     protected setHistory(urlOrState: HistoryState | string, usePush: boolean = true) {
         if (typeof urlOrState === "string") {
             if (usePush) {
-                browserHistory.push(urlOrState);
+                app.browserHistory.push(urlOrState);
             } else {
-                browserHistory.replace(urlOrState);
+                app.browserHistory.replace(urlOrState);
             }
         } else {
             const currentURL = location.pathname + location.search;
             if (usePush) {
-                browserHistory.push(currentURL, urlOrState);
+                app.browserHistory.push(currentURL, urlOrState);
             } else {
-                browserHistory.replace(currentURL, urlOrState);
+                app.browserHistory.replace(currentURL, urlOrState);
             }
         }
     }
-}
-
-export type ActionHandler = (...args: any[]) => SagaIterator;
-
-export type ErrorHandler = (error: Exception) => SagaIterator;
-
-export interface ErrorListener {
-    onError: ErrorHandler;
 }

@@ -1,5 +1,5 @@
-import {RuntimeException} from "Exception";
-import {errorAction} from "reducer";
+import {RuntimeException} from "../src/Exception";
+import {errorAction} from "../src/reducer";
 
 test("errorAction", () => {
     const errorMessage = "runtime error message";

@@ -24,11 +24,6 @@ class Component extends React.PureComponent<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        if (process.env.NODE_ENV === "development") {
-            console.error(error);
-            console.error("React Component Stack", errorInfo.componentStack);
-        }
-
         const exception = new ReactLifecycleException(error.message, errorInfo.componentStack);
         this.props.dispatch(errorAction(exception));
         this.setState({exception});

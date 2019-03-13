@@ -5,9 +5,9 @@ import {withRouter} from "react-router";
 import {Router} from "react-router-dom";
 import {app} from "../app";
 import {ErrorBoundary} from "../ErrorBoundary";
-import {ErrorListener, Module} from "../handler";
+import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
-import {browserHistory} from "./route";
+import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
 
@@ -24,7 +24,7 @@ export function startApp(config: AppOption): void {
     setupEventLoggerContext(config.eventLoggerContext);
 }
 
-function renderDOM(AppComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
+function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -32,12 +32,12 @@ function renderDOM(AppComponent: ComponentType<any>, onInitialized: () => void =
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    const RoutedAppComponent = withRouter(AppComponent);
+    const RoutedEntryComponent = withRouter(EntryComponent);
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
-                <Router history={browserHistory}>
-                    <RoutedAppComponent />
+                <Router history={app.browserHistory}>
+                    <RoutedEntryComponent />
                 </Router>
             </ErrorBoundary>
         </Provider>,
@@ -56,17 +56,6 @@ function renderDOM(AppComponent: ComponentType<any>, onInitialized: () => void =
 
 function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
-        if (process.env.NODE_ENV === "development") {
-            console.error("window global error");
-            if (error) {
-                console.error(error);
-            }
-            console.error(`message: ${message.toString()}`);
-            if (source && line && column) {
-                console.error(`source: ${source} (${line}, ${column})`);
-            }
-        }
-
         if (!error) {
             error = new Error(message.toString());
         }

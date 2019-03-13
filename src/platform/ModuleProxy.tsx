@@ -1,19 +1,17 @@
 import React from "react";
+import {RouteComponentProps} from "react-router";
 import {SagaIterator, Task} from "redux-saga";
-import {app} from "./app";
-import {ErrorListener, Module, ModuleLifecycleListener} from "./handler";
-import {Action, setStateAction} from "./reducer";
-import {lifecycleSaga} from "./saga";
-
-type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
-type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
-type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
+import {delay, put} from "redux-saga/effects";
+import {app} from "../app";
+import {ActionCreators, ActionHandler} from "../module";
+import {errorAction, setStateAction} from "../reducer";
+import {Module, ModuleLifecycleListener} from "./Module";
 
 interface AttachLifecycleOption {
     retainStateOnLeave?: boolean;
 }
 
-class ModuleProxy<M extends Module<any>> {
+export class ModuleProxy<M extends Module<any>> {
     public constructor(private module: M, private actions: ActionCreators<M>) {}
 
     public getActions(): ActionCreators<M> {
@@ -32,7 +30,7 @@ class ModuleProxy<M extends Module<any>> {
 
             constructor(props: P) {
                 super(props);
-                this.lifecycleSagaTask = app.sagaMiddleware.run(lifecycleSaga, props, lifecycleListener);
+                this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
                 console.info(`Module [${moduleName}] attached component initially rendered`);
             }
 
@@ -62,33 +60,38 @@ class ModuleProxy<M extends Module<any>> {
             render() {
                 return <ComponentType {...this.props} />;
             }
+
+            private *lifecycleSaga(): SagaIterator {
+                if (lifecycleListener.onRegister.isLifecycle) {
+                    yield* runSafely(lifecycleListener.onRegister.bind(lifecycleListener));
+                }
+
+                if (lifecycleListener.onRender.isLifecycle) {
+                    if ("match" in this.props && "location" in this.props) {
+                        const props = (this.props as any) as RouteComponentProps;
+                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
+                    } else {
+                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
+                    }
+                }
+
+                if (lifecycleListener.onTick.isLifecycle) {
+                    const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
+                    const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
+                    while (true) {
+                        yield* runSafely(boundTicker);
+                        yield delay(tickIntervalInMillisecond);
+                    }
+                }
+            }
         };
     }
 }
 
-export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
-    const moduleName = module.name;
-    const keys = getKeys(module);
-
-    // Transform every method into ActionCreator
-    const actions: any = {};
-    keys.forEach(actionType => {
-        const method = module[actionType];
-        const qualifiedActionType = `${moduleName}/${actionType}`;
-        actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
-        app.actionHandlers[qualifiedActionType] = method.bind(module);
-    });
-
-    return new ModuleProxy(module, actions);
-}
-
-function getKeys<M extends Module<any>>(module: M) {
-    // Do not use Object.keys(Object.getPrototypeOf(module)), because class methods are not enumerable
-    const keys: string[] = [];
-    for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(module))) {
-        if (module[propertyName] instanceof Function && propertyName !== "constructor") {
-            keys.push(propertyName);
-        }
+function* runSafely(handler: ActionHandler, ...payload: any[]): SagaIterator {
+    try {
+        yield* handler(...payload);
+    } catch (error) {
+        yield put(errorAction(error));
     }
-    return keys;
 }
