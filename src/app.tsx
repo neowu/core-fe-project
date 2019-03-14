@@ -1,3 +1,5 @@
+import {routerMiddleware} from "connected-react-router";
+import {createBrowserHistory, History} from "history";
 import React from "react";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
@@ -9,6 +11,7 @@ import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, Sta
 declare const window: any;
 
 interface App {
+    readonly browserHistory: History;
     readonly store: Store<State>;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly actionHandlers: {[actionType: string]: ActionHandler};
@@ -32,10 +35,10 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 }
 
 function createApp(): App {
+    const browserHistory = createBrowserHistory();
     const eventLogger = new EventLogger();
     const sagaMiddleware = createSagaMiddleware();
-    const store: Store<State> = createStore(rootReducer(), composeWithDevTools(applyMiddleware(sagaMiddleware)));
-    const actionHandlers: {[actionType: string]: ActionHandler} = {};
+    const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function* rootSaga() {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
@@ -54,7 +57,7 @@ function createApp(): App {
             }
         });
     });
-    return {store, sagaMiddleware, actionHandlers, eventLogger, errorHandler: null};
+    return {browserHistory, store, sagaMiddleware, actionHandlers: {}, eventLogger, errorHandler: null};
 }
 
 export const app = createApp();

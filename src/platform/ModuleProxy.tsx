@@ -5,7 +5,6 @@ import {delay, put} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, ActionHandler} from "../module";
 import {errorAction, setStateAction} from "../reducer";
-import {browserHistory} from "./browserHistory";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 interface AttachLifecycleOption {
@@ -69,7 +68,7 @@ export class ModuleProxy<M extends Module<any>> {
                     if ("match" in props && "location" in props) {
                         yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
                     } else {
-                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, browserHistory);
+                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
                     }
                 }
 

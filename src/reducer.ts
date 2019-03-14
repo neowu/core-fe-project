@@ -1,3 +1,5 @@
+import {connectRouter, RouterState} from "connected-react-router";
+import {History} from "history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
 import {Exception, RuntimeException} from "./Exception";
 
@@ -9,6 +11,7 @@ interface LoadingState {
 export interface State {
     loading: LoadingState;
     app: {};
+    router: RouterState;
 }
 
 // Redux Action
@@ -85,8 +88,9 @@ export function errorAction(error: any): Action<Exception> {
 }
 
 // Root Reducer
-export function rootReducer(): Reducer<State> {
+export function rootReducer(history: History): Reducer<State> {
     return combineReducers<State>({
+        router: connectRouter(history),
         loading: loadingReducer,
         app: setStateReducer,
     });

@@ -1,13 +1,12 @@
+import {ConnectedRouter} from "connected-react-router";
 import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router";
-import {Router} from "react-router-dom";
 import {app} from "../app";
 import {ErrorBoundary} from "../ErrorBoundary";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
-import {browserHistory} from "./browserHistory";
 import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
@@ -16,13 +15,11 @@ interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
-    eventLoggerContext?: {[key: string]: string | (() => string)};
 }
 
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
-    setupEventLoggerContext(config.eventLoggerContext);
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
@@ -37,9 +34,9 @@ function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
-                <Router history={browserHistory}>
+                <ConnectedRouter history={app.browserHistory}>
                     <RoutedEntryComponent />
-                </Router>
+                </ConnectedRouter>
             </ErrorBoundary>
         </Provider>,
         rootElement,
@@ -66,8 +63,4 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
 
     const errorHandler = new ErrorHandlerModule("error-handler", {});
     app.errorHandler = errorHandler.onError.bind(errorHandler);
-}
-
-function setupEventLoggerContext(context: {[key: string]: string | (() => string)} = {}) {
-    app.eventLogger.setContext(context);
 }

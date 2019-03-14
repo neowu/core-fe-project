@@ -1,10 +1,10 @@
+import {push, replace} from "connected-react-router";
 import {Location} from "history";
 import {SagaIterator} from "redux-saga";
 import {app} from "../app";
 import {EventLogger} from "../EventLogger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
-import {browserHistory} from "./browserHistory";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
     onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
@@ -64,18 +64,10 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
 
     protected setHistory(urlOrState: HistoryState | string, usePush: boolean = true) {
         if (typeof urlOrState === "string") {
-            if (usePush) {
-                browserHistory.push(urlOrState);
-            } else {
-                browserHistory.replace(urlOrState);
-            }
+            app.store.dispatch(usePush ? push(urlOrState) : replace(urlOrState));
         } else {
             const currentURL = location.pathname + location.search;
-            if (usePush) {
-                browserHistory.push(currentURL, urlOrState);
-            } else {
-                browserHistory.replace(currentURL, urlOrState);
-            }
+            app.store.dispatch(usePush ? push(currentURL, urlOrState) : replace(currentURL, urlOrState));
         }
     }
 }
