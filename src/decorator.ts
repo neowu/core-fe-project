@@ -43,6 +43,19 @@ export function Loading(identifier: string = "global"): HandlerDecorator {
 }
 
 export function Log(type: string): HandlerDecorator {
+    return (target, propertyKey, descriptor) => {
+        const fn = descriptor.value!;
+        descriptor.value = function*(...args: any[]): SagaIterator {
+            const onLogEnd = app.eventLogger.log(type, args.length > 1 ? {parameters: JSON.stringify(args)} : args.length === 1 ? {parameter: JSON.stringify(args[0])} : undefined);
+            try {
+                yield* fn.bind(this)(...args);
+            } finally {
+                onLogEnd();
+            }
+        };
+        return descriptor;
+    };
+
     return createActionHandlerDecorator(function*(handler) {
         const onLogEnd = app.eventLogger.log(type);
         try {

@@ -1,4 +1,5 @@
-import {APIException, Exception, ReactLifecycleException} from "./Exception";
+import {app} from "./app";
+import {APIException, Exception, ReactLifecycleException, RuntimeException} from "./Exception";
 
 export interface LogEvent {
     id: string;
@@ -31,12 +32,15 @@ export class EventLogger {
             return this.appendLog(type, extraContext);
         } else {
             const exception = type;
-            const exceptionContext: {[key: string]: string} = {};
+            const exceptionContext: {[key: string]: string} = {appState: JSON.stringify(app.store.getState().app)};
             if (exception instanceof APIException) {
                 exceptionContext.requestURL = exception.requestURL;
                 exceptionContext.statusCode = exception.statusCode.toString();
             } else if (exception instanceof ReactLifecycleException) {
                 exceptionContext.stackTrace = exception.componentStack;
+                exceptionContext.appState = JSON.stringify(app.store.getState().app);
+            } else if (exception instanceof RuntimeException) {
+                exceptionContext.appState = JSON.stringify(app.store.getState().app);
             }
             return this.appendLog("error", exceptionContext, exception.message);
         }
