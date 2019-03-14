@@ -42,13 +42,12 @@ export class EventLogger {
         }
     }
 
-    /**
-     * Calling collect() will empty current logs, return a copied list
-     */
     collect(): Array<Readonly<LogEvent>> {
-        const copiedLogs = this.logQueue.slice();
+        return this.logQueue;
+    }
+
+    empty(): void {
         this.logQueue = [];
-        return copiedLogs;
     }
 
     private appendLog(type: string, extraContext: {[key: string]: string}, errorMessage?: string): () => void {

@@ -12,14 +12,14 @@ import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
 
-interface AppOption {
-    componentType: ComponentType<any>;
+interface BootstrapOption {
+    componentType: ComponentType<{}>;
     errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
     eventLoggerContext?: {[key: string]: string | (() => string)};
 }
 
-export function startApp(config: AppOption): void {
+export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
     setupEventLoggerContext(config.eventLoggerContext);
