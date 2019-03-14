@@ -55,15 +55,6 @@ export function Log(type: string): HandlerDecorator {
         };
         return descriptor;
     };
-
-    return createActionHandlerDecorator(function*(handler) {
-        const onLogEnd = app.eventLogger.log(type);
-        try {
-            yield* handler();
-        } finally {
-            onLogEnd();
-        }
-    });
 }
 
 export function Lifecycle(): LifecycleHandlerDecorator {
