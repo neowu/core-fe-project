@@ -47,7 +47,7 @@ export class ModuleProxy<M extends Module<any>> {
 
             componentWillUnmount() {
                 if (lifecycleListener.onDestroy.isLifecycle) {
-                    app.store.dispatch(actions.onLeave());
+                    app.store.dispatch(actions.onDestroy());
                 }
 
                 if (!config.retainStateOnLeave) {

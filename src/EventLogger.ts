@@ -38,7 +38,7 @@ export class EventLogger {
             } else if (exception instanceof ReactLifecycleException) {
                 exceptionContext.stackTrace = exception.componentStack;
             }
-            return this.appendLog("ERROR", exceptionContext, exception.message);
+            return this.appendLog("error", exceptionContext, exception.message);
         }
     }
 
