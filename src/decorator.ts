@@ -42,11 +42,14 @@ export function Loading(identifier: string = "global"): HandlerDecorator {
     });
 }
 
-export function Log(type: string): HandlerDecorator {
+export function Log(): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            const onLogEnd = app.eventLogger.log(type, args.length > 1 ? {parameters: JSON.stringify(args)} : args.length === 1 ? {parameter: JSON.stringify(args[0])} : undefined);
+            // Do not use fn directly, it is a different object
+            const logTypeName = (descriptor.value as any).actionName;
+            const context: {[key: string]: string} = args.length > 1 ? {params: JSON.stringify(args)} : args.length === 1 ? {params: JSON.stringify(args[0])} : {};
+            const onLogEnd = app.eventLogger.log(logTypeName, context);
             try {
                 yield* fn.bind(this)(...args);
             } finally {

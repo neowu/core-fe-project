@@ -38,7 +38,9 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const actions: any = {};
     getKeys(module).forEach(actionType => {
         const method = module[actionType];
+        // Attach action name, for @Log reflection
         const qualifiedActionType = `${moduleName}/${actionType}`;
+        method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
         app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
