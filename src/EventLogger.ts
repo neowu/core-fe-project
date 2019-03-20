@@ -1,13 +1,21 @@
 import {app} from "./app";
-import {APIException, Exception, ReactLifecycleException, RuntimeException} from "./Exception";
+import {
+    APIException,
+    Exception,
+    NetworkConnectionException,
+    ReactLifecycleException,
+    RuntimeException
+} from "./Exception";
 
 export interface LogEvent {
     id: string;
     date: Date;
     type: string;
+    result: "OK" | "WARN" | "ERROR";
     context: {[key: string]: string};
+    elapsedTime: number;
     errorMessage?: string;
-    elapsedTime?: number;
+    exceptionStackTrace?: string;
 }
 
 export class EventLogger {
@@ -29,20 +37,30 @@ export class EventLogger {
 
     log(type: string | Exception, extraContext: {[key: string]: string} = {}): () => void {
         if (typeof type === "string") {
-            return this.appendLog(type, extraContext);
+            return this.appendLog(type, "OK", extraContext);
+        } else if (type instanceof NetworkConnectionException) {
+            return this.appendLog("networkFailure", "WARN", {}, type.message);
         } else {
             const exception = type;
-            const exceptionContext: {[key: string]: string} = {appState: JSON.stringify(app.store.getState().app)};
+            const exceptionContext: {[key: string]: string} = {};
+            let errorType: string = "error";
+            let stackTrace: string | undefined;
+
             if (exception instanceof APIException) {
+                errorType = "apiError";
                 exceptionContext.requestURL = exception.requestURL;
                 exceptionContext.statusCode = exception.statusCode.toString();
             } else if (exception instanceof ReactLifecycleException) {
-                exceptionContext.stackTrace = exception.componentStack;
+                errorType = "lifecycleError";
+                stackTrace = exception.componentStack;
                 exceptionContext.appState = JSON.stringify(app.store.getState().app);
             } else if (exception instanceof RuntimeException) {
+                errorType = "jsError";
+                stackTrace = JSON.stringify(exception.errorObject);
                 exceptionContext.appState = JSON.stringify(app.store.getState().app);
             }
-            return this.appendLog("error", exceptionContext, exception.message);
+
+            return this.appendLog(errorType, "ERROR", exceptionContext, exception.message, stackTrace);
         }
     }
 
@@ -54,7 +72,7 @@ export class EventLogger {
         this.logQueue = [];
     }
 
-    private appendLog(type: string, extraContext: {[key: string]: string}, errorMessage?: string): () => void {
+    private appendLog(type: string, result: "OK" | "WARN" | "ERROR", extraContext: {[key: string]: string}, errorMessage?: string, exceptionStackTrace?: string): () => void {
         const completeContext = {...extraContext};
         Object.entries(this.environmentContext).map(([key, value]) => {
             completeContext[key] = typeof value === "string" ? value : value();
@@ -63,15 +81,15 @@ export class EventLogger {
         const event: LogEvent = {
             id: this.getUUID(),
             date: new Date(),
+            result,
             type,
             context: completeContext,
+            elapsedTime: 0,
             errorMessage,
+            exceptionStackTrace,
         };
         this.logQueue.push(event);
         return () => {
-            if (event.elapsedTime) {
-                throw new Error("This log event has frozen, and cannot record elapsed time again");
-            }
             event.elapsedTime = new Date().getTime() - event.date.getTime();
         };
     }

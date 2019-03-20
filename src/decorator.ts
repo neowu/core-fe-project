@@ -47,6 +47,7 @@ export function Log(): HandlerDecorator {
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
             // Do not use fn directly, it is a different object
+            args = args.filter(_ => typeof _ !== "function");
             const logTypeName = (descriptor.value as any).actionName;
             const context: {[key: string]: string} = args.length > 1 ? {params: JSON.stringify(args)} : args.length === 1 ? {params: JSON.stringify(args[0])} : {};
             const onLogEnd = app.eventLogger.log(logTypeName, context);
