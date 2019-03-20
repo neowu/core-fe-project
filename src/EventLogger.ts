@@ -1,11 +1,5 @@
 import {app} from "./app";
-import {
-    APIException,
-    Exception,
-    NetworkConnectionException,
-    ReactLifecycleException,
-    RuntimeException
-} from "./Exception";
+import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
 
 export interface LogEvent {
     id: string;
