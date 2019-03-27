@@ -1,10 +1,10 @@
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
-import {stringifyWithMask} from "../src/util/json";
 import {app} from "./app";
 import {ActionHandler, LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "./module";
 import {ModuleLifecycleListener} from "./platform/Module";
 import {loadingAction, State} from "./reducer";
+import {stringifyWithMask} from "./util/json";
 
 /**
  * Decorator type declaration, required by TypeScript
