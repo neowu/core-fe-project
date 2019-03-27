@@ -53,7 +53,7 @@ interface LoadingActionPayload {
 
 export const LOADING_ACTION = "@@framework/loading";
 
-export function loadingAction(identifier: string, show: boolean): Action<LoadingActionPayload> {
+export function loadingAction(show: boolean, identifier: string = "global"): Action<LoadingActionPayload> {
     return {
         type: LOADING_ACTION,
         payload: {identifier, show},

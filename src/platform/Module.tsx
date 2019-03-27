@@ -13,7 +13,6 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryStat
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
 }
 
-// TODO: need to merge RouteParam & HistoryState?
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
 

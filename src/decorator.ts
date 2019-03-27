@@ -1,5 +1,6 @@
 import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
+import {stringifyWithMask} from "../src/util/json";
 import {app} from "./app";
 import {ActionHandler, LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "./module";
 import {ModuleLifecycleListener} from "./platform/Module";
@@ -34,10 +35,10 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
 export function Loading(identifier: string = "global"): HandlerDecorator {
     return createActionHandlerDecorator(function*(handler) {
         try {
-            yield put(loadingAction(identifier, true));
+            yield put(loadingAction(true, identifier));
             yield* handler();
         } finally {
-            yield put(loadingAction(identifier, false));
+            yield put(loadingAction(false, identifier));
         }
     });
 }
@@ -47,9 +48,9 @@ export function Log(): HandlerDecorator {
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
             // Do not use fn directly, it is a different object
-            args = args.filter(_ => typeof _ !== "function");
+            const params = stringifyWithMask(app.maskedEventKeywords, "***", ...args);
             const logTypeName = (descriptor.value as any).actionName;
-            const context: {[key: string]: string} = args.length > 1 ? {params: JSON.stringify(args)} : args.length === 1 ? {params: JSON.stringify(args[0])} : {};
+            const context: {[key: string]: string} = params ? {params} : {};
             const onLogEnd = app.eventLogger.log(logTypeName, context);
             try {
                 yield* fn.bind(this)(...args);

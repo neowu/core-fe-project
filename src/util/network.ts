@@ -1,10 +1,11 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
+import {parseWithDate} from "./json";
 
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
-        return json(data);
+        return parseWithDate(data);
     }
     return data;
 };
@@ -23,17 +24,6 @@ axios.interceptors.response.use(
         }
     }
 );
-
-export function json(data: string) {
-    // ISO format (supported by Java ZonedDateTime)
-    const ISO_DATE_FORMAT = /^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-][01]\d:[0-5]\d)$/;
-    return JSON.parse(data, (key: any, value: any) => {
-        if (typeof value === "string" && ISO_DATE_FORMAT.test(value)) {
-            return new Date(value);
-        }
-        return value;
-    });
-}
 
 export function ajax<Request, Response>(method: string, path: string, pathParams: object, request: Request): Promise<Response> {
     const config: AxiosRequestConfig = {method, url: url(path, pathParams)};

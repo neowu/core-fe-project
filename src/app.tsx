@@ -17,6 +17,7 @@ interface App {
     readonly actionHandlers: {[actionType: string]: ActionHandler};
     readonly eventLogger: EventLogger;
     errorHandler: ErrorHandler | null;
+    maskedEventKeywords: RegExp[];
 }
 
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
@@ -57,7 +58,15 @@ function createApp(): App {
             }
         });
     });
-    return {browserHistory, store, sagaMiddleware, actionHandlers: {}, eventLogger, errorHandler: null};
+    return {
+        browserHistory,
+        store,
+        sagaMiddleware,
+        actionHandlers: {},
+        eventLogger,
+        errorHandler: null,
+        maskedEventKeywords: [],
+    };
 }
 
 export const app = createApp();

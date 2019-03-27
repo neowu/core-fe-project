@@ -4,9 +4,9 @@ import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router";
 import {app} from "../app";
-import {ErrorBoundary} from "../ErrorBoundary";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
+import {ErrorBoundary} from "../util/ErrorBoundary";
 import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
@@ -15,11 +15,17 @@ interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
+    logMasks?: string[];
+    maskedEventKeywords?: RegExp[];
 }
 
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
+
+    if (config.maskedEventKeywords) {
+        app.maskedEventKeywords = config.maskedEventKeywords;
+    }
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {

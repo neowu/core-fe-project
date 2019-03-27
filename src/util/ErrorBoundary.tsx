@@ -1,7 +1,7 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
-import {ReactLifecycleException} from "./Exception";
-import {errorAction} from "./reducer";
+import {ReactLifecycleException} from "../Exception";
+import {errorAction} from "../reducer";
 
 interface Props extends DispatchProp<any> {
     render: (exception: ReactLifecycleException) => React.ReactNode;

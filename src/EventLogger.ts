@@ -1,5 +1,11 @@
 import {app} from "./app";
-import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
+import {
+    APIException,
+    Exception,
+    NetworkConnectionException,
+    ReactLifecycleException,
+    RuntimeException
+} from "./Exception";
 
 export interface LogEvent {
     id: string;
@@ -41,7 +47,7 @@ export class EventLogger {
             let stackTrace: string | undefined;
 
             if (exception instanceof APIException) {
-                errorType = "apiError";
+                errorType = `apiError(${exception.statusCode})`;
                 exceptionContext.requestURL = exception.requestURL;
                 exceptionContext.statusCode = exception.statusCode.toString();
             } else if (exception instanceof ReactLifecycleException) {
