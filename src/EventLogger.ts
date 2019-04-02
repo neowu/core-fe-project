@@ -4,12 +4,12 @@ import {APIException, Exception, NetworkConnectionException, ReactLifecycleExcep
 export interface LogEvent {
     id: string;
     date: Date;
-    type: string;
     result: "OK" | "WARN" | "ERROR";
-    context: {[key: string]: string};
+    context: {[key: string]: string}; // To store indexed data (for Elastic Search)
+    info: {[key: string]: string}; // To store text data (no index)
     elapsedTime: number;
-    errorMessage?: string;
-    exceptionStackTrace?: string;
+    action?: string;
+    errorCode?: string;
 }
 
 export class EventLogger {
@@ -26,35 +26,33 @@ export class EventLogger {
      * Declare function overload signatures in advance
      * Ref: http://www.typescriptlang.org/docs/handbook/functions.html#overloads
      */
-    log(type: string, extraContext?: {[key: string]: string}): () => void;
+    log(action: string, info?: {[key: string]: string}): () => void;
     log(exception: Exception): () => void;
 
-    log(type: string | Exception, extraContext: {[key: string]: string} = {}): () => void {
-        if (typeof type === "string") {
-            return this.appendLog(type, "OK", extraContext);
-        } else if (type instanceof NetworkConnectionException) {
-            return this.appendLog("networkFailure", "WARN", {}, type.message);
+    log(_: string | Exception, info: {[key: string]: string} = {}): () => void {
+        if (typeof _ === "string") {
+            return this.appendLog(_, "OK", info);
+        } else if (_ instanceof NetworkConnectionException) {
+            return this.appendLog("networkFailure", "WARN", {errorMessage: _.message});
         } else {
-            const exception = type;
-            const exceptionContext: {[key: string]: string} = {};
-            let errorType: string = "error";
-            let stackTrace: string | undefined;
+            const exceptionInfo: {[key: string]: string} = {errorMessage: _.message};
+            let errorCode: string = "error";
 
-            if (exception instanceof APIException) {
-                errorType = `apiError(${exception.statusCode})`;
-                exceptionContext.requestURL = exception.requestURL;
-                exceptionContext.statusCode = exception.statusCode.toString();
-            } else if (exception instanceof ReactLifecycleException) {
-                errorType = "lifecycleError";
-                stackTrace = exception.componentStack;
-                exceptionContext.appState = JSON.stringify(app.store.getState().app);
-            } else if (exception instanceof RuntimeException) {
-                errorType = "jsError";
-                stackTrace = JSON.stringify(exception.errorObject);
-                exceptionContext.appState = JSON.stringify(app.store.getState().app);
+            if (_ instanceof APIException) {
+                errorCode = `apiError:${_.statusCode}`;
+                exceptionInfo.requestURL = _.requestURL;
+                exceptionInfo.statusCode = _.statusCode.toString();
+            } else if (_ instanceof ReactLifecycleException) {
+                errorCode = "lifecycleError";
+                exceptionInfo.stackTrace = _.componentStack;
+                exceptionInfo.appState = JSON.stringify(app.store.getState().app);
+            } else if (_ instanceof RuntimeException) {
+                errorCode = "jsError";
+                exceptionInfo.stackTrace = JSON.stringify(_.errorObject);
+                exceptionInfo.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog(errorType, "ERROR", exceptionContext, exception.message, stackTrace);
+            return this.appendLog(errorCode, "ERROR", exceptionInfo);
         }
     }
 
@@ -66,8 +64,8 @@ export class EventLogger {
         this.logQueue = [];
     }
 
-    private appendLog(type: string, result: "OK" | "WARN" | "ERROR", extraContext: {[key: string]: string}, errorMessage?: string, exceptionStackTrace?: string): () => void {
-        const completeContext = {...extraContext};
+    private appendLog(actionOrErrorCode: string, result: "OK" | "WARN" | "ERROR", info: {[key: string]: string}): () => void {
+        const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             completeContext[key] = typeof value === "string" ? value : value();
         });
@@ -76,12 +74,17 @@ export class EventLogger {
             id: this.getUUID(),
             date: new Date(),
             result,
-            type,
+            info,
             context: completeContext,
             elapsedTime: 0,
-            errorMessage,
-            exceptionStackTrace,
         };
+
+        if (result === "OK") {
+            event.action = actionOrErrorCode;
+        } else {
+            event.errorCode = actionOrErrorCode;
+        }
+
         this.logQueue.push(event);
         return () => {
             event.elapsedTime = new Date().getTime() - event.date.getTime();
