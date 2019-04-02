@@ -46,6 +46,7 @@ function distribute() {
     fs.mkdirsSync("build/dist/lib");
     fs.copySync("build/out/src", "build/dist/lib/", {dereference: true});
     fs.copySync("package.json", "build/dist/package.json", {dereference: true});
+    fs.copySync("README.md", "build/dist/README.md", {dereference: true});
     fs.copySync("src", "build/dist/src", {dereference: true});
 }
 
