@@ -24,26 +24,7 @@ interface BootstrapOption {
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
-
-    if (config.eventLoggerConfig) {
-        app.eventLoggerConfig = config.eventLoggerConfig;
-        if (process.env.NODE_ENV === "production") {
-            app.sagaMiddleware.run(function*() {
-                while (true) {
-                    yield delay(app.eventLoggerConfig!.sendingFrequency * 1000);
-                    try {
-                        const logs: EventLog[] = (app.eventLogger as any).logQueue;
-                        if (logs.length > 0) {
-                            yield call(ajax, "PUT", app.eventLoggerConfig!.serverURL, {}, {events: logs});
-                            (app.eventLogger as any).logQueue = [];
-                        }
-                    } catch (e) {
-                        // Silent if sending error
-                    }
-                }
-            });
-        }
-    }
+    setupEventLogger(config.eventLoggerConfig);
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
@@ -87,4 +68,26 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
 
     const errorHandler = new ErrorHandlerModule("error-handler", {});
     app.errorHandler = errorHandler.onError.bind(errorHandler);
+}
+
+function setupEventLogger(config: EventLoggerConfig | undefined) {
+    if (config) {
+        app.eventLoggerConfig = config;
+        if (process.env.NODE_ENV === "production") {
+            app.sagaMiddleware.run(function*() {
+                while (true) {
+                    yield delay(config.sendingFrequency * 1000);
+                    try {
+                        const logs: EventLog[] = (app.eventLogger as any).logQueue;
+                        if (logs.length > 0) {
+                            yield call(ajax, "PUT", config.serverURL, {}, {events: logs});
+                            (app.eventLogger as any).logQueue = []; // TODO: expose method rather than "as any"?
+                        }
+                    } catch (e) {
+                        // Silent if sending error
+                    }
+                }
+            });
+        }
+    }
 }

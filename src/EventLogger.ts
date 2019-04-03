@@ -27,7 +27,7 @@ export interface EventLoggerConfig {
 
 export class EventLogger {
     private environmentContext: {[key: string]: string | (() => string)} = {};
-    private uuidCounter = new Date().getTime();
+    private idCounter = new Date().getTime();
     private logQueue: EventLog[] = [];
 
     setContext(context: {[key: string]: string | (() => string)}): void {
@@ -48,27 +48,28 @@ export class EventLogger {
         } else if (_ instanceof NetworkConnectionException) {
             return this.appendLog("NETWORK_FAILURE", "WARN", {errorMessage: _.message});
         } else {
-            const exceptionInfo: {[key: string]: string} = {errorMessage: _.message};
-            let errorCode: string = "error";
+            const info: {[key: string]: string} = {errorMessage: _.message};
+            let errorCode: string = "ERROR";
 
             if (_ instanceof APIException) {
                 errorCode = `API_ERROR:${_.statusCode}`;
-                exceptionInfo.requestURL = _.requestURL;
-                exceptionInfo.statusCode = _.statusCode.toString();
+                info.requestURL = _.requestURL;
+                info.statusCode = _.statusCode.toString();
             } else if (_ instanceof ReactLifecycleException) {
                 errorCode = "LIFECYCLE_ERROR";
-                exceptionInfo.stackTrace = _.componentStack;
-                exceptionInfo.appState = JSON.stringify(app.store.getState().app);
+                info.stackTrace = _.componentStack;
+                info.appState = JSON.stringify(app.store.getState().app);
             } else if (_ instanceof RuntimeException) {
                 errorCode = "JS_ERROR";
-                exceptionInfo.stackTrace = JSON.stringify(_.errorObject);
-                exceptionInfo.appState = JSON.stringify(app.store.getState().app);
+                info.stackTrace = JSON.stringify(_.errorObject);
+                info.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog(errorCode, "ERROR", exceptionInfo);
+            return this.appendLog(errorCode, "ERROR", info);
         }
     }
 
+    // TODO: WARN/ERROR can have action as well
     private appendLog(actionOrErrorCode: string, result: "OK" | "WARN" | "ERROR", info: {[key: string]: string}): () => void {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
@@ -76,7 +77,7 @@ export class EventLogger {
         });
 
         const event: EventLog = {
-            id: this.getUUID(),
+            id: this.nextId(),
             date: new Date(),
             result,
             info,
@@ -96,7 +97,7 @@ export class EventLogger {
         };
     }
 
-    private getUUID(): string {
-        return (this.uuidCounter++).toString(16);
+    private nextId(): string {
+        return (this.idCounter++).toString(16);
     }
 }
