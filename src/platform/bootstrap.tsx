@@ -27,7 +27,7 @@ export function startApp(config: BootstrapOption): void {
 
     if (config.eventLoggerConfig) {
         app.eventLoggerConfig = config.eventLoggerConfig;
-        if (process.env.NODE_ENV !== "production") {
+        if (process.env.NODE_ENV === "production") {
             app.sagaMiddleware.run(function*() {
                 while (true) {
                     yield delay(app.eventLoggerConfig!.sendingFrequency * 1000);
