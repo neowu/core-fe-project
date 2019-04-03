@@ -10,7 +10,6 @@ export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 
 export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log} from "./decorator";
-export {LogEvent} from "./EventLogger";
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

@@ -3,10 +3,13 @@ import React, {ComponentType} from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router";
+import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
+import {EventLog, EventLoggerConfig} from "../EventLogger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
+import {ajax} from "../util/network";
 import {Module} from "./Module";
 
 type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
@@ -15,16 +18,27 @@ interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
-    logMasks?: string[];
-    maskedEventKeywords?: RegExp[];
+    eventLoggerConfig?: EventLoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
 
-    if (config.maskedEventKeywords) {
-        app.maskedEventKeywords = config.maskedEventKeywords;
+    if (config.eventLoggerConfig) {
+        app.eventLoggerConfig = config.eventLoggerConfig;
+        if (process.env.NODE_ENV !== "production") {
+            app.sagaMiddleware.run(function*() {
+                while (true) {
+                    yield delay(app.eventLoggerConfig!.sendingFrequency * 1000);
+                    const logs: EventLog[] = (app.eventLogger as any).logQueue;
+                    if (logs.length > 0) {
+                        yield call(ajax, "PUT", app.eventLoggerConfig!.serverURL, {}, {events: logs});
+                        (app.eventLogger as any).logQueue = [];
+                    }
+                }
+            });
+        }
     }
 }
 

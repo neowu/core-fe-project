@@ -47,15 +47,19 @@ export function Log(): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            // Do not use fn directly, it is a different object
-            const params = stringifyWithMask(app.maskedEventKeywords, "***", ...args);
-            const logTypeName = (descriptor.value as any).actionName;
-            const context: {[key: string]: string} = params ? {params} : {};
-            const onLogEnd = app.eventLogger.log(logTypeName, context);
-            try {
+            if (app.eventLoggerConfig) {
+                // Do not use fn directly, it is a different object
+                const params = stringifyWithMask(app.eventLoggerConfig.maskedKeywords || [], "***", ...args);
+                const logTypeName = (descriptor.value as any).actionName;
+                const context: {[key: string]: string} = params ? {params} : {};
+                const onLogEnd = app.eventLogger.log(logTypeName, context);
+                try {
+                    yield* fn.bind(this)(...args);
+                } finally {
+                    onLogEnd();
+                }
+            } else {
                 yield* fn.bind(this)(...args);
-            } finally {
-                onLogEnd();
             }
         };
         return descriptor;

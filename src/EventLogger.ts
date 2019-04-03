@@ -1,7 +1,13 @@
 import {app} from "./app";
-import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
+import {
+    APIException,
+    Exception,
+    NetworkConnectionException,
+    ReactLifecycleException,
+    RuntimeException
+} from "./Exception";
 
-export interface LogEvent {
+export interface EventLog {
     id: string;
     date: Date;
     result: "OK" | "WARN" | "ERROR";
@@ -12,10 +18,23 @@ export interface LogEvent {
     errorCode?: string;
 }
 
+/**
+ * If eventLogger config is provided in non-DEV environment
+ * All collected logs will automatically sent to {serverURL} every {sendingFrequency} second
+ *
+ * The request will be PUT to the server in the following format
+ *      {events: LogEvent[]}
+ */
+export interface EventLoggerConfig {
+    serverURL: string;
+    sendingFrequency: number;
+    maskedKeywords?: RegExp[];
+}
+
 export class EventLogger {
     private environmentContext: {[key: string]: string | (() => string)} = {};
     private uuidCounter = new Date().getTime();
-    private logQueue: LogEvent[] = [];
+    private logQueue: EventLog[] = [];
 
     setContext(context: {[key: string]: string | (() => string)}): void {
         this.environmentContext = context;
@@ -33,21 +52,21 @@ export class EventLogger {
         if (typeof _ === "string") {
             return this.appendLog(_, "OK", info);
         } else if (_ instanceof NetworkConnectionException) {
-            return this.appendLog("networkFailure", "WARN", {errorMessage: _.message});
+            return this.appendLog("NETWORK_FAILURE", "WARN", {errorMessage: _.message});
         } else {
             const exceptionInfo: {[key: string]: string} = {errorMessage: _.message};
             let errorCode: string = "error";
 
             if (_ instanceof APIException) {
-                errorCode = `apiError:${_.statusCode}`;
+                errorCode = `API_ERROR:${_.statusCode}`;
                 exceptionInfo.requestURL = _.requestURL;
                 exceptionInfo.statusCode = _.statusCode.toString();
             } else if (_ instanceof ReactLifecycleException) {
-                errorCode = "lifecycleError";
+                errorCode = "LIFECYCLE_ERROR";
                 exceptionInfo.stackTrace = _.componentStack;
                 exceptionInfo.appState = JSON.stringify(app.store.getState().app);
             } else if (_ instanceof RuntimeException) {
-                errorCode = "jsError";
+                errorCode = "JS_ERROR";
                 exceptionInfo.stackTrace = JSON.stringify(_.errorObject);
                 exceptionInfo.appState = JSON.stringify(app.store.getState().app);
             }
@@ -56,21 +75,13 @@ export class EventLogger {
         }
     }
 
-    collect(): Array<Readonly<LogEvent>> {
-        return this.logQueue;
-    }
-
-    empty(): void {
-        this.logQueue = [];
-    }
-
     private appendLog(actionOrErrorCode: string, result: "OK" | "WARN" | "ERROR", info: {[key: string]: string}): () => void {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             completeContext[key] = typeof value === "string" ? value : value();
         });
 
-        const event: LogEvent = {
+        const event: EventLog = {
             id: this.getUUID(),
             date: new Date(),
             result,
