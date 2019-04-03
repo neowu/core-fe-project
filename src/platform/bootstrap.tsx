@@ -31,10 +31,14 @@ export function startApp(config: BootstrapOption): void {
             app.sagaMiddleware.run(function*() {
                 while (true) {
                     yield delay(app.eventLoggerConfig!.sendingFrequency * 1000);
-                    const logs: EventLog[] = (app.eventLogger as any).logQueue;
-                    if (logs.length > 0) {
-                        yield call(ajax, "PUT", app.eventLoggerConfig!.serverURL, {}, {events: logs});
-                        (app.eventLogger as any).logQueue = [];
+                    try {
+                        const logs: EventLog[] = (app.eventLogger as any).logQueue;
+                        if (logs.length > 0) {
+                            yield call(ajax, "PUT", app.eventLoggerConfig!.serverURL, {}, {events: logs});
+                            (app.eventLogger as any).logQueue = [];
+                        }
+                    } catch (e) {
+                        // Silent if sending error
                     }
                 }
             });
