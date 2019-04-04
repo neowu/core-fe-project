@@ -48,6 +48,7 @@ function distribute() {
     fs.copySync("package.json", "build/dist/package.json", {dereference: true});
     fs.copySync("README.md", "build/dist/README.md", {dereference: true});
     fs.copySync("src", "build/dist/src", {dereference: true});
+    fs.removeSync("build/out");
 }
 
 function build() {

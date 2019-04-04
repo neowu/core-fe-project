@@ -9,7 +9,7 @@ export {call} from "./util/sagaCall";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 
-export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log} from "./decorator";
+export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log, Mutex, Memo} from "./decorator";
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

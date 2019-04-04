@@ -5,7 +5,7 @@ import {Provider} from "react-redux";
 import {withRouter} from "react-router";
 import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
-import {EventLog, EventLoggerConfig} from "../EventLogger";
+import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
@@ -18,13 +18,13 @@ interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorHandlerModule: ErrorHandlerModuleClass;
     onInitialized?: () => void;
-    eventLoggerConfig?: EventLoggerConfig;
+    logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
-    setupEventLogger(config.eventLoggerConfig);
+    setupEventLogger(config.logger);
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
@@ -70,18 +70,18 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
     app.errorHandler = errorHandler.onError.bind(errorHandler);
 }
 
-function setupEventLogger(config: EventLoggerConfig | undefined) {
+function setupEventLogger(config: LoggerConfig | undefined) {
     if (config) {
-        app.eventLoggerConfig = config;
+        app.loggerConfig = config;
         if (process.env.NODE_ENV === "production") {
             app.sagaMiddleware.run(function*() {
                 while (true) {
                     yield delay(config.sendingFrequency * 1000);
                     try {
-                        const logs: EventLog[] = (app.eventLogger as any).logQueue;
+                        const logs = app.logger.collect();
                         if (logs.length > 0) {
                             yield call(ajax, "PUT", config.serverURL, {}, {events: logs});
-                            (app.eventLogger as any).logQueue = []; // TODO: expose method rather than "as any"?
+                            app.logger.empty();
                         }
                     } catch (e) {
                         // Silent if sending error

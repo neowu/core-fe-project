@@ -4,7 +4,7 @@ import React from "react";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {put, takeEvery} from "redux-saga/effects";
-import {EventLogger, EventLoggerConfig} from "./EventLogger";
+import {LoggerImpl, LoggerConfig} from "./Logger";
 import {ActionHandler, ErrorHandler} from "./module";
 import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, State} from "./reducer";
 
@@ -15,9 +15,9 @@ interface App {
     readonly store: Store<State>;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly actionHandlers: {[actionType: string]: ActionHandler};
-    readonly eventLogger: EventLogger;
+    readonly logger: LoggerImpl;
     errorHandler: ErrorHandler | null;
-    eventLoggerConfig: EventLoggerConfig | null;
+    loggerConfig: LoggerConfig | null;
 }
 
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
@@ -36,7 +36,7 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 
 function createApp(): App {
     const browserHistory = createBrowserHistory();
-    const eventLogger = new EventLogger();
+    const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware();
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function* rootSaga() {
@@ -63,9 +63,9 @@ function createApp(): App {
         store,
         sagaMiddleware,
         actionHandlers: {},
-        eventLogger,
+        logger: eventLogger,
         errorHandler: null,
-        eventLoggerConfig: null,
+        loggerConfig: null,
     };
 }
 
