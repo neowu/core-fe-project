@@ -16,7 +16,7 @@ type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & Err
 
 interface BootstrapOption {
     componentType: ComponentType<{}>;
-    errorHandlerModule: ErrorHandlerModuleClass;
+    errorHandlerModule: ErrorHandlerModuleClass; // TODO: discuss: rename to errorHandler and do we really need to ask for module?
     onInitialized?: () => void;
     logger?: LoggerConfig;
 }
@@ -24,7 +24,7 @@ interface BootstrapOption {
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
     setupGlobalErrorHandler(config.errorHandlerModule);
-    setupEventLogger(config.logger);
+    setupLogger(config.logger);
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
@@ -70,7 +70,7 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
     app.errorHandler = errorHandler.onError.bind(errorHandler);
 }
 
-function setupEventLogger(config: LoggerConfig | undefined) {
+function setupLogger(config: LoggerConfig | undefined) {
     if (config) {
         app.loggerConfig = config;
         if (process.env.NODE_ENV === "production") {
