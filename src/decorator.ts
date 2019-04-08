@@ -107,6 +107,11 @@ export function Mutex() {
     });
 }
 
+/**
+ * Memoize the last computed result, and return the same value if given the same input
+ * Input equality is based on JSON.stringify by default
+ * Only used for pure functions
+ */
 const defaultMemoKeyGenerator = (args: any[]) => JSON.stringify(args);
 export function Memo(memoKeyGenerator: (args: any[]) => string = defaultMemoKeyGenerator): AnyFunctionDecorator {
     return (target: any) => {
