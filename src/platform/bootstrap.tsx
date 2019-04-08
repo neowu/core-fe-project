@@ -16,14 +16,14 @@ type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & Err
 
 interface BootstrapOption {
     componentType: ComponentType<{}>;
-    errorHandlerModule: ErrorHandlerModuleClass; // TODO: discuss: rename to errorHandler and do we really need to ask for module?
+    errorHandler: ErrorHandlerModuleClass;
     onInitialized?: () => void;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.onInitialized);
-    setupGlobalErrorHandler(config.errorHandlerModule);
+    setupGlobalErrorHandler(config.errorHandler);
     setupLogger(config.logger);
 }
 
