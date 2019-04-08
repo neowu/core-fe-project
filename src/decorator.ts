@@ -116,9 +116,8 @@ export function Mutex(): HandlerDecorator {
  */
 const defaultMemoKeyGenerator = (args: any[]) => JSON.stringify(args);
 export function Memo(memoKeyGenerator: (args: any[]) => string = defaultMemoKeyGenerator): AnyFunctionDecorator {
-    return (target: any) => {
-        const descriptor = target.descriptor;
-        const fn = descriptor.value;
+    return (target, propertyKey, descriptor) => {
+        const fn = descriptor.value!;
         const cache = {};
         descriptor.value = (...args: any[]) => {
             const paramKey = memoKeyGenerator(args);
@@ -127,6 +126,6 @@ export function Memo(memoKeyGenerator: (args: any[]) => string = defaultMemoKeyG
             }
             return cache[paramKey];
         };
-        return target;
+        return descriptor;
     };
 }
