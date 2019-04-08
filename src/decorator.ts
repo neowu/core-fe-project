@@ -93,7 +93,7 @@ export function Interval(second: number): OnTickHandlerDecorator {
  * If specified, the Saga action cannot be entered by other threads during execution
  * Useful for error handler action
  */
-export function Mutex() {
+export function Mutex(): HandlerDecorator {
     let isLocked = false;
     return createActionHandlerDecorator(function*(handler) {
         if (!isLocked) {
@@ -108,6 +108,8 @@ export function Mutex() {
 }
 
 /**
+ * For Regular function ONLY
+ *
  * Memoize the last computed result, and return the same value if given the same input
  * Input equality is based on JSON.stringify by default
  * Only used for pure functions
