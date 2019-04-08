@@ -42,7 +42,7 @@ Register a module (including lifecycle actions and custom actions).
 
 We also develop a same (90% similarity) framework for app, using the same tech stack (in React Native).
 
-https://github.com/neowu/core-fe-project
+https://github.com/dionshihk/core-native-project
 
 Our idea is also inspired by many React-based frameworks
 
