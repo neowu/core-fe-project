@@ -47,6 +47,7 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
         app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
 
+    // TODO: logic has bug, let me review later
     // Execute initialization logic
     const lifecycleListener = module as ModuleLifecycleListener;
     if (lifecycleListener.onRegister.isLifecycle) {
