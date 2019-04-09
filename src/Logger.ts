@@ -1,6 +1,12 @@
-import {loggerContext} from "./platform/loggerContext";
 import {app} from "./app";
-import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
+import {
+    APIException,
+    Exception,
+    NetworkConnectionException,
+    ReactLifecycleException,
+    RuntimeException
+} from "./Exception";
+import {loggerContext} from "./platform/loggerContext";
 
 interface Log {
     date: Date;
@@ -44,11 +50,6 @@ export interface Logger {
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
     error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
-
-    /**
-     * This function can auto convert to ERROR/WARN level with exception information, according to type
-     */
-    exception(exception: Exception): () => void;
 }
 
 export class LoggerImpl implements Logger {

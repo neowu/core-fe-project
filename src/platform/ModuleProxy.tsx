@@ -1,10 +1,10 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {SagaIterator, Task} from "redux-saga";
-import {delay, put} from "redux-saga/effects";
+import {delay} from "redux-saga/effects";
 import {app} from "../app";
-import {ActionCreators, ActionHandler} from "../module";
-import {errorAction, setStateAction} from "../reducer";
+import {ActionCreators, executeAction} from "../module";
+import {setStateAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 interface AttachLifecycleOption {
@@ -60,15 +60,11 @@ export class ModuleProxy<M extends Module<any>> {
             private *lifecycleSaga(): SagaIterator {
                 const props = this.props as (RouteComponentProps | {});
 
-                if (lifecycleListener.onRegister.isLifecycle) {
-                    yield* runSafely(lifecycleListener.onRegister.bind(lifecycleListener));
-                }
-
                 if (lifecycleListener.onRender.isLifecycle) {
                     if ("match" in props && "location" in props) {
-                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
+                        yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
                     } else {
-                        yield* runSafely(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
+                        yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
                     }
                 }
 
@@ -76,7 +72,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     while (true) {
-                        yield* runSafely(boundTicker);
+                        yield* executeAction(boundTicker);
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
@@ -86,13 +82,5 @@ export class ModuleProxy<M extends Module<any>> {
                 return <ComponentType {...this.props} />;
             }
         };
-    }
-}
-
-function* runSafely(handler: ActionHandler, ...payload: any[]): SagaIterator {
-    try {
-        yield* handler(...payload);
-    } catch (error) {
-        yield put(errorAction(error));
     }
 }

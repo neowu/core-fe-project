@@ -20,7 +20,7 @@ axios.interceptors.response.use(
             const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
-            throw new APIException(errorMessage, error.response.status, url, errorId, errorCode);
+            throw new APIException(errorMessage, error.response.status, url, responseData, errorId, errorCode);
         } else {
             throw new NetworkConnectionException(url);
         }

@@ -5,26 +5,32 @@ import {Provider} from "react-redux";
 import {withRouter} from "react-router";
 import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
+import {setInitializationCallback} from "../initialization";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {Module} from "./Module";
-
-type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
 
 interface BootstrapOption {
     componentType: ComponentType<{}>;
-    errorHandler: ErrorHandlerModuleClass;
+    errorListener: ErrorListener;
     onInitialized?: () => void;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
-    renderDOM(config.componentType, config.onInitialized);
-    setupGlobalErrorHandler(config.errorHandler);
+    setInitializationCallback(() => {
+        const rootElement = document.getElementById("framework-app-root")!;
+        rootElement.style.transform = "none";
+        rootElement.style.opacity = "1";
+        if (config.onInitialized) {
+            config.onInitialized();
+        }
+    });
+    setupGlobalErrorHandler(config.errorListener);
     setupLogger(config.logger);
+    renderDOM(config.componentType, config.onInitialized);
 }
 
 function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
@@ -44,20 +50,11 @@ function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void
                 </ConnectedRouter>
             </ErrorBoundary>
         </Provider>,
-        rootElement,
-        () => {
-            onInitialized();
-            setTimeout(() => {
-                // To make the rendering effect smooth
-                const rootElement = document.getElementById("framework-app-root")!;
-                rootElement.style.transform = "none";
-                rootElement.style.opacity = "1";
-            }, 100);
-        }
+        rootElement
     );
 }
 
-function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
+function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
         if (!error) {
             error = new Error(message.toString());
@@ -66,8 +63,7 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
         return true;
     };
 
-    const errorHandler = new ErrorHandlerModule("error-handler", {});
-    app.errorHandler = errorHandler.onError.bind(errorHandler);
+    app.errorHandler = errorListener.onError.bind(errorListener);
 }
 
 function setupLogger(config: LoggerConfig | undefined) {

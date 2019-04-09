@@ -3,7 +3,8 @@ import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {put, takeEvery} from "redux-saga/effects";
-import {LoggerImpl, LoggerConfig} from "./Logger";
+import {Exception} from "./Exception";
+import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler} from "./module";
 import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, State} from "./reducer";
 
@@ -38,11 +39,15 @@ function createApp(): App {
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware();
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
-    sagaMiddleware.run(function* rootSaga() {
+    sagaMiddleware.run(function*() {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
                 if (app.errorHandler) {
-                    yield* app.errorHandler(action.payload);
+                    const errorAction = action as Action<Exception>;
+                    if (app.errorHandler) {
+                        app.logger.exception(errorAction.payload);
+                        yield* app.errorHandler(errorAction.payload);
+                    }
                 }
             } else {
                 const handler = app.actionHandlers[action.type];
