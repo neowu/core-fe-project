@@ -2,7 +2,6 @@ import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {app} from "./app";
 import {Exception} from "./Exception";
-import {markModuleAsInitialized} from "./initialization";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
 import {Action, errorAction, setStateAction} from "./reducer";
@@ -47,16 +46,10 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
         app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
 
-    // TODO: logic has bug, let me review later
-    // Execute initialization logic
+    // Execute register action
     const lifecycleListener = module as ModuleLifecycleListener;
     if (lifecycleListener.onRegister.isLifecycle) {
-        app.sagaMiddleware.run(function*() {
-            yield* executeAction(lifecycleListener.onRegister.bind(lifecycleListener));
-            markModuleAsInitialized(moduleName);
-        });
-    } else {
-        markModuleAsInitialized(moduleName);
+        app.store.dispatch(actions.onRegister());
     }
 
     return new ModuleProxy(module, actions);

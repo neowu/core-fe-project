@@ -19,7 +19,7 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
     *onRegister(): SagaIterator {
         /**
          * Called when the module is registered the first time
-         * Usually used for fetching one-time configuration
+         * Usually used for fetching configuration
          */
     }
 

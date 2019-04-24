@@ -5,7 +5,6 @@ import {Provider} from "react-redux";
 import {withRouter} from "react-router";
 import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
-import {setInitializationCallback} from "../initialization";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
@@ -15,25 +14,16 @@ import {ajax} from "../util/network";
 interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorListener: ErrorListener;
-    onInitialized?: () => void;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
-    setInitializationCallback(() => {
-        const rootElement = document.getElementById("framework-app-root")!;
-        rootElement.style.transform = "none";
-        rootElement.style.opacity = "1";
-        if (config.onInitialized) {
-            config.onInitialized();
-        }
-    });
     setupGlobalErrorHandler(config.errorListener);
     setupLogger(config.logger);
-    renderDOM(config.componentType, config.onInitialized);
+    renderDOM(config.componentType);
 }
 
-function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void = () => {}) {
+function renderDOM(EntryComponent: ComponentType<any>) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -50,7 +40,12 @@ function renderDOM(EntryComponent: ComponentType<any>, onInitialized: () => void
                 </ConnectedRouter>
             </ErrorBoundary>
         </Provider>,
-        rootElement
+        rootElement,
+        () => {
+            const rootElement = document.getElementById("framework-app-root")!;
+            rootElement.style.transform = "none";
+            rootElement.style.opacity = "1";
+        }
     );
 }
 

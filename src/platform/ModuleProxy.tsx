@@ -24,7 +24,7 @@ export class ModuleProxy<M extends Module<any>> {
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
 
-        return class MainComponent extends React.PureComponent<P> {
+        return class extends React.PureComponent<P> {
             public static displayName = `ModuleBoundary(${moduleName})`;
             private readonly lifecycleSagaTask: Task;
 
