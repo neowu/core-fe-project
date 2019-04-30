@@ -44,10 +44,8 @@ function createApp(): App {
             if (action.type === ERROR_ACTION_TYPE) {
                 if (app.errorHandler) {
                     const errorAction = action as Action<Exception>;
-                    if (app.errorHandler) {
-                        app.logger.exception(errorAction.payload);
-                        yield* app.errorHandler(errorAction.payload);
-                    }
+                    app.logger.exception(errorAction.payload);
+                    yield* app.errorHandler(errorAction.payload);
                 }
             } else {
                 const handler = app.actionHandlers[action.type];
