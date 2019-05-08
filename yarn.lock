@@ -382,6 +382,14 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.2.tgz#0e670ea254d559241b6eeb3894f8754991e73220"
   integrity sha512-ui3WwXmjTaY73fOQ3/m3nnajU/Orhi6cEu5rzX+BrAAJxa3eITXZ5ch9suPqtM03OWhAHhPSyBGCN4UKoxO20Q==
 
+"@types/hoist-non-react-statics@^3.3.0":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
+  integrity sha512-iMIqiko6ooLrTh1joXodJK5X9xeEALT1kM5G3ZLhD3hszxBdIEd5C75U834D9mLcINgD4OyZf5uQXjkuYydWvA==
+  dependencies:
+    "@types/react" "*"
+    hoist-non-react-statics "^3.3.0"
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.1.tgz#42995b446db9a48a11a07ec083499a860e9138ff"
@@ -431,35 +439,36 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-redux@7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.0.1.tgz#9dd2503be7a9861c5a092bf1c5050b7ade4dc62e"
-  integrity sha512-+DIH7TI2MT4Ke4lOrRMgNy//DzTDIzv5QwkJSD6AVrlsIgzf7yMM0JoWL5wJUXYwKQ2f1FgvwlvIVGD2QWQnew==
+"@types/react-redux@7.0.8":
+  version "7.0.8"
+  resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.0.8.tgz#c928863058e334d41031c6bedd0f113bc514e234"
+  integrity sha512-vIBC15E84ehN6RzdGwRVa41whp9e4CkfPm+WfD0r6y6vqBf4tQPKZeKEBfLLM8k79uSwQC7rh3rH/MFaN1IESQ==
   dependencies:
+    "@types/hoist-non-react-statics" "^3.3.0"
     "@types/react" "*"
     redux "^4.0.0"
 
-"@types/react-router-dom@4.3.2":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.2.tgz#52c17c3682597638f31c17c42620403dc5c2a3f5"
-  integrity sha512-biesHodFxPgDxku2m08XwPeAfUYBcxAnrQG7pwFikuA3L2e3u2OKAb+Sb16bJuU3L5CTHd+Ivap+ke4mmGsHqQ==
+"@types/react-router-dom@4.3.3":
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.3.tgz#7837e3e9fefbc84a8f6c8a51dca004f4e83e94e3"
+  integrity sha512-xj0DmFjgvAqRfh/kJPO7apD5G30yPQe+8slu/dugioQOkdKpyzc4Fgk4hoTelm6CSHz7pI2PPsW5+Y6GRBF2zw==
   dependencies:
     "@types/history" "*"
     "@types/react" "*"
     "@types/react-router" "*"
 
 "@types/react-router@*":
-  version "4.4.5"
-  resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-4.4.5.tgz#1166997dc7eef2917b5ebce890ebecb32ee5c1b3"
-  integrity sha512-12+VOu1+xiC8RPc9yrgHCyLI79VswjtuqeS2gPrMcywH6tkc8rGIUhs4LaL3AJPqo5d+RPnfRpNKiJ7MK2Qhcg==
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-5.0.0.tgz#22ae8f55d8af770ea1f755218936f01bfe1bfe27"
+  integrity sha512-0JjtJMxkQSyWUHTHaD3GhKf6rcZSUFmcQob8OlPTsbnxnIg2Nh3btkss4uke5CKVRtbCMipGU7My5jtfZQC+jw==
   dependencies:
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.8.16":
-  version "16.8.16"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.16.tgz#2bf980b4fb29cceeb01b2c139b3e185e57d3e08e"
-  integrity sha512-A0+6kS6zwPtvubOLiCJmZ8li5bm3wKIkoKV0h3RdMDOnCj9cYkUnj3bWbE03/lcICdQmwBmUfoFiHeNhbFiyHQ==
+"@types/react@*", "@types/react@16.8.17":
+  version "16.8.17"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.17.tgz#f287b76a5badb93bc9aa3f54521a3eb53d6c2374"
+  integrity sha512-pln3mgc6VfkNg92WXODul/ONo140huK9OMsx62GlBlZ2lvjNK86PQJhYMPLO1i66aF5O9OPyZefogvNltBIszA==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
@@ -1453,9 +1462,9 @@ getpass@^0.1.1:
     assert-plus "^1.0.0"
 
 glob@^7.1.1, glob@^7.1.2, glob@^7.1.3:
-  version "7.1.3"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.3.tgz#3960832d3f1574108342dafd3a67b332c0969df1"
-  integrity sha512-vcfuiIxogLV4DlGBHIUOwI0IbrJ8HWPc4MU7HzviGeNho/UJDfi6B5p3sHeWIQ0KGIU0Jpxi5ZHxemQfLkkAwQ==
+  version "7.1.4"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.4.tgz#aa608a2f6c577ad357e1ae5a5c26d9a8d1969255"
+  integrity sha512-hkLPepehmnKk41pUGm3sYxoFs/umurYfYJCerbXEyFIWcAzvpipAgVkBqqT9RBKMGjnq6kMuyYwha6csxbiM1A==
   dependencies:
     fs.realpath "^1.0.0"
     inflight "^1.0.4"
@@ -3895,9 +3904,9 @@ ua-parser-js@^0.7.18:
   integrity sha512-T3PVJ6uz8i0HzPxOF9SWzWAlfN/DavlpQqepn22xgve/5QecC+XMCAtmUNnY7C9StehaV6exjUCI801lOI7QlQ==
 
 uglify-js@^3.1.4:
-  version "3.5.10"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.5.10.tgz#652bef39f86d9dbfd6674407ee05a5e2d372cf2d"
-  integrity sha512-/GTF0nosyPLbdJBd+AwYiZ+Hu5z8KXWnO0WCGt1BQ/u9Iamhejykqmz5o1OHJ53+VAk6xVxychonnApDjuqGsw==
+  version "3.5.11"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.5.11.tgz#833442c0aa29b3a7d34344c7c63adaa3f3504f6a"
+  integrity sha512-izPJg8RsSyqxbdnqX36ExpbH3K7tDBsAU/VfNv89VkMFy3z39zFjunQGsSHOlGlyIfGLGprGeosgQno3bo2/Kg==
   dependencies:
     commander "~2.20.0"
     source-map "~0.6.1"
