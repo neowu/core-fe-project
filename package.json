@@ -15,7 +15,7 @@
     "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@babel/core": "7.4.4",
+    "@babel/core": "7.4.5",
     "@types/jest": "24.0.13",
     "chalk": "2.4.2",
     "fs-extra": "8.0.1",
