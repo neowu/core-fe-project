@@ -61,12 +61,19 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
         app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
-    protected setHistory(urlOrState: HistoryState | string, usePush: boolean = true) {
+    protected setHistory(urlOrState: HistoryState | string, state: HistoryState | null = null) {
         if (typeof urlOrState === "string") {
-            app.store.dispatch(usePush ? push(urlOrState) : replace(urlOrState));
+            if (state === null) {
+                app.store.dispatch(push(urlOrState));
+            } else {
+                app.store.dispatch(push(urlOrState, state));
+            }
         } else {
+            if (state !== null) {
+                throw new Error("Second argument [state] should not bet set here");
+            }
             const currentURL = location.pathname + location.search;
-            app.store.dispatch(usePush ? push(currentURL, urlOrState) : replace(currentURL, urlOrState));
+            app.store.dispatch(push(currentURL, urlOrState));
         }
     }
 }
