@@ -15,12 +15,18 @@ axios.interceptors.response.use(
     (error: AxiosError) => {
         const url = error.config.url!;
         if (error.response) {
-            // Try to get server errorMessage from response
+            // Try to get server error message/ID/code from response
             const responseData = error.response.data;
             const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
-            throw new APIException(errorMessage, error.response.status, url, responseData, errorId, errorCode);
+
+            if (!errorId && error.response.status > 500) {
+                // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
+                throw new NetworkConnectionException(url, `Gateway Error (${error.response.status})`);
+            } else {
+                throw new APIException(errorMessage, error.response.status, url, responseData, errorId, errorCode);
+            }
         } else {
             throw new NetworkConnectionException(url);
         }
