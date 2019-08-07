@@ -23,12 +23,12 @@ axios.interceptors.response.use(
 
             if (!errorId && (error.response.status === 502 || error.response.status === 504)) {
                 // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
-                throw new NetworkConnectionException(url, `Gateway Error (${error.response.status})`);
+                throw new NetworkConnectionException(`gateway error (${error.response.status})`, url);
             } else {
                 throw new APIException(errorMessage, error.response.status, url, responseData, errorId, errorCode);
             }
         } else {
-            throw new NetworkConnectionException(url);
+            throw new NetworkConnectionException(`failed to connect to ${url}`, url);
         }
     }
 );

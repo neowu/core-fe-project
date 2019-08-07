@@ -9,8 +9,8 @@ export class APIException extends Exception {
 }
 
 export class NetworkConnectionException extends Exception {
-    constructor(requestURL: string, message: string = "failed to connect") {
-        super(`${message}: ${requestURL}`);
+    constructor(message: string, public requestURL: string) {
+        super(message);
     }
 }
 
