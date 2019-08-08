@@ -57,7 +57,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
         app.store.dispatch(errorAction(error));
         return true;
     };
-    window.addEventListener("unhandledrejection", event => app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + event.reason.toString()))));
+    window.onunhandledrejection = event => app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + event.reason.toString())));
 
     app.errorHandler = errorListener.onError.bind(errorListener);
 }
