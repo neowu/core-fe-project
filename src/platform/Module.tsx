@@ -1,4 +1,4 @@
-import {push, replace} from "connected-react-router";
+import {push} from "connected-react-router";
 import {Location} from "history";
 import {SagaIterator} from "redux-saga";
 import {app} from "../app";
