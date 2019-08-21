@@ -4,7 +4,7 @@ import {SagaIterator, Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {setStateAction} from "../reducer";
+import {navigationPreventionAction, setStateAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 interface AttachLifecycleOption {
@@ -39,8 +39,9 @@ export class ModuleProxy<M extends Module<any>> {
                 const currentLocation = (this.props as any).location;
                 const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
-                    // Only trigger if current component is connected to <Route>
+                    // Only trigger onRender if current component is connected to <Route>
                     app.store.dispatch(actions.onRender(currentRouteParams, currentLocation));
+                    app.store.dispatch(navigationPreventionAction(false));
                 }
             }
 
@@ -51,6 +52,12 @@ export class ModuleProxy<M extends Module<any>> {
 
                 if (!config.retainStateOnLeave) {
                     app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
+                }
+
+                const currentLocation = (this.props as any).location;
+                if (currentLocation) {
+                    // Only cancel navigation prevention if current component is connected to <Route>
+                    app.store.dispatch(navigationPreventionAction(false));
                 }
 
                 this.lifecycleSagaTask.cancel();

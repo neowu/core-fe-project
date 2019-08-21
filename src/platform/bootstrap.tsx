@@ -5,6 +5,7 @@ import {Provider} from "react-redux";
 import {withRouter} from "react-router";
 import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
+import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
@@ -14,16 +15,17 @@ import {ajax} from "../util/network";
 interface BootstrapOption {
     componentType: ComponentType<{}>;
     errorListener: ErrorListener;
+    navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
     setupGlobalErrorHandler(config.errorListener);
     setupLogger(config.logger);
-    renderDOM(config.componentType);
+    renderDOM(config.componentType, config.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
-function renderDOM(EntryComponent: ComponentType<any>) {
+function renderDOM(EntryComponent: ComponentType<any>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -36,6 +38,7 @@ function renderDOM(EntryComponent: ComponentType<any>) {
         <Provider store={app.store}>
             <ErrorBoundary>
                 <ConnectedRouter history={app.browserHistory}>
+                    <NavigationGuard message={navigationPreventionMessage} />
                     <RoutedEntryComponent />
                 </ConnectedRouter>
             </ErrorBoundary>

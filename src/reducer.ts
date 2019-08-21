@@ -10,8 +10,9 @@ interface LoadingState {
 
 export interface State {
     loading: LoadingState;
-    app: {};
     router: RouterState;
+    navigationPrevented: boolean;
+    app: {};
 }
 
 // Redux Action
@@ -72,6 +73,28 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
     return state;
 }
 
+// Redux Action: Navigation Prevent (to update state.navigationPrevented)
+interface NavigationPreventionActionPayload {
+    isPrevented: boolean;
+}
+
+const NAVIGATION_PREVENTION_ACTION = "@@framework/navigation-prevention";
+
+export function navigationPreventionAction(isPrevented: boolean): Action<NavigationPreventionActionPayload> {
+    return {
+        type: NAVIGATION_PREVENTION_ACTION,
+        payload: {isPrevented},
+    };
+}
+
+function navigationPreventionReducer(state: boolean = false, action: Action<NavigationPreventionActionPayload>): boolean {
+    if (action.type === NAVIGATION_PREVENTION_ACTION) {
+        const payload = action.payload as NavigationPreventionActionPayload;
+        return payload.isPrevented;
+    }
+    return state;
+}
+
 // Redux Action: Error (handled by saga)
 export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
@@ -93,6 +116,7 @@ export function rootReducer(history: History): Reducer<State> {
         router: connectRouter(history),
         loading: loadingReducer,
         app: setStateReducer,
+        navigationPrevented: navigationPreventionReducer,
     });
 }
 

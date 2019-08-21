@@ -3,10 +3,12 @@ import {connect, DispatchProp} from "react-redux";
 import {ReactLifecycleException} from "../Exception";
 import {errorAction} from "../reducer";
 
-interface Props extends DispatchProp<any> {
+interface OwnProps {
     render: (exception: ReactLifecycleException) => React.ReactNode;
     children: React.ReactNode;
 }
+
+interface Props extends OwnProps, DispatchProp {}
 
 interface State {
     exception: ReactLifecycleException | null;

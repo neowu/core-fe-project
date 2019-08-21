@@ -4,7 +4,7 @@ import {SagaIterator} from "redux-saga";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
-import {setStateAction, State} from "../reducer";
+import {navigationPreventionAction, setStateAction, State} from "../reducer";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
     onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
@@ -55,6 +55,10 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
 
     protected get logger(): Logger {
         return app.logger;
+    }
+
+    protected setNavigationPrevented(isPrevented: boolean) {
+        app.store.dispatch(navigationPreventionAction(isPrevented));
     }
 
     protected setState(newState: Partial<ModuleState>) {
