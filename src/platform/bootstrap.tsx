@@ -1,5 +1,5 @@
 import {ConnectedRouter} from "connected-react-router";
-import React, {ComponentType} from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 import {withRouter} from "react-router";
@@ -13,7 +13,7 @@ import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 
 interface BootstrapOption {
-    componentType: ComponentType<{}>;
+    componentType: React.ComponentType<{}>;
     errorListener: ErrorListener;
     navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
     logger?: LoggerConfig;
@@ -25,7 +25,7 @@ export function startApp(config: BootstrapOption): void {
     renderDOM(config.componentType, config.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
-function renderDOM(EntryComponent: ComponentType<any>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
+function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -33,7 +33,7 @@ function renderDOM(EntryComponent: ComponentType<any>, navigationPreventionMessa
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    const RoutedEntryComponent = withRouter(EntryComponent);
+    const RoutedEntryComponent = withRouter(EntryComponent as any);
     ReactDOM.render(
         <Provider store={app.store}>
             <ErrorBoundary>
@@ -60,7 +60,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
         app.store.dispatch(errorAction(error));
         return true;
     };
-    window.onunhandledrejection = event => app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + event.reason.toString())));
+    window.onunhandledrejection = (event: PromiseRejectionEvent) => app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + event.reason.toString())));
 
     app.errorHandler = errorListener.onError.bind(errorListener);
 }
