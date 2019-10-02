@@ -13,22 +13,22 @@ axios.defaults.transformResponse = (data, headers) => {
 axios.interceptors.response.use(
     response => response,
     (error: AxiosError) => {
-        const url = error.config.url!;
+        const requestURL = error.config.url!;
         if (error.response) {
             // Try to get server error message/ID/code from response
             const responseData = error.response.data;
-            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
+            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${requestURL}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
 
             if (!errorId && (error.response.status === 502 || error.response.status === 504)) {
                 // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
-                throw new NetworkConnectionException(`gateway error (${error.response.status})`, url);
+                throw new NetworkConnectionException(`gateway error (${error.response.status})`, requestURL);
             } else {
-                throw new APIException(errorMessage, error.response.status, url, responseData, errorId, errorCode);
+                throw new APIException(errorMessage, error.response.status, requestURL, responseData, errorId, errorCode);
             }
         } else {
-            throw new NetworkConnectionException(`failed to connect to ${url}`, url);
+            throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL);
         }
     }
 );

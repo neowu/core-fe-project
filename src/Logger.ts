@@ -75,10 +75,18 @@ export class LoggerImpl implements Logger {
             return this.appendLog("WARN", undefined, "NETWORK_FAILURE", {errorMessage: exception.message});
         } else {
             const info: {[key: string]: string} = {errorMessage: exception.message};
-            let errorCode: string = "ERROR";
+            let isWarning: boolean = false;
+            let errorCode: string = "OTHER_ERROR";
 
             if (exception instanceof APIException) {
-                errorCode = `API_ERROR:${exception.statusCode}`;
+                errorCode = `API_ERROR_${exception.statusCode}`;
+                // Following cases are treated as expected
+                if ([401, 403].includes(exception.statusCode)) {
+                    isWarning = true;
+                } else if (exception.statusCode === 400 && exception.errorCode !== "VALIDATION_ERROR") {
+                    isWarning = true;
+                }
+
                 info.requestURL = exception.requestURL;
                 if (exception.errorCode) {
                     info.errorCode = exception.errorCode;
@@ -96,7 +104,7 @@ export class LoggerImpl implements Logger {
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog("ERROR", undefined, errorCode, info);
+            return this.appendLog(isWarning ? "WARN" : "ERROR", undefined, errorCode, info);
         }
     }
 
