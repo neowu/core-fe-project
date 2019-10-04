@@ -72,7 +72,7 @@ export class LoggerImpl implements Logger {
 
     exception(exception: Exception): () => void {
         if (exception instanceof NetworkConnectionException) {
-            return this.appendLog("WARN", undefined, "NETWORK_FAILURE", {errorMessage: exception.message});
+            return this.appendLog("WARN", undefined, "NETWORK_FAILURE", {errorMessage: exception.message, url: exception.requestURL});
         } else {
             const info: {[key: string]: string} = {errorMessage: exception.message};
             let isWarning: boolean = false;
