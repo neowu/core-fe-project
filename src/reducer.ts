@@ -96,9 +96,14 @@ function navigationPreventionReducer(state: boolean = false, action: Action<Navi
 }
 
 // Redux Action: Error (handled by saga)
+export interface ExceptionPayload {
+    exception: Exception;
+    actionName?: string;
+}
+
 export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
-export function errorAction(error: any): Action<Exception> {
+export function errorAction(error: any, actionName?: string): Action<ExceptionPayload> {
     if (process.env.NODE_ENV === "development") {
         console.warn("Error Caught:", error);
     }
@@ -106,7 +111,7 @@ export function errorAction(error: any): Action<Exception> {
     const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
     return {
         type: ERROR_ACTION_TYPE,
-        payload: exception,
+        payload: {exception, actionName},
     };
 }
 

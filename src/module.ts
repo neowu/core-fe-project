@@ -39,11 +39,12 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const actions: any = {};
     getKeys(module).forEach(actionType => {
         const method = module[actionType];
-        // Attach action name, for @Log reflection
+        const boundMethod = method.bind(module);
+        // Attach action name, for @Log / error handler reflection
         const qualifiedActionType = `${moduleName}/${actionType}`;
-        method.actionName = qualifiedActionType;
+        boundMethod.actionName = method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
-        app.actionHandlers[qualifiedActionType] = method.bind(module);
+        app.actionHandlers[qualifiedActionType] = boundMethod;
     });
 
     // Execute register action
@@ -59,7 +60,7 @@ export function* executeAction(handler: ActionHandler, ...payload: any[]): SagaI
     try {
         yield* handler(...payload);
     } catch (error) {
-        yield put(errorAction(error));
+        yield put(errorAction(error, (handler as any).actionName));
     }
 }
 

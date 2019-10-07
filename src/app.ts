@@ -2,11 +2,10 @@ import {routerMiddleware} from "connected-react-router";
 import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {put, takeEvery} from "redux-saga/effects";
-import {Exception} from "./Exception";
+import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
-import {ActionHandler, ErrorHandler} from "./module";
-import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {ActionHandler, ErrorHandler, executeAction} from "./module";
+import {Action, ERROR_ACTION_TYPE, errorAction, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
 
 declare const window: any;
 
@@ -43,18 +42,19 @@ function createApp(): App {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
                 if (app.errorHandler) {
-                    const errorAction = action as Action<Exception>;
-                    app.logger.exception(errorAction.payload);
-                    yield* app.errorHandler(errorAction.payload);
+                    const errorAction = action as Action<ExceptionPayload>;
+                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName);
+                    try {
+                        yield* app.errorHandler(errorAction.payload.exception);
+                    } catch (e) {
+                        console.error("Error Caught In Error Handler");
+                        console.error(e);
+                    }
                 }
             } else {
                 const handler = app.actionHandlers[action.type];
                 if (handler) {
-                    try {
-                        yield* handler(...action.payload);
-                    } catch (error) {
-                        yield put(errorAction(error));
-                    }
+                    yield* executeAction(handler, ...action.payload);
                 }
             }
         });

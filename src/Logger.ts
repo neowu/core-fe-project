@@ -44,6 +44,11 @@ export interface Logger {
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
     error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
+
+    /**
+     * Output all the logs in the console, from current queue
+     */
+    debug(): void;
 }
 
 export class LoggerImpl implements Logger {
@@ -70,9 +75,14 @@ export class LoggerImpl implements Logger {
         return this.appendLog("ERROR", action, errorCode, info);
     }
 
-    exception(exception: Exception): () => void {
+    debug(): void {
+        console.info("#### Current Logs [" + new Date().toLocaleString() + "]");
+        console.info(this.logQueue);
+    }
+
+    exception(exception: Exception, action?: string): () => void {
         if (exception instanceof NetworkConnectionException) {
-            return this.appendLog("WARN", undefined, "NETWORK_FAILURE", {errorMessage: exception.message, url: exception.requestURL});
+            return this.appendLog("WARN", action, "NETWORK_FAILURE", {errorMessage: exception.message, url: exception.requestURL});
         } else {
             const info: {[key: string]: string} = {errorMessage: exception.message};
             let isWarning: boolean = false;
@@ -104,7 +114,7 @@ export class LoggerImpl implements Logger {
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog(isWarning ? "WARN" : "ERROR", undefined, errorCode, info);
+            return this.appendLog(isWarning ? "WARN" : "ERROR", action, errorCode, info);
         }
     }
 
