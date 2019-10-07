@@ -26,7 +26,7 @@ class Component extends React.PureComponent<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        const exception = new ReactLifecycleException(error.message, errorInfo.componentStack);
+        const exception = new ReactLifecycleException(error.name + ": " + error.message, errorInfo.componentStack);
         this.props.dispatch(errorAction(exception));
         this.setState({exception});
     }

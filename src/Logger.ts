@@ -93,8 +93,12 @@ export class LoggerImpl implements Logger {
                 // Following cases are treated as expected
                 if ([401, 403, 426, 503].includes(exception.statusCode)) {
                     isWarning = true;
-                } else if (exception.statusCode === 400 && exception.errorCode !== "VALIDATION_ERROR") {
-                    isWarning = true;
+                } else if (exception.statusCode === 400) {
+                    if (exception.errorCode === "VALIDATION_ERROR") {
+                        errorCode = "API_VALIDATION_FAIL";
+                    } else {
+                        isWarning = true;
+                    }
                 }
 
                 info.requestURL = exception.requestURL;
