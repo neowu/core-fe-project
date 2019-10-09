@@ -32,7 +32,6 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
         // To get private property
         const initialState = (module as any).initialState;
         app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@init`));
-        console.info(`Module [${moduleName}] registered`);
     }
 
     // Transform every method into ActionCreator
@@ -46,12 +45,6 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
         app.actionHandlers[qualifiedActionType] = boundMethod;
     });
-
-    // Execute register action
-    const lifecycleListener = module as ModuleLifecycleListener;
-    if (lifecycleListener.onRegister.isLifecycle) {
-        app.store.dispatch(actions.onRegister());
-    }
 
     return new ModuleProxy(module, actions);
 }

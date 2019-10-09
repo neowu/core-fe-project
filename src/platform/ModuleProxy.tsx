@@ -27,11 +27,11 @@ export class ModuleProxy<M extends Module<any>> {
         return class extends React.PureComponent<P> {
             public static displayName = `ModuleBoundary(${moduleName})`;
             private readonly lifecycleSagaTask: Task;
+            private successTickCount: number = 0;
 
             constructor(props: P) {
                 super(props);
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
-                console.info(`Module [${moduleName}] attached component initially rendered`);
             }
 
             componentDidUpdate(prevProps: Readonly<P>) {
@@ -40,6 +40,7 @@ export class ModuleProxy<M extends Module<any>> {
                 const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger onRender if current component is connected to <Route>
+                    app.logger.info(`${moduleName}/@@LOCATION_CHANGE_RENDER`, {locationParams: JSON.stringify(currentRouteParams)});
                     app.store.dispatch(actions.onRender(currentRouteParams, currentLocation));
                     app.store.dispatch(navigationPreventionAction(false));
                 }
@@ -61,16 +62,24 @@ export class ModuleProxy<M extends Module<any>> {
                 }
 
                 this.lifecycleSagaTask.cancel();
-                console.info(`Module [${moduleName}] attached component destroyed`);
+                app.logger.info(`${moduleName}/@@DESTROY`, {retainState: Boolean(config.retainStateOnLeave).toString(), successTickCount: this.successTickCount.toString()});
             }
 
             private *lifecycleSaga(): SagaIterator {
                 const props = this.props as (RouteComponentProps | {});
+                app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)});
+
+                if (lifecycleListener.onEnter.isLifecycle) {
+                    yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener));
+                }
 
                 if (lifecycleListener.onRender.isLifecycle) {
                     if ("match" in props && "location" in props) {
+                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {locationParams: JSON.stringify(props.match.params)});
                         yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
                     } else {
+                        console.warn(`Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
+                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {type: "Non-Route-Component"});
                         yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
                     }
                 }
@@ -80,6 +89,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     while (true) {
                         yield* executeAction(boundTicker);
+                        this.successTickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }

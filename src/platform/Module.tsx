@@ -7,7 +7,7 @@ import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {navigationPreventionAction, setStateAction, State} from "../reducer";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
-    onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
+    onEnter: (() => SagaIterator) & LifecycleDecoratorFlag;
     onRender: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
@@ -16,10 +16,9 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryStat
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
 
-    *onRegister(): SagaIterator {
+    *onEnter(): SagaIterator {
         /**
-         * Called when the module is registered the first time
-         * Usually used for fetching configuration
+         * Called when the attached component is initially mounted.
          */
     }
 
