@@ -23,10 +23,5 @@
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     "space-before-function-paren": [true, {"anonymous": "never", "named": "never", "asyncArrow": "always"}],
     "trailing-comma": [true, {"multiline": {"objects": "always", "arrays": "always", "functions": "never", "typeLiterals": "ignore"}, "esSpecCompliant": true}]
-  },
-  "linterOptions": {
-    "exclude": [
-      "../src/**/*.json"
-    ]
   }
 }
