@@ -6,27 +6,42 @@ function generateUniqueId() {
     return new Date().getTime().toString(16) + "-" + Math.floor(Math.random() * 9999900 + 1000).toString(16);
 }
 
+/**
+ * CAVEAT:
+ * In Safari, the user may block localStorage access via setting "Block All Cookies".
+ * The following code will throw error in such case.
+ *
+ * Ref: https://codingrepo.com/javascript/2018/11/15/safari-securityerror-dom-exception-18-thrown-by-localstorage-or-cookies-are-blocked/
+ */
 function getVisitorId() {
-    const token = "@@framework-visitor-id";
-    const previousId = localStorage.getItem(token);
-    if (previousId) {
-        return previousId;
-    } else {
-        const newId = generateUniqueId();
-        localStorage.setItem(token, newId);
-        return newId;
+    try {
+        const token = "@@framework-visitor-id";
+        const previousId = localStorage.getItem(token);
+        if (previousId) {
+            return previousId;
+        } else {
+            const newId = generateUniqueId();
+            localStorage.setItem(token, newId);
+            return newId;
+        }
+    } catch (e) {
+        return generateUniqueId();
     }
 }
 
 function getSessionId() {
-    const token = "@@framework-session-id";
-    const previousId = sessionStorage.getItem(token);
-    if (previousId) {
-        return previousId;
-    } else {
-        const newId = generateUniqueId();
-        sessionStorage.setItem(token, newId);
-        return newId;
+    try {
+        const token = "@@framework-session-id";
+        const previousId = sessionStorage.getItem(token);
+        if (previousId) {
+            return previousId;
+        } else {
+            const newId = generateUniqueId();
+            sessionStorage.setItem(token, newId);
+            return newId;
+        }
+    } catch (e) {
+        return generateUniqueId();
     }
 }
 
