@@ -44,11 +44,6 @@ export interface Logger {
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
     error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
-
-    /**
-     * Output all the logs in the console, from current queue
-     */
-    debug(): void;
 }
 
 export class LoggerImpl implements Logger {
@@ -73,28 +68,6 @@ export class LoggerImpl implements Logger {
 
     error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void {
         return this.appendLog("ERROR", action, errorCode, info);
-    }
-
-    debug(): void {
-        console.info("#### [" + new Date().toLocaleString() + "] Logs, Total " + this.logQueue.length);
-        this.logQueue.forEach((_, index) => {
-            let colorString: string;
-            if (_.result === "OK") {
-                colorString = "background:green; color:#fff";
-            } else {
-                colorString = "background:red; color:#fff";
-            }
-            console.info(`%c (${index + 1}) ${_.result} `, colorString, _.date.toLocaleString());
-            if (_.errorCode) {
-                console.info(`%c CODE `, "background:red; color:#fff", _.errorCode);
-            }
-            if (_.action) {
-                console.info(`%c ACTION `, "background:#ddd; color:#111", _.action);
-            }
-            if (Object.keys(_.info).length > 0) {
-                console.info(`%c INFO `, "background:#ddd; color:#111", _.info);
-            }
-        });
     }
 
     exception(exception: Exception, action?: string): () => void {

@@ -1,5 +1,6 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
+import "./debug";
 
 export {startApp} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
