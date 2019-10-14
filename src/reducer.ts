@@ -104,10 +104,6 @@ export interface ExceptionPayload {
 export const ERROR_ACTION_TYPE: string = "@@framework/error";
 
 export function errorAction(error: any, actionName?: string): Action<ExceptionPayload> {
-    if (process.env.NODE_ENV === "development") {
-        console.warn("Error Caught:", error);
-    }
-
     const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
     return {
         type: ERROR_ACTION_TYPE,

@@ -53,7 +53,9 @@ export function* executeAction(handler: ActionHandler, ...payload: any[]): SagaI
     try {
         yield* handler(...payload);
     } catch (error) {
-        yield put(errorAction(error, (handler as any).actionName));
+        const actionName = (handler as any).actionName;
+        console.error(`Saga Action (${actionName}) Error`, error);
+        yield put(errorAction(error, actionName));
     }
 }
 
