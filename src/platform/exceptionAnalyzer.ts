@@ -6,7 +6,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
         const {exception} = exceptionPayload;
         if (exception instanceof RuntimeException) {
             const errorMessage = exception.message;
-            if (errorMessage.endsWith("is not defined")) {
+            if (errorMessage.includes("is not defined")) {
                 /**
                  * Typical issue:
                  * _start is not undefined

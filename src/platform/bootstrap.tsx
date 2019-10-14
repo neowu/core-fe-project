@@ -55,7 +55,7 @@ function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPrevention
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
-        const fullMessage = `Message: ${JSON.stringify(message)}\nSource: ${source || "-"}\nLine: ${line || "-"}\nColumn: ${column || "-"}`;
+        const fullMessage = `Message: ${typeof message === "string" ? message : JSON.stringify(message)}\nSource: ${source || "-"}\nLine: ${line || "-"}\nColumn: ${column || "-"}`;
         if (process.env.NODE_ENV === "development") {
             console.error("Window Global Error", error, fullMessage);
         }
