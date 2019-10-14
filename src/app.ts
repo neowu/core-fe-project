@@ -6,6 +6,7 @@ import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, ERROR_ACTION_TYPE, errorAction, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {shouldHandle} from "./platform/exceptionAnalyzer";
 
 declare const window: any;
 
@@ -41,15 +42,18 @@ function createApp(): App {
     sagaMiddleware.run(function*() {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
-                if (app.errorHandler) {
-                    const errorAction = action as Action<ExceptionPayload>;
+                const errorAction = action as Action<ExceptionPayload>;
+                if (shouldHandle(errorAction.payload)) {
                     app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName);
                     try {
-                        yield* app.errorHandler(errorAction.payload.exception);
+                        if (app.errorHandler) {
+                            yield* app.errorHandler(errorAction.payload.exception);
+                        }
                     } catch (e) {
-                        console.error("Error Caught In Error Handler");
-                        console.error(e);
+                        console.error("Error Caught In Error Handler", e);
                     }
+                } else {
+                    app.logger.warn("TRIVIAL_WARN", errorAction.payload.actionName, {exceptionObject: JSON.stringify(errorAction.payload.exception)});
                 }
             } else {
                 const handler = app.actionHandlers[action.type];

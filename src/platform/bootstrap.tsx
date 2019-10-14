@@ -11,6 +11,7 @@ import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
+import {RuntimeException} from "../Exception";
 
 interface BootstrapOption {
     componentType: React.ComponentType<{}>;
@@ -54,13 +55,19 @@ function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPrevention
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
-        if (!error) {
-            error = new Error(message.toString());
+        const fullMessage = `Message: ${JSON.stringify(message)}\nSource: ${source || "-"}\nLine: ${line || "-"}\nColumn: ${column || "-"}`;
+        if (process.env.NODE_ENV === "development") {
+            console.error("Window Global Error", error, fullMessage);
         }
-        app.store.dispatch(errorAction(error));
+        app.store.dispatch(errorAction(new RuntimeException(fullMessage, error)));
         return true;
     };
-    window.onunhandledrejection = (event: PromiseRejectionEvent) => app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + event.reason.toString())));
+    window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+        if (process.env.NODE_ENV === "development") {
+            console.error("Unhandled Promise Rejection", event);
+        }
+        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + JSON.stringify(event.reason))));
+    };
 
     app.errorHandler = errorListener.onError.bind(errorListener);
 }
