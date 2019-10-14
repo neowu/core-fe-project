@@ -60,7 +60,12 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
         app.store.dispatch(navigationPreventionAction(isPrevented));
     }
 
-    protected setState(newState: Partial<ModuleState>) {
+    /**
+     * CAVEAT:
+     * Do not use Partial<ModuleState> as parameter.
+     * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
+     */
+    protected setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
         app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
