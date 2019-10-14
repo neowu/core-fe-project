@@ -16,7 +16,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
                 return false;
             }
 
-            if (errorMessage.startsWith("Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script")) {
+            if (errorMessage.includes("Refused to evaluate a string as JavaScript")) {
                 /**
                  * Typical issue:
                  * Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src ...".
