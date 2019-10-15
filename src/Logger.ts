@@ -80,7 +80,10 @@ export class LoggerImpl implements Logger {
 
     exception(exception: Exception, action?: string): () => void {
         if (exception instanceof NetworkConnectionException) {
-            const info: {[key: string]: string} = {url: exception.requestURL};
+            const info: {[key: string]: string} = {
+                url: exception.requestURL,
+                errorObject: JSON.stringify(exception.errorObject),
+            };
             return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info});
         } else {
             const info: {[key: string]: string} = {};

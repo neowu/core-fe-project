@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "1.10.8",
+  "version": "1.10.9",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",

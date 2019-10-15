@@ -9,7 +9,7 @@ export class APIException extends Exception {
 }
 
 export class NetworkConnectionException extends Exception {
-    constructor(message: string, public requestURL: string) {
+    constructor(message: string, public requestURL: string, public errorObject: any) {
         super(message);
     }
 }
