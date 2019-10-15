@@ -5,11 +5,19 @@ import {loggerContext} from "./platform/loggerContext";
 interface Log {
     date: Date;
     result: "OK" | "WARN" | "ERROR";
+    elapsedTime: number;
     context: {[key: string]: string}; // To store indexed data (for Elastic Search)
     info: {[key: string]: string}; // To store text data (no index)
-    elapsedTime: number;
     action?: string;
     errorCode?: string;
+    errorMessage?: string;
+}
+
+interface ErrorLogEntry {
+    action: string;
+    errorCode: string;
+    errorMessage: string;
+    info: {[key: string]: string};
 }
 
 /**
@@ -37,13 +45,13 @@ export interface Logger {
      * Add a log item, whose result is WARN
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
-    warn(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
+    warn(data: ErrorLogEntry): () => void;
 
     /**
      * Add a log item, whose result is ERROR
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
-    error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
+    error(data: ErrorLogEntry): () => void;
 }
 
 export class LoggerImpl implements Logger {
@@ -59,22 +67,23 @@ export class LoggerImpl implements Logger {
     }
 
     info(action: string, info?: {[key: string]: string}): () => void {
-        return this.appendLog("OK", action, undefined, info);
+        return this.appendLog("OK", {action, info: info || {}});
     }
 
-    warn(errorCode: string, action?: string, info?: {[key: string]: string}): () => void {
-        return this.appendLog("WARN", action, errorCode, info);
+    warn(data: ErrorLogEntry): () => void {
+        return this.appendLog("WARN", data);
     }
 
-    error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void {
-        return this.appendLog("ERROR", action, errorCode, info);
+    error(data: ErrorLogEntry): () => void {
+        return this.appendLog("ERROR", data);
     }
 
     exception(exception: Exception, action?: string): () => void {
         if (exception instanceof NetworkConnectionException) {
-            return this.appendLog("WARN", action, "NETWORK_FAILURE", {errorMessage: exception.message, url: exception.requestURL});
+            const info: {[key: string]: string} = {url: exception.requestURL};
+            return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info});
         } else {
-            const info: {[key: string]: string} = {errorMessage: exception.message};
+            const info: {[key: string]: string} = {};
             let isWarning: boolean = false;
             let errorCode: string = "OTHER_ERROR";
 
@@ -104,11 +113,11 @@ export class LoggerImpl implements Logger {
                 info.appState = JSON.stringify(app.store.getState().app);
             } else if (exception instanceof RuntimeException) {
                 errorCode = "JS_ERROR";
-                info.stackTrace = JSON.stringify(exception.errorObject);
+                info.errorObject = JSON.stringify(exception.errorObject);
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog(isWarning ? "WARN" : "ERROR", action, errorCode, info);
+            return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info});
         }
     }
 
@@ -120,7 +129,7 @@ export class LoggerImpl implements Logger {
         this.logQueue = [];
     }
 
-    private appendLog(result: "OK" | "WARN" | "ERROR", action?: string, errorCode?: string, info?: {[key: string]: string}): () => void {
+    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage">): () => void {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             completeContext[key] = typeof value === "string" ? value : value();
@@ -129,11 +138,9 @@ export class LoggerImpl implements Logger {
         const event: Log = {
             date: new Date(),
             result,
-            action,
-            errorCode,
-            info: info || {},
             context: completeContext,
             elapsedTime: 0,
+            ...data,
         };
 
         this.logQueue.push(event);

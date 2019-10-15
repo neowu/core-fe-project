@@ -53,7 +53,12 @@ function createApp(): App {
                         console.error("Error Caught In Error Handler", e);
                     }
                 } else {
-                    app.logger.warn("TRIVIAL_WARN", errorAction.payload.actionName, {exceptionObject: JSON.stringify(errorAction.payload.exception)});
+                    app.logger.warn({
+                        action: errorAction.payload.actionName || "-",
+                        errorCode: "EXTERNAL_WARN",
+                        errorMessage: errorAction.payload.exception.message,
+                        info: {errorObject: JSON.stringify(errorAction.payload.exception)},
+                    });
                 }
             } else {
                 const handler = app.actionHandlers[action.type];
