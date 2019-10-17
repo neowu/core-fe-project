@@ -1,10 +1,11 @@
 import {SagaIterator} from "redux-saga";
-import {put} from "redux-saga/effects";
+import {put, delay} from "redux-saga/effects";
 import {app} from "./app";
 import {ActionHandler, LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "./module";
 import {ModuleLifecycleListener} from "./platform/Module";
 import {loadingAction, State} from "./reducer";
 import {stringifyWithMask} from "./util/json";
+import {NetworkConnectionException} from "./Exception";
 
 /**
  * Decorator type declaration, required by TypeScript
@@ -13,7 +14,8 @@ type HandlerDecorator = (target: object, propertyKey: string, descriptor: TypedP
 type LifecycleHandlerDecorator = (target: object, propertyKey: keyof ModuleLifecycleListener, descriptor: TypedPropertyDescriptor<ActionHandler & LifecycleDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor: TypedPropertyDescriptor<ActionHandler & TickIntervalDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 
-type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) => SagaIterator;
+type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
+type HandlerInterceptor<S> = (handler: ActionHandlerWithMetaData, rootState: Readonly<S>) => SagaIterator;
 
 /**
  * A helper for ActionHandler functions (Saga)
@@ -23,7 +25,11 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
             const rootState: S = app.store.getState() as S;
-            yield* interceptor(fn.bind(this, ...args), rootState);
+            const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
+            // Do not use fn.actionName, it returns undefined
+            boundFn.actionName = (descriptor.value as any).actionName;
+            boundFn.maskedParams = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args) || "[No Parameter]";
+            yield* interceptor(boundFn, rootState);
         };
         return descriptor;
     };
@@ -47,21 +53,44 @@ export function Loading(identifier: string = "global"): HandlerDecorator {
  * To log (Result=OK) this action, including action name and parameters (masked)
  */
 export function Log(): HandlerDecorator {
-    return (target, propertyKey, descriptor) => {
-        const fn = descriptor.value!;
-        descriptor.value = function*(...args: any[]): SagaIterator {
-            // Do not use fn directly, it is a different object
-            const params = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args);
-            const actionName = (descriptor.value as any).actionName;
-            const onLogEnd = app.logger.info(actionName, params ? {params} : {});
+    return createActionHandlerDecorator(function*(handler) {
+        const startTime = Date.now();
+        try {
+            yield* handler();
+        } finally {
+            app.logger.info(handler.actionName, {params: handler.maskedParams}, Date.now() - startTime);
+        }
+    });
+}
+
+export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3): HandlerDecorator {
+    return createActionHandlerDecorator(function*(handler) {
+        let retryTime = 0;
+        while (true) {
+            const currentRoundStartTime = Date.now();
             try {
-                yield* fn.bind(this)(...args);
-            } finally {
-                onLogEnd();
+                yield* handler();
+                break;
+            } catch (e) {
+                if (e instanceof NetworkConnectionException) {
+                    retryTime++;
+                    app.logger.warn({
+                        action: handler.actionName,
+                        errorCode: "NETWORK_FAILURE_RETRY",
+                        errorMessage: `Retry #${retryTime} after ${retryIntervalSecond} seconds: ${e.message}`,
+                        info: {
+                            params: handler.maskedParams,
+                            errorObject: JSON.stringify(e),
+                        },
+                        elapsedTime: Date.now() - currentRoundStartTime,
+                    });
+                    yield delay(retryIntervalSecond * 1000);
+                } else {
+                    throw e;
+                }
             }
-        };
-        return descriptor;
-    };
+        }
+    });
 }
 
 /**

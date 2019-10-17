@@ -11,7 +11,7 @@ export {call} from "./util/sagaCall";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 
-export {createActionHandlerDecorator, Loading, Interval, Lifecycle, Log, Mutex} from "./decorator";
+export {createActionHandlerDecorator, Loading, Interval, RetryOnNetworkConnectionError, Lifecycle, Log, Mutex} from "./decorator";
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

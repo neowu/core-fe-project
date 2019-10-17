@@ -14,6 +14,7 @@ interface Log {
 }
 
 interface ErrorLogEntry {
+    elapsedTime: number;
     action: string;
     errorCode: string;
     errorMessage: string;
@@ -39,19 +40,19 @@ export interface Logger {
     /**
      * Add a log item, whose result is OK
      */
-    info(action: string, info?: {[key: string]: string}): () => void;
+    info(action: string, info?: {[key: string]: string}): void;
 
     /**
      * Add a log item, whose result is WARN
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
-    warn(data: ErrorLogEntry): () => void;
+    warn(data: ErrorLogEntry): void;
 
     /**
      * Add a log item, whose result is ERROR
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
-    error(data: ErrorLogEntry): () => void;
+    error(data: ErrorLogEntry): void;
 }
 
 export class LoggerImpl implements Logger {
@@ -66,25 +67,25 @@ export class LoggerImpl implements Logger {
         this.environmentContext = {...this.environmentContext, ...context};
     }
 
-    info(action: string, info?: {[key: string]: string}): () => void {
-        return this.appendLog("OK", {action, info: info || {}});
+    info(action: string, info?: {[key: string]: string}, elapsedTime?: number): void {
+        return this.appendLog("OK", {action, info: info || {}, elapsedTime: elapsedTime || 0});
     }
 
-    warn(data: ErrorLogEntry): () => void {
+    warn(data: ErrorLogEntry): void {
         return this.appendLog("WARN", data);
     }
 
-    error(data: ErrorLogEntry): () => void {
+    error(data: ErrorLogEntry): void {
         return this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, action?: string): () => void {
+    exception(exception: Exception, action?: string): void {
         if (exception instanceof NetworkConnectionException) {
             const info: {[key: string]: string} = {
                 url: exception.requestURL,
                 errorObject: JSON.stringify(exception.errorObject),
             };
-            return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info});
+            return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
         } else {
             const info: {[key: string]: string} = {};
             let isWarning: boolean = false;
@@ -120,7 +121,7 @@ export class LoggerImpl implements Logger {
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 
-            return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info});
+            return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
         }
     }
 
@@ -132,7 +133,7 @@ export class LoggerImpl implements Logger {
         this.logQueue = [];
     }
 
-    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage">): () => void {
+    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             completeContext[key] = typeof value === "string" ? value : value();
@@ -142,13 +143,8 @@ export class LoggerImpl implements Logger {
             date: new Date(),
             result,
             context: completeContext,
-            elapsedTime: 0,
             ...data,
         };
-
         this.logQueue.push(event);
-        return () => {
-            event.elapsedTime = new Date().getTime() - event.date.getTime();
-        };
     }
 }

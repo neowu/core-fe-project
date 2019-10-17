@@ -1,6 +1,7 @@
 const chalk = require("chalk");
 const childProcess = require("child_process");
 const fs = require("fs-extra");
+const yargs = require("yargs");
 
 function spawn(command, args, errorMessage) {
     const isWindows = process.platform === "win32"; // spawn with {shell: true} can solve .cmd resolving, but prettier doesn't run correctly on mac/linux
@@ -52,10 +53,15 @@ function distribute() {
 }
 
 function build() {
+    const isFastMode = yargs.argv.mode === "fast";
+
+    if (!isFastMode) {
+        checkCodeStyle();
+        test();
+        lint();
+    }
+
     cleanup();
-    checkCodeStyle();
-    test();
-    lint();
     compile();
     distribute();
 }

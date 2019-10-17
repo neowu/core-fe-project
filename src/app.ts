@@ -58,6 +58,7 @@ function createApp(): App {
                         errorCode: "EXTERNAL_WARN",
                         errorMessage: errorAction.payload.exception.message,
                         info: {errorObject: JSON.stringify(errorAction.payload.exception)},
+                        elapsedTime: 0,
                     });
                 }
             } else {

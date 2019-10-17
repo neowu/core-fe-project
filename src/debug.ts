@@ -16,10 +16,13 @@ if (process.env.NODE_ENV === "development") {
                 }
                 console.info(`%c (${index + 1}) ${_.result} `, colorString, _.date.toLocaleString());
                 if (_.errorCode) {
-                    console.info(`%c CODE `, "background:red; color:#fff", _.errorCode);
+                    console.info(`%c ${_.errorCode} `, "background:red; color:#fff", _.errorMessage || "<No Message>");
                 }
                 if (_.action) {
                     console.info(`%c ACTION `, "background:#ddd; color:#111", _.action);
+                }
+                if (_.elapsedTime > 0) {
+                    console.info(`%c DURATION `, "background:yellow; color:#111", _.elapsedTime);
                 }
                 if (Object.keys(_.info).length > 0) {
                     console.info(`%c INFO `, "background:#ddd; color:#111", _.info);
