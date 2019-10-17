@@ -28,6 +28,7 @@ export class ModuleProxy<M extends Module<any>> {
             public static displayName = `ModuleBoundary(${moduleName})`;
             private readonly lifecycleSagaTask: Task;
             private successTickCount: number = 0;
+            private mountedTime: number = Date.now();
 
             constructor(props: P) {
                 super(props);
@@ -62,7 +63,11 @@ export class ModuleProxy<M extends Module<any>> {
                 }
 
                 this.lifecycleSagaTask.cancel();
-                app.logger.info(`${moduleName}/@@DESTROY`, {retainState: Boolean(config.retainStateOnLeave).toString(), successTickCount: this.successTickCount.toString()});
+                app.logger.info(`${moduleName}/@@DESTROY`, {
+                    retainState: Boolean(config.retainStateOnLeave).toString(),
+                    successTickCount: this.successTickCount.toString(),
+                    stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                });
             }
 
             private *lifecycleSaga(): SagaIterator {
