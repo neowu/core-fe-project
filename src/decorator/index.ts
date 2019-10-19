@@ -38,6 +38,7 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
             const rootState: S = app.store.getState() as S;
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
+            // The reason is, fn is created before module register(), and the actionName had not been attached then
             boundFn.actionName = (descriptor.value as any).actionName;
             boundFn.maskedParams = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args) || "[No Parameter]";
             yield* interceptor(boundFn, rootState);

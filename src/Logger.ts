@@ -40,7 +40,7 @@ export interface Logger {
     /**
      * Add a log item, whose result is OK
      */
-    info(action: string, info?: {[key: string]: string}): void;
+    info(action: string, info: {[key: string]: string}): void;
 
     /**
      * Add a log item, whose result is WARN
@@ -67,8 +67,8 @@ export class LoggerImpl implements Logger {
         this.environmentContext = {...this.environmentContext, ...context};
     }
 
-    info(action: string, info?: {[key: string]: string}, elapsedTime?: number): void {
-        return this.appendLog("OK", {action, info: info || {}, elapsedTime: elapsedTime || 0});
+    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
+        return this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 
     warn(data: ErrorLogEntry): void {

@@ -2,7 +2,7 @@ import {routerMiddleware} from "connected-react-router";
 import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {takeEvery, takeLeading} from "redux-saga/effects";
+import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
@@ -46,34 +46,43 @@ function createApp(): App {
      * One for handling errors (blocked, handle only one at one time).
      */
     sagaMiddleware.run(function*() {
+        let isHandlingError = false;
         yield takeEvery("*", function*(action: Action<any>) {
-            const handler = app.actionHandlers[action.type];
-            if (handler) {
-                yield* executeAction(handler, ...action.payload);
-            }
-        });
-    });
-    sagaMiddleware.run(function*() {
-        yield takeLeading(ERROR_ACTION_TYPE, function*(action: Action<any>) {
-            const errorAction = action as Action<ExceptionPayload>;
-            if (shouldHandle(errorAction.payload)) {
-                app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName);
-                if (app.errorHandler) {
-                    try {
-                        yield* app.errorHandler(errorAction.payload.exception);
-                    } catch (e) {
-                        console.error("Error Caught In Error Handler");
-                        console.error(e);
+            if (action.type === ERROR_ACTION_TYPE) {
+                /**
+                 * CAVEAT:
+                 * Do not use takeLeading to handle error.
+                 * Otherwise, only one error will be logged.
+                 * Expected behavior is: Log every error, but execute one errorHandler at one time
+                 */
+                const errorAction = action as Action<ExceptionPayload>;
+                if (shouldHandle(errorAction.payload)) {
+                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped (Last handler not finished)" : "Received"});
+                    if (app.errorHandler && !isHandlingError) {
+                        try {
+                            isHandlingError = true;
+                            yield* app.errorHandler(errorAction.payload.exception);
+                        } catch (e) {
+                            console.error("Error Caught In Error Handler");
+                            console.error(e);
+                        } finally {
+                            isHandlingError = false;
+                        }
                     }
+                } else {
+                    app.logger.warn({
+                        action: errorAction.payload.actionName || "-",
+                        errorCode: "EXTERNAL_WARN",
+                        errorMessage: errorAction.payload.exception.message,
+                        info: {errorObject: JSON.stringify(errorAction.payload.exception)},
+                        elapsedTime: 0,
+                    });
                 }
             } else {
-                app.logger.warn({
-                    action: errorAction.payload.actionName || "-",
-                    errorCode: "EXTERNAL_WARN",
-                    errorMessage: errorAction.payload.exception.message,
-                    info: {errorObject: JSON.stringify(errorAction.payload.exception)},
-                    elapsedTime: 0,
-                });
+                const handler = app.actionHandlers[action.type];
+                if (handler) {
+                    yield* executeAction(action.type, handler, ...action.payload);
+                }
             }
         });
     });

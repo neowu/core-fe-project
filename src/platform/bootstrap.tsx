@@ -95,15 +95,14 @@ function setupLogger(config: LoggerConfig | undefined) {
                 "unload",
                 () => {
                     try {
+                        app.logger.info("@@EXIT", {});
                         const logs = app.logger.collect();
-                        if (logs.length > 0) {
-                            /**
-                             * Using Blob, instead of simple string.
-                             * Because simple string will generate content-type: text/plain.
-                             */
-                            const blob = new Blob([JSON.stringify({events: logs})], {type: "application/json"});
-                            navigator.sendBeacon(config.serverURL, blob); // As HTTP POST request
-                        }
+                        /**
+                         * Using Blob, instead of simple string.
+                         * Because simple string will generate content-type: text/plain.
+                         */
+                        const blob = new Blob([JSON.stringify({events: logs})], {type: "application/json"});
+                        navigator.sendBeacon(config.serverURL, blob); // As HTTP POST request
                     } catch (e) {
                         // Silent if sending error
                     }
@@ -112,4 +111,6 @@ function setupLogger(config: LoggerConfig | undefined) {
             );
         }
     }
+
+    app.logger.info("@@ENTER", {});
 }

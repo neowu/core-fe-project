@@ -37,23 +37,22 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     // Transform every method into ActionCreator
     const actions: any = {};
     getKeys(module).forEach(actionType => {
-        const method = module[actionType];
-        const boundMethod = method.bind(module);
         // Attach action name, for @Log / error handler reflection
+        const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
-        boundMethod.actionName = method.actionName = qualifiedActionType;
+        method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
-        app.actionHandlers[qualifiedActionType] = boundMethod;
+
+        app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
 
     return new ModuleProxy(module, actions);
 }
 
-export function* executeAction(handler: ActionHandler, ...payload: any[]): SagaIterator {
+export function* executeAction(actionName: string, handler: ActionHandler, ...payload: any[]): SagaIterator {
     try {
         yield* handler(...payload);
     } catch (error) {
-        const actionName = (handler as any).actionName;
         console.error(`Saga Action (${actionName}) Error`, error);
         yield put(errorAction(error, actionName));
     }

@@ -17,7 +17,7 @@ export interface State {
 
 // Redux Action
 export interface Action<P> extends ReduxAction<string> {
-    name?: string;
+    name?: typeof SET_STATE_ACTION;
     payload: P;
 }
 
