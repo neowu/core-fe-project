@@ -40,7 +40,7 @@ export interface Logger {
     /**
      * Add a log item, whose result is OK
      */
-    info(action: string, info: {[key: string]: string}): void;
+    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void;
 
     /**
      * Add a log item, whose result is WARN
