@@ -14,6 +14,7 @@ export {Interval} from "./Interval";
 export {Lifecycle} from "./Lifecycle";
 export {Loading} from "./Loading";
 export {Log} from "./Log";
+export {Mutex} from "./Mutex";
 export {RetryOnNetworkConnectionError} from "./RetryOnNetworkConnectionError";
 export {SilentOnAllError} from "./SilentOnAllError";
 export {SilentOnNetworkConnectionError} from "./SilentOnNetworkConnectionError";
