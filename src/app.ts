@@ -2,10 +2,10 @@ import {routerMiddleware} from "connected-react-router";
 import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {takeEvery} from "redux-saga/effects";
+import {takeEvery, takeLeading} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
-import {Action, ERROR_ACTION_TYPE, errorAction, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
 import {shouldHandle} from "./platform/exceptionAnalyzer";
 
 declare const window: any;
@@ -39,33 +39,41 @@ function createApp(): App {
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware();
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
+
+    /**
+     * Spawns two root sagas:
+     * One for handling module actions (non-block, handle all).
+     * One for handling errors (blocked, handle only one at one time).
+     */
     sagaMiddleware.run(function*() {
         yield takeEvery("*", function*(action: Action<any>) {
-            if (action.type === ERROR_ACTION_TYPE) {
-                const errorAction = action as Action<ExceptionPayload>;
-                if (shouldHandle(errorAction.payload)) {
-                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName);
+            const handler = app.actionHandlers[action.type];
+            if (handler) {
+                yield* executeAction(handler, ...action.payload);
+            }
+        });
+    });
+    sagaMiddleware.run(function*() {
+        yield takeLeading(ERROR_ACTION_TYPE, function*(action: Action<any>) {
+            const errorAction = action as Action<ExceptionPayload>;
+            if (shouldHandle(errorAction.payload)) {
+                app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName);
+                if (app.errorHandler) {
                     try {
-                        if (app.errorHandler) {
-                            yield* app.errorHandler(errorAction.payload.exception);
-                        }
+                        yield* app.errorHandler(errorAction.payload.exception);
                     } catch (e) {
-                        console.error("Error Caught In Error Handler", e);
+                        console.error("Error Caught In Error Handler");
+                        console.error(e);
                     }
-                } else {
-                    app.logger.warn({
-                        action: errorAction.payload.actionName || "-",
-                        errorCode: "EXTERNAL_WARN",
-                        errorMessage: errorAction.payload.exception.message,
-                        info: {errorObject: JSON.stringify(errorAction.payload.exception)},
-                        elapsedTime: 0,
-                    });
                 }
             } else {
-                const handler = app.actionHandlers[action.type];
-                if (handler) {
-                    yield* executeAction(handler, ...action.payload);
-                }
+                app.logger.warn({
+                    action: errorAction.payload.actionName || "-",
+                    errorCode: "EXTERNAL_WARN",
+                    errorMessage: errorAction.payload.exception.message,
+                    info: {errorObject: JSON.stringify(errorAction.payload.exception)},
+                    elapsedTime: 0,
+                });
             }
         });
     });

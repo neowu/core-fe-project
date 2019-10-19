@@ -79,15 +79,16 @@ export class LoggerImpl implements Logger {
         return this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, action?: string): void {
+    exception(exception: Exception, action?: string, extraInfo?: {[key: string]: string}): void {
         if (exception instanceof NetworkConnectionException) {
             const info: {[key: string]: string} = {
+                ...extraInfo,
                 url: exception.requestURL,
                 errorObject: JSON.stringify(exception.errorObject),
             };
             return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
         } else {
-            const info: {[key: string]: string} = {};
+            const info: {[key: string]: string} = {...extraInfo};
             let isWarning: boolean = false;
             let errorCode: string = "OTHER_ERROR";
 

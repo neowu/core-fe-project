@@ -3,7 +3,7 @@ import {RouteComponentProps} from "react-router";
 import {SagaIterator, Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
-import {ActionCreators, executeAction} from "../module";
+import {ActionCreators, ActionHandler, executeAction, LifecycleDecoratorFlag} from "../module";
 import {navigationPreventionAction, setStateAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
@@ -52,6 +52,7 @@ export class ModuleProxy<M extends Module<any>> {
                     app.store.dispatch(actions.onDestroy());
                 }
 
+                // TODO: remove next version
                 if (!config.retainStateOnLeave) {
                     app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
                 }
@@ -64,7 +65,6 @@ export class ModuleProxy<M extends Module<any>> {
 
                 this.lifecycleSagaTask.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
-                    retainState: Boolean(config.retainStateOnLeave).toString(),
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                 });
@@ -72,20 +72,25 @@ export class ModuleProxy<M extends Module<any>> {
 
             private *lifecycleSaga(): SagaIterator {
                 const props = this.props as (RouteComponentProps | {});
-                app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)});
 
                 if (lifecycleListener.onEnter.isLifecycle) {
+                    const startTime = Date.now();
                     yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener));
+                    app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
+                } else {
+                    app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)});
                 }
 
                 if (lifecycleListener.onRender.isLifecycle) {
                     if ("match" in props && "location" in props) {
-                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {locationParams: JSON.stringify(props.match.params)});
+                        const startTime = Date.now();
                         yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
+                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {locationParams: JSON.stringify(props.match.params)}, Date.now() - startTime);
                     } else {
+                        const startTime = Date.now();
                         console.warn(`Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
-                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {type: "Non-Route-Component"});
                         yield* executeAction(lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
+                        app.logger.info(`${moduleName}/@@INITIAL_RENDER`, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
                     }
                 }
 

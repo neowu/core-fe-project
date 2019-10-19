@@ -21,7 +21,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
                  * Typical issue:
                  * Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src ...".
                  *
-                 * Happens in some Mac Chrome, cannot figure out detailed reason now.
+                 * Happens in some Mac Chrome, possibly Chrome extensions.
                  */
                 return false;
             }
