@@ -30,8 +30,7 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const moduleName = module.name;
     if (!app.store.getState().app[moduleName]) {
         // To get private property
-        const initialState = (module as any).initialState;
-        app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@init`));
+        app.store.dispatch(setStateAction(moduleName, module.initialState, `@@${moduleName}/@@init`));
     }
 
     // Transform every method into ActionCreator

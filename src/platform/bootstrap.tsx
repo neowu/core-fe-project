@@ -73,6 +73,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 }
 
 function setupLogger(config: LoggerConfig | undefined) {
+    const pageOpenedTime = Date.now();
     if (config) {
         app.loggerConfig = config;
         if (process.env.NODE_ENV === "production") {
@@ -82,11 +83,12 @@ function setupLogger(config: LoggerConfig | undefined) {
                     try {
                         const logs = app.logger.collect();
                         if (logs.length > 0) {
-                            yield call(ajax, "PUT", config.serverURL, {}, {events: logs});
+                            yield call(ajax, "POST", config.serverURL, {}, {events: logs});
                             app.logger.empty();
                         }
                     } catch (e) {
                         // Silent if sending error
+                        console.error("Background Event Collector Error", e);
                     }
                 }
             });
@@ -95,7 +97,7 @@ function setupLogger(config: LoggerConfig | undefined) {
                 "unload",
                 () => {
                     try {
-                        app.logger.info("@@EXIT", {});
+                        app.logger.info("@@EXIT", {stayingSecond: ((Date.now() - pageOpenedTime) / 1000).toFixed(2)});
                         const logs = app.logger.collect();
                         /**
                          * Using Blob, instead of simple string.

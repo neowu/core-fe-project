@@ -14,7 +14,7 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryStat
 }
 
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
-    public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
+    public constructor(public readonly name: string, public readonly initialState: ModuleState) {}
 
     *onEnter(): SagaIterator {
         /**
@@ -44,19 +44,19 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
          */
     }
 
-    protected get state(): Readonly<ModuleState> {
+    get state(): Readonly<ModuleState> {
         return this.rootState.app[this.name];
     }
 
-    protected get rootState(): Readonly<RootState> {
+    get rootState(): Readonly<RootState> {
         return app.store.getState() as Readonly<RootState>;
     }
 
-    protected get logger(): Logger {
+    get logger(): Logger {
         return app.logger;
     }
 
-    protected setNavigationPrevented(isPrevented: boolean) {
+    setNavigationPrevented(isPrevented: boolean) {
         app.store.dispatch(navigationPreventionAction(isPrevented));
     }
 
@@ -65,11 +65,11 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
      * Do not use Partial<ModuleState> as parameter.
      * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
      */
-    protected setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
+    setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
         app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
-    protected setHistory(urlOrState: HistoryState | string, state: HistoryState | null = null) {
+    setHistory(urlOrState: HistoryState | string, state: HistoryState | null = null) {
         if (typeof urlOrState === "string") {
             if (state === null) {
                 app.store.dispatch(push(urlOrState));

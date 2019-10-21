@@ -1,4 +1,5 @@
 import {ActionHandler} from "../module";
+import {Module} from "../platform/Module";
 import {SagaIterator} from "redux-saga";
 import {State} from "../reducer";
 import {app} from "../app";
@@ -27,22 +28,21 @@ type HandlerDecorator = (target: object, propertyKey: string, descriptor: TypedP
 
 type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
 
-type HandlerInterceptor<S> = (handler: ActionHandlerWithMetaData, rootState: Readonly<S>) => SagaIterator;
+type HandlerInterceptor<RootState extends State = State, ModuleState extends {} = {}> = (handler: ActionHandlerWithMetaData, thisModule: Module<ModuleState, {}, {}, RootState>) => SagaIterator;
 
 /**
  * A helper for ActionHandler functions (Saga).
  */
-export function createActionHandlerDecorator<S extends State = State>(interceptor: HandlerInterceptor<S>): HandlerDecorator {
+export function createActionHandlerDecorator<RootState extends State = State, ModuleState extends {} = {}>(interceptor: HandlerInterceptor<RootState, ModuleState>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            const rootState: S = app.store.getState() as S;
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then
             boundFn.actionName = (descriptor.value as any).actionName;
             boundFn.maskedParams = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args) || "[No Parameter]";
-            yield* interceptor(boundFn, rootState);
+            yield* interceptor(boundFn, this as any);
         };
         return descriptor;
     };
