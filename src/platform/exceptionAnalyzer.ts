@@ -49,7 +49,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
 
             if (exception.errorObject === null && errorMessage.includes("Script error")) {
                 /**
-                 * Typiecal issue:
+                 * Typical issue:
                  * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
                  *
                  * Happens in Xiaomi Android browser, no extra info.
@@ -59,7 +59,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
 
             if (errorMessage.includes("ChunkLoadError")) {
                 /**
-                 * Typiecal issue:
+                 * Typical issue:
                  * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
                  *
                  * Network error while downloading JavaScript (async loading).
