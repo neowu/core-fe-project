@@ -17,7 +17,6 @@ export {Loading} from "./Loading";
 export {Log} from "./Log";
 export {Mutex} from "./Mutex";
 export {RetryOnNetworkConnectionError} from "./RetryOnNetworkConnectionError";
-export {SilentOnAllError} from "./SilentOnAllError";
 export {SilentOnNetworkConnectionError} from "./SilentOnNetworkConnectionError";
 export {TimeLimit} from "./TimeLimit";
 

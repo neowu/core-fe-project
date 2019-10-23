@@ -10,6 +10,7 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
                 /**
                  * Typical issue:
                  * _start is not undefined
+                 * hasInject is not undefined
                  *
                  * Happens in some Android browser, possibly script injection.
                  */
@@ -32,6 +33,36 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
                  * Unhandled Promise Rejection: SecurityError: Failed to execute 'sendBeacon' on 'Navigator': Refused to send beacon to 'https://track.uc.cn/collect?...'
                  *
                  * Happens in Android UC browser, because of auto user-behavior tracking.
+                 */
+                return false;
+            }
+
+            if (errorMessage.includes("vivoNewsDetailPage.getNewsReadStatus4Vivo")) {
+                /**
+                 * Typical issue:
+                 * Uncaught TypeError: vivoNewsDetailPage.getNewsReadStatus4Vivo is not a function
+                 *
+                 * Happens in Vivo Android browser, because of its own plugin.
+                 */
+                return false;
+            }
+
+            if (exception.errorObject === null && errorMessage.includes("Script error")) {
+                /**
+                 * Typiecal issue:
+                 * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
+                 *
+                 * Happens in Xiaomi Android browser, no extra info.
+                 */
+                return false;
+            }
+
+            if (errorMessage.includes("ChunkLoadError")) {
+                /**
+                 * Typiecal issue:
+                 * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
+                 *
+                 * Network error while downloading JavaScript (async loading).
                  */
                 return false;
             }
