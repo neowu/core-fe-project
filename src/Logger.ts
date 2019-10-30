@@ -99,7 +99,7 @@ export class LoggerImpl implements Logger {
                     isWarning = true;
                 } else if (exception.statusCode === 400) {
                     if (exception.errorCode === "VALIDATION_ERROR") {
-                        errorCode = "API_VALIDATION_FAIL";
+                        errorCode = "API_VALIDATION_ERROR";
                     } else {
                         isWarning = true;
                     }
