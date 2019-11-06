@@ -46,7 +46,7 @@ function getSessionId() {
 }
 
 export const loggerContext = {
-    path: () => location.href,
+    requestURL: () => location.href,
     visitorId: getVisitorId(),
     sessionId: getSessionId(),
 };

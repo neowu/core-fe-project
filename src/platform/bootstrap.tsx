@@ -74,6 +74,8 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 
 function setupLogger(config: LoggerConfig | undefined) {
     const pageOpenedTime = Date.now();
+    app.logger.info("@@ENTER", {});
+
     if (config) {
         app.loggerConfig = config;
         if (process.env.NODE_ENV === "production") {
@@ -100,11 +102,11 @@ function setupLogger(config: LoggerConfig | undefined) {
                         app.logger.info("@@EXIT", {stayingSecond: ((Date.now() - pageOpenedTime) / 1000).toFixed(2)});
                         const logs = app.logger.collect();
                         /**
-                         * Using Blob, instead of simple string.
-                         * Because simple string will generate content-type: text/plain.
+                         * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
+                         * We have to use text/plain as content type, instead of JSON.
                          */
-                        const blob = new Blob([JSON.stringify({events: logs})], {type: "application/json"});
-                        navigator.sendBeacon(config.serverURL, blob); // As HTTP POST request
+                        const textData = JSON.stringify({events: logs});
+                        navigator.sendBeacon(config.serverURL, textData);
                     } catch (e) {
                         // Silent if sending error
                     }
@@ -113,6 +115,4 @@ function setupLogger(config: LoggerConfig | undefined) {
             );
         }
     }
-
-    app.logger.info("@@ENTER", {});
 }
