@@ -95,8 +95,10 @@ function setupLogger(config: LoggerConfig | undefined) {
                 }
             });
 
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
             window.addEventListener(
-                "unload",
+                // Ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
+                isIOS ? "pagehide" : "unload",
                 () => {
                     try {
                         app.logger.info("@@EXIT", {stayingSecond: ((Date.now() - pageOpenedTime) / 1000).toFixed(2)});
