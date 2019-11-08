@@ -80,7 +80,7 @@ export class ModuleProxy<M extends Module<any>> {
                 const enterActionName = `${moduleName}/@@ENTER`;
                 if (lifecycleListener.onEnter.isLifecycle) {
                     const startTime = Date.now();
-                    yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener));
+                    yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
