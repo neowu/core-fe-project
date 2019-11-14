@@ -22,7 +22,7 @@ export interface ErrorListener {
     onError: ErrorHandler;
 }
 
-type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
+type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? (...args: P) => Action<P> : never;
 type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
 export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 

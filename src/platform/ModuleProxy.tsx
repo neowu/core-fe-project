@@ -75,7 +75,7 @@ export class ModuleProxy<M extends Module<any>> {
             }
 
             private *lifecycleSaga(): SagaIterator {
-                const props = this.props as (RouteComponentProps | {});
+                const props = this.props as RouteComponentProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;
                 if (lifecycleListener.onEnter.isLifecycle) {

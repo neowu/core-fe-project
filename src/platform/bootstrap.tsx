@@ -66,7 +66,9 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
         if (process.env.NODE_ENV === "development") {
             console.error("Unhandled Promise Rejection", event);
         }
-        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + JSON.stringify(event.reason))));
+        let message = event.reason && typeof event.reason.toString === "function" ? event.reason.toString() + ", reason object: " : "";
+        message += JSON.stringify(event.reason);
+        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + message)));
     };
 
     app.errorHandler = errorListener.onError.bind(errorListener);
@@ -90,7 +92,6 @@ function setupLogger(config: LoggerConfig | undefined) {
                         }
                     } catch (e) {
                         // Silent if sending error
-                        console.error("Background Event Collector Error", e);
                     }
                 }
             });

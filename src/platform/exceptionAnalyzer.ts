@@ -57,12 +57,13 @@ export function shouldHandle(exceptionPayload: ExceptionPayload): boolean {
                 return false;
             }
 
-            if (errorMessage.includes("ChunkLoadError")) {
+            if (errorMessage.includes("ChunkLoadError") || errorMessage.includes("CSS_CHUNK_LOAD_FAILED")) {
                 /**
                  * Typical issue:
                  * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
+                 * http://kube.jianfengdemo-g.com:30102/app/kibana#/doc/event-pattern/event-*?id=6E64DF07836BB24A55CE&_g=()
                  *
-                 * Network error while downloading JavaScript (async loading).
+                 * Network error while downloading JavaScript/CSS (async loading).
                  */
                 return false;
             }
