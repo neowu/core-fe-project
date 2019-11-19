@@ -12,6 +12,7 @@ import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {RuntimeException} from "../Exception";
+import {serializeError} from "../util/error-util";
 
 interface BootstrapOption {
     componentType: React.ComponentType<{}>;
@@ -66,9 +67,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
         if (process.env.NODE_ENV === "development") {
             console.error("Unhandled Promise Rejection", event);
         }
-        let message = event.reason && typeof event.reason.toString === "function" ? event.reason.toString() + ", reason object: " : "";
-        message += JSON.stringify(event.reason);
-        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + message)));
+        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + serializeError(event.reason))));
     };
 
     app.errorHandler = errorListener.onError.bind(errorListener);

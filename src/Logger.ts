@@ -1,6 +1,7 @@
 import {app} from "./app";
 import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
-import {loggerContext} from "./platform/loggerContext";
+import {loggerContext} from "./platform/logger-context";
+import {serializeError} from "./util/error-util";
 
 interface Log {
     date: Date;
@@ -117,8 +118,8 @@ export class LoggerImpl implements Logger {
                 info.stackTrace = exception.componentStack;
                 info.appState = JSON.stringify(app.store.getState().app);
             } else if (exception instanceof RuntimeException) {
-                errorCode = "JS_ERROR";
-                info.errorObject = JSON.stringify(exception.errorObject);
+                errorCode = "RUNTIME_ERROR";
+                info.errorObject = serializeError(exception.errorObject);
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 

@@ -7,7 +7,7 @@ export {Module} from "./platform/Module";
 
 export {async} from "./util/async";
 export {ajax} from "./util/network";
-export {call} from "./util/sagaCall";
+export {call} from "./util/typed-saga-call";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 

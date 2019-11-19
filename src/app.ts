@@ -6,7 +6,7 @@ import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
-import {shouldHandle} from "./platform/exceptionAnalyzer";
+import {shouldAlertToUser} from "./util/error-util";
 
 declare const window: any;
 
@@ -56,7 +56,7 @@ function createApp(): App {
                  * Expected behavior is: Log every error, but execute one errorHandler at one time
                  */
                 const errorAction = action as Action<ExceptionPayload>;
-                if (shouldHandle(errorAction.payload)) {
+                if (shouldAlertToUser(errorAction.payload)) {
                     app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped (Last handler not finished)" : "Received"});
                     if (app.errorHandler && !isHandlingError) {
                         try {
