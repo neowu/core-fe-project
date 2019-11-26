@@ -4,12 +4,8 @@ import {SagaIterator, Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {navigationPreventionAction, setStateAction} from "../reducer";
+import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
-
-interface AttachLifecycleOption {
-    retainStateOnLeave?: boolean;
-}
 
 export class ModuleProxy<M extends Module<any>> {
     public constructor(private module: M, private actions: ActionCreators<M>) {}
@@ -18,7 +14,7 @@ export class ModuleProxy<M extends Module<any>> {
         return this.actions;
     }
 
-    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>, config: AttachLifecycleOption = {}): React.ComponentType<P> {
+    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name;
         const initialState = this.module.initialState;
         const lifecycleListener = this.module as ModuleLifecycleListener;
@@ -54,11 +50,6 @@ export class ModuleProxy<M extends Module<any>> {
             componentWillUnmount() {
                 if (lifecycleListener.onDestroy.isLifecycle) {
                     app.store.dispatch(actions.onDestroy());
-                }
-
-                // TODO: remove next version
-                if (!config.retainStateOnLeave) {
-                    app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
                 }
 
                 const currentLocation = (this.props as any).location;
