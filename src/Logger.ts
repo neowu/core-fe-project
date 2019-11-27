@@ -138,7 +138,18 @@ export class LoggerImpl implements Logger {
     private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
-            completeContext[key] = typeof value === "string" ? value : value();
+            if (typeof value === "string") {
+                completeContext[key] = value;
+            } else {
+                let evaluatedResult: string;
+                try {
+                    evaluatedResult = value();
+                } catch (e) {
+                    evaluatedResult = "[ERROR] " + serializeError(e);
+                    console.warn("Fail to execute logger context: " + serializeError(e));
+                }
+                completeContext[key] = evaluatedResult;
+            }
         });
 
         const event: Log = {

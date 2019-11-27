@@ -2,9 +2,16 @@ import {ExceptionPayload} from "../reducer";
 import {RuntimeException} from "../Exception";
 
 export function serializeError(errorObject: any): string {
-    let message = errorObject && typeof errorObject.toString === "function" ? errorObject.toString() + "\n[JSON]:\n" : "";
-    message += JSON.stringify(errorObject);
-    return message;
+    if (errorObject) {
+        const jsonString = JSON.stringify(errorObject);
+        let message = errorObject && typeof errorObject.toString === "function" ? errorObject.toString() + "\n" : "";
+        if (jsonString) {
+            message += jsonString;
+        }
+        return message;
+    } else {
+        return "[NULL]";
+    }
 }
 
 export function shouldAlertToUser(exceptionPayload: ExceptionPayload): boolean {

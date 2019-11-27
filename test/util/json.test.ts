@@ -1,4 +1,4 @@
-import {parseWithDate, stringifyWithMask} from "../../src/util/json";
+import {parseWithDate, stringifyWithMask} from "../../src/util/json-util";
 
 test("parseJSONWithDate (with valid Date)", () => {
     expect(parseWithDate('{"date": "2018-05-24T12:00:00.123456Z"}')).toEqual({date: new Date("2018-05-24T12:00:00.123456Z")});

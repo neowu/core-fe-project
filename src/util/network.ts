@@ -1,6 +1,6 @@
 import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
-import {parseWithDate} from "./json";
+import {parseWithDate} from "./json-util";
 
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];

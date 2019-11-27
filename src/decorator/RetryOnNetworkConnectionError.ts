@@ -2,6 +2,7 @@ import {NetworkConnectionException} from "../Exception";
 import {app} from "../app";
 import {delay} from "@redux-saga/core/effects";
 import {createActionHandlerDecorator} from "./index";
+import {serializeError} from "../util/error-util";
 
 /**
  * Re-execute the action if NetworkConnectionException is thrown.
@@ -25,7 +26,7 @@ export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3) {
                         info: {
                             url: e.requestURL,
                             params: handler.maskedParams,
-                            errorObject: JSON.stringify(e),
+                            errorObject: serializeError(e.errorObject),
                         },
                         elapsedTime: Date.now() - currentRoundStartTime,
                     });

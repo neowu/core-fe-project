@@ -3,7 +3,7 @@ import {Module} from "../platform/Module";
 import {SagaIterator} from "redux-saga";
 import {State} from "../reducer";
 import {app} from "../app";
-import {stringifyWithMask} from "../util/json";
+import {stringifyWithMask} from "../util/json-util";
 
 /**
  * For latest decorator spec, please ref following:

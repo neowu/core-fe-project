@@ -41,7 +41,7 @@ function createApp(): App {
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
 
     /**
-     * Spawns two root sagas:
+     * Two parallel sagas:
      * One for handling module actions (non-block, handle all).
      * One for handling errors (blocked, handle only one at one time).
      */
@@ -57,7 +57,7 @@ function createApp(): App {
                  */
                 const errorAction = action as Action<ExceptionPayload>;
                 if (shouldAlertToUser(errorAction.payload)) {
-                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped (Last handler not finished)" : "Received"});
+                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped" : "Received"});
                     if (app.errorHandler && !isHandlingError) {
                         try {
                             isHandlingError = true;

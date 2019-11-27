@@ -8,19 +8,19 @@ import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 export class ModuleProxy<M extends Module<any>> {
-    public constructor(private module: M, private actions: ActionCreators<M>) {}
+    constructor(private module: M, private actions: ActionCreators<M>) {}
 
-    public getActions(): ActionCreators<M> {
+    getActions(): ActionCreators<M> {
         return this.actions;
     }
 
-    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
+    attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P> {
-            public static displayName = `ModuleBoundary(${moduleName})`;
+            static displayName = `ModuleBoundary(${moduleName})`;
             private readonly lifecycleSagaTask: Task;
             private successTickCount: number = 0;
             private mountedTime: number = Date.now();
@@ -64,6 +64,10 @@ export class ModuleProxy<M extends Module<any>> {
                 });
             }
 
+            render() {
+                return <ComponentType {...this.props} />;
+            }
+
             private *lifecycleSaga(): SagaIterator {
                 const props = this.props as RouteComponentProps | {};
 
@@ -100,10 +104,6 @@ export class ModuleProxy<M extends Module<any>> {
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
-            }
-
-            render() {
-                return <ComponentType {...this.props} />;
             }
         };
     }

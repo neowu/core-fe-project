@@ -11,7 +11,7 @@ interface Props extends RouteProps {
 }
 
 export class Route extends React.PureComponent<Props> {
-    public static defaultProps: Pick<Props, "exact" | "withErrorBoundary" | "accessCondition" | "unauthorizedRedirectTo"> = {
+    static defaultProps: Pick<Props, "exact" | "withErrorBoundary" | "accessCondition" | "unauthorizedRedirectTo"> = {
         exact: true,
         withErrorBoundary: true,
         accessCondition: true,

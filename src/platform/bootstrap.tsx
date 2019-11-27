@@ -74,7 +74,6 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 }
 
 function setupLogger(config: LoggerConfig | undefined) {
-    const pageOpenedTime = Date.now();
     app.logger.info("@@ENTER", {});
 
     if (config) {
@@ -101,7 +100,7 @@ function setupLogger(config: LoggerConfig | undefined) {
                 isIOS ? "pagehide" : "unload",
                 () => {
                     try {
-                        app.logger.info("@@EXIT", {stayingSecond: ((Date.now() - pageOpenedTime) / 1000).toFixed(2)});
+                        app.logger.info("@@EXIT", {});
                         const logs = app.logger.collect();
                         /**
                          * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
