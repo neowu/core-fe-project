@@ -85,7 +85,7 @@ export class LoggerImpl implements Logger {
             const info: {[key: string]: string} = {
                 ...extraInfo,
                 url: exception.requestURL,
-                errorObject: JSON.stringify(exception.errorObject),
+                errorObject: serializeError(exception.errorObject),
             };
             return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
         } else {
