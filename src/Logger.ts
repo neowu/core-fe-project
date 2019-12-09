@@ -120,7 +120,6 @@ export class LoggerImpl implements Logger {
             } else if (exception instanceof RuntimeException) {
                 errorCode = "RUNTIME_ERROR";
                 info.errorObject = serializeError(exception.errorObject);
-                info.appState = JSON.stringify(app.store.getState().app);
             }
 
             return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});

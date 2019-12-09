@@ -11,7 +11,7 @@ import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {RuntimeException} from "../Exception";
+import {NetworkConnectionException, RuntimeException} from "../Exception";
 import {serializeError} from "../util/error-util";
 
 interface BootstrapOption {
@@ -89,7 +89,13 @@ function setupLogger(config: LoggerConfig | undefined) {
                             app.logger.empty();
                         }
                     } catch (e) {
-                        // Silent if sending error
+                        if (e instanceof NetworkConnectionException) {
+                            // Log this case and retry later
+                            app.logger.exception(e);
+                        } else {
+                            // If not network error, retry always leads to same error, so have to give up
+                            app.logger.empty();
+                        }
                     }
                 }
             });

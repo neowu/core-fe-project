@@ -19,8 +19,8 @@ axios.interceptors.response.use(
             if (error.response) {
                 // Try to get server error message/ID/code from response
                 const responseData = error.response.data;
-                const errorId = responseData && responseData.id ? responseData.id : null;
-                const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
+                const errorId: string | null = responseData && responseData.id ? responseData.id : null;
+                const errorCode: string | null = responseData && responseData.errorCode ? responseData.errorCode : null;
 
                 if (!errorId && (error.response.status === 502 || error.response.status === 504)) {
                     // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
