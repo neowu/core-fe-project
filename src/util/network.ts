@@ -27,7 +27,7 @@ axios.interceptors.response.use(
                     // Note: Status 503 is maintenance
                     throw new NetworkConnectionException(`gateway error (${error.response.status})`, requestURL, error);
                 } else {
-                    const errorMessage = responseData && responseData.message ? responseData.message : `[No response message]`;
+                    const errorMessage: string = responseData && responseData.message ? responseData.message : `[No response message]`;
                     throw new APIException(errorMessage, error.response.status, requestURL, responseData, errorId, errorCode);
                 }
             } else {

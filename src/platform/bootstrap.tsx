@@ -18,13 +18,22 @@ interface BootstrapOption {
     componentType: React.ComponentType<{}>;
     errorListener: ErrorListener;
     navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
+    ieBrowserAlertMessage?: string;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption): void {
+    detectIEBrowser(config.ieBrowserAlertMessage);
     setupGlobalErrorHandler(config.errorListener);
     setupLogger(config.logger);
     renderDOM(config.componentType, config.navigationPreventionMessage || "Are you sure to leave current page?");
+}
+
+function detectIEBrowser(ieBrowserMessage?: string) {
+    if (ieBrowserMessage && (navigator.userAgent.indexOf("MSIE") > 0 || navigator.userAgent.indexOf("Trident/") > 0)) {
+        alert(ieBrowserMessage);
+        // After alert, still run the following code, just let whatever error happens
+    }
 }
 
 function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {

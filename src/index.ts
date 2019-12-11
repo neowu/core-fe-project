@@ -15,4 +15,4 @@ export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkCo
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
-export {useLoadingStatus} from "./hooks";
+export {useLoadingStatus, useModuleAction} from "./hooks";
