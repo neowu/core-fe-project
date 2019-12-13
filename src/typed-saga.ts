@@ -1,6 +1,8 @@
-import {StrictEffect} from "redux-saga/effects";
-import {call as rawCall, Effect, put as rawPut, race as rawRace, spawn, all, delay} from "redux-saga/effects";
 import {Action} from "./reducer";
+import {StrictEffect} from "redux-saga/effects";
+import {call as rawCall, Effect, put as rawPut, race as rawRace, spawn, all as rawAll, delay} from "redux-saga/effects";
+
+type StrictObject<T extends {}> = T extends any[] ? never : T;
 
 type SagaGenerator<RT> = Generator<Effect<any>, RT, any>;
 
@@ -16,10 +18,12 @@ export function* put<T extends Action<any>>(action: T): SagaGenerator<T> {
     return yield rawPut(action);
 }
 
-export function race<T extends object>(effects: T): SagaGenerator<{[P in keyof T]?: UnwrapReturnType<T[P]>}>;
-export function race<T>(effects: T[]): SagaGenerator<UnwrapReturnType<T>>;
-export function* race<T extends object>(effects: T): SagaGenerator<{[P in keyof T]?: UnwrapReturnType<T[P]>}> {
-    return yield rawRace(effects as any);
+export function* race<T extends {}>(effects: StrictObject<T>): SagaGenerator<{[P in keyof T]?: UnwrapReturnType<T[P]>}> {
+    return yield rawRace(effects);
 }
 
-export {spawn, all, delay};
+export function* all<T extends {}>(effects: StrictObject<T>): SagaGenerator<{[P in keyof T]: UnwrapReturnType<T[P]>}> {
+    return yield rawAll(effects);
+}
+
+export {spawn, delay};

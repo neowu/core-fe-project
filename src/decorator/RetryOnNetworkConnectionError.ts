@@ -1,6 +1,6 @@
 import {NetworkConnectionException} from "../Exception";
 import {app} from "../app";
-import {delay} from "@redux-saga/core/effects";
+import {delay} from "redux-saga/effects";
 import {createActionHandlerDecorator} from "./index";
 import {serializeError} from "../util/error-util";
 

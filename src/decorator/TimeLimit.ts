@@ -1,7 +1,7 @@
-import {delay, call} from "@redux-saga/core/effects";
-import {race} from "../typed-saga";
+import {delay, call} from "redux-saga/effects";
 import {NetworkConnectionException} from "../Exception";
 import {createActionHandlerDecorator} from "./index";
+import {race} from "../typed-saga";
 
 /**
  * Throws NetworkConnectionException if the action executes longer than specified second.
