@@ -1,6 +1,6 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
-import {SagaIterator, Task} from "redux-saga";
+import {Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
@@ -68,7 +68,7 @@ export class ModuleProxy<M extends Module<any>> {
                 return <ComponentType {...this.props} />;
             }
 
-            private *lifecycleSaga(): SagaIterator {
+            private *lifecycleSaga() {
                 const props = this.props as RouteComponentProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;

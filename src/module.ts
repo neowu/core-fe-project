@@ -1,10 +1,10 @@
-import {SagaIterator} from "redux-saga";
 import {put} from "redux-saga/effects";
 import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
 import {Action, errorAction, setStateAction} from "./reducer";
+import {SagaIterator} from "./typed-saga";
 
 export interface LifecycleDecoratorFlag {
     isLifecycle?: boolean;

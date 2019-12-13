@@ -1,6 +1,6 @@
 import {push} from "connected-react-router";
 import {Location} from "history";
-import {SagaIterator} from "redux-saga";
+import {SagaIterator} from "../typed-saga";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";

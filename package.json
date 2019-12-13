@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "1.14.0",
+  "version": "1.15.1",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +25,7 @@
     "ts-node": "8.5.4",
     "tslint": "5.20.1",
     "tslint-react": "4.1.0",
-    "typescript": "3.5.3",
+    "typescript": "3.7.3",
     "yargs": "15.0.2"
   },
   "dependencies": {
