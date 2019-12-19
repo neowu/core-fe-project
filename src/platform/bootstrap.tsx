@@ -13,6 +13,7 @@ import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {NetworkConnectionException, RuntimeException} from "../Exception";
 import {serializeError} from "../util/error-util";
+import {isIEBrowser} from "../util/navigator-util";
 
 interface BootstrapOption {
     componentType: React.ComponentType<{}>;
@@ -30,7 +31,7 @@ export function startApp(config: BootstrapOption): void {
 }
 
 function detectIEBrowser(ieBrowserMessage?: string) {
-    if (ieBrowserMessage && (navigator.userAgent.indexOf("MSIE") > 0 || navigator.userAgent.indexOf("Trident/") > 0)) {
+    if (ieBrowserMessage && isIEBrowser()) {
         alert(ieBrowserMessage);
         // After alert, still run the following code, just let whatever error happens
     }

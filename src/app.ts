@@ -7,6 +7,7 @@ import {LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
 import {shouldAlertToUser} from "./util/error-util";
+import {isIEBrowser} from "./util/navigator-util";
 
 declare const window: any;
 
@@ -57,16 +58,26 @@ function createApp(): App {
                  */
                 const errorAction = action as Action<ExceptionPayload>;
                 if (shouldAlertToUser(errorAction.payload)) {
-                    app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped" : "Received"});
-                    if (app.errorHandler && !isHandlingError) {
-                        try {
-                            isHandlingError = true;
-                            yield* app.errorHandler(errorAction.payload.exception);
-                        } catch (e) {
-                            console.error("Error Caught In Error Handler");
-                            console.error(e);
-                        } finally {
-                            isHandlingError = false;
+                    if (isIEBrowser()) {
+                        app.logger.warn({
+                            action: errorAction.payload.actionName || "-",
+                            errorCode: "IE_BROWSER_ISSUE",
+                            errorMessage: errorAction.payload.exception.message,
+                            info: {errorObject: JSON.stringify(errorAction.payload.exception)},
+                            elapsedTime: 0,
+                        });
+                    } else {
+                        app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped" : "Received"});
+                        if (app.errorHandler && !isHandlingError) {
+                            try {
+                                isHandlingError = true;
+                                yield* app.errorHandler(errorAction.payload.exception);
+                            } catch (e) {
+                                console.error("Error Caught In Error Handler");
+                                console.error(e);
+                            } finally {
+                                isHandlingError = false;
+                            }
                         }
                     }
                 } else {
