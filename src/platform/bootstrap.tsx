@@ -101,10 +101,12 @@ function setupLogger(config: LoggerConfig | undefined) {
                     } catch (e) {
                         if (e instanceof NetworkConnectionException) {
                             // Log this case and retry later
-                            app.logger.exception(e);
+                            app.logger.exception(e, "@@framework/logger");
                         } else {
                             // If not network error, retry always leads to same error, so have to give up
+                            const length = app.logger.collect().length;
                             app.logger.empty();
+                            app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
                         }
                     }
                 }
