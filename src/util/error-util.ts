@@ -28,7 +28,7 @@ export function shouldAlertToUser(exceptionPayload: ExceptionPayload): boolean {
                  *
                  * ATTENTION:
                  * This error may occur while calling setHistory (because the UC browser overwrites history API).
-                 * In such case, the actionName is not undefined.
+                 * In such case, exception.actionName is not undefined.
                  */
                 return false;
             } else if (errorMessage.includes("vivoNewsDetailPage.getNewsReadStatus4Vivo")) {
@@ -37,6 +37,16 @@ export function shouldAlertToUser(exceptionPayload: ExceptionPayload): boolean {
                  * Uncaught TypeError: vivoNewsDetailPage.getNewsReadStatus4Vivo is not a function
                  *
                  * Happens in Vivo Android browser, because of its own plugin.
+                 */
+                return false;
+            } else if (errorMessage.includes("ChunkLoadError") || errorMessage.includes("Loading CSS chunk")) {
+                /**
+                 * Typical issue:
+                 * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
+                 * http://kube.jianfengdemo-g.com:30102/app/kibana#/doc/event-pattern/event-*?id=6F656544FD585A83D7A7&_g=()
+                 *
+                 * Network error while downloading JavaScript/CSS (async loading).
+                 * In such case, exception.actionName might be "changeTheme".
                  */
                 return false;
             } else if (!exceptionPayload.actionName) {
@@ -63,15 +73,6 @@ export function shouldAlertToUser(exceptionPayload: ExceptionPayload): boolean {
                      * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
                      *
                      * Happens in Xiaomi Android browser, no extra info.
-                     */
-                    return false;
-                } else if (errorMessage.includes("ChunkLoadError") || errorMessage.includes("CSS_CHUNK_LOAD_FAILED")) {
-                    /**
-                     * Typical issue:
-                     * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
-                     * http://kube.jianfengdemo-g.com:30102/app/kibana#/doc/event-pattern/event-*?id=6E64DF07836BB24A55CE&_g=()
-                     *
-                     * Network error while downloading JavaScript/CSS (async loading).
                      */
                     return false;
                 }
