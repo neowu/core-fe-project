@@ -39,14 +39,16 @@ export function shouldAlertToUser(exceptionPayload: ExceptionPayload): boolean {
                  * Happens in Vivo Android browser, because of its own plugin.
                  */
                 return false;
-            } else if (errorMessage.includes("ChunkLoadError") || errorMessage.includes("Loading CSS chunk")) {
+            } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
                 /**
                  * Typical issue:
-                 * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
+                 * http://kube.pinnacle-gaming.com:30107/app/kibana#/doc/event-pattern/event-*?id=6F8351282DC640433269&_g=()
                  * http://kube.jianfengdemo-g.com:30102/app/kibana#/doc/event-pattern/event-*?id=6F656544FD585A83D7A7&_g=()
                  *
                  * Network error while downloading JavaScript/CSS (async loading).
-                 * In such case, exception.actionName might be "changeTheme".
+                 * In such case, exception.actionName might be "changeTheme", "@@ENTER".
+                 *
+                 * This works with webpack 4.41
                  */
                 return false;
             } else if (!exceptionPayload.actionName) {
