@@ -88,50 +88,48 @@ function setupLogger(config: LoggerConfig | undefined) {
 
     if (config) {
         app.loggerConfig = config;
-        if (process.env.NODE_ENV === "production") {
-            app.sagaMiddleware.run(function*() {
-                while (true) {
-                    yield delay(config.sendingFrequency * 1000);
-                    try {
-                        const logs = app.logger.collect();
-                        if (logs.length > 0) {
-                            yield call(ajax, "POST", config.serverURL, {}, {events: logs});
-                            app.logger.empty();
-                        }
-                    } catch (e) {
-                        if (e instanceof NetworkConnectionException) {
-                            // Log this case and retry later
-                            app.logger.exception(e, "@@framework/logger");
-                        } else {
-                            // If not network error, retry always leads to same error, so have to give up
-                            const length = app.logger.collect().length;
-                            app.logger.empty();
-                            app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
-                        }
+        app.sagaMiddleware.run(function*() {
+            while (true) {
+                yield delay(config.sendingFrequency * 1000);
+                try {
+                    const logs = app.logger.collect();
+                    if (logs.length > 0) {
+                        yield call(ajax, "POST", config.serverURL, {}, {events: logs});
+                        app.logger.empty();
+                    }
+                } catch (e) {
+                    if (e instanceof NetworkConnectionException) {
+                        // Log this case and retry later
+                        app.logger.exception(e, "@@framework/logger");
+                    } else {
+                        // If not network error, retry always leads to same error, so have to give up
+                        const length = app.logger.collect().length;
+                        app.logger.empty();
+                        app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
                     }
                 }
-            });
+            }
+        });
 
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
-            window.addEventListener(
-                // Ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
-                isIOS ? "pagehide" : "unload",
-                () => {
-                    try {
-                        app.logger.info("@@EXIT", {});
-                        const logs = app.logger.collect();
-                        /**
-                         * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
-                         * We have to use text/plain as content type, instead of JSON.
-                         */
-                        const textData = JSON.stringify({events: logs});
-                        navigator.sendBeacon(config.serverURL, textData);
-                    } catch (e) {
-                        // Silent if sending error
-                    }
-                },
-                false
-            );
-        }
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
+        window.addEventListener(
+            // Ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
+            isIOS ? "pagehide" : "unload",
+            () => {
+                try {
+                    app.logger.info("@@EXIT", {});
+                    const logs = app.logger.collect();
+                    /**
+                     * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
+                     * We have to use text/plain as content type, instead of JSON.
+                     */
+                    const textData = JSON.stringify({events: logs});
+                    navigator.sendBeacon(config.serverURL, textData);
+                } catch (e) {
+                    // Silent if sending error
+                }
+            },
+            false
+        );
     }
 }

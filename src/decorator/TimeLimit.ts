@@ -14,7 +14,7 @@ export function TimeLimit(second: number) {
             timerExecution: delay(second * 1000),
         });
         if (raceResult.timerExecution) {
-            throw new NetworkConnectionException(`[${handler.actionName}] time-out (${second} seconds)`, "[No URL]", null);
+            throw new NetworkConnectionException(`[${handler.actionName}] time-out (${second} seconds)`, "[No URL]");
         }
     });
 }
