@@ -138,7 +138,7 @@ export class LoggerImpl implements Logger {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             if (typeof value === "string") {
-                completeContext[key] = value;
+                completeContext[key] = value.substr(0, 1000);
             } else {
                 let evaluatedResult: string;
                 try {
@@ -147,7 +147,7 @@ export class LoggerImpl implements Logger {
                     evaluatedResult = "[ERROR] " + serializeError(e);
                     console.warn("Fail to execute logger context: " + serializeError(e));
                 }
-                completeContext[key] = evaluatedResult;
+                completeContext[key] = evaluatedResult.substr(0, 1000);
             }
         });
 
