@@ -16,14 +16,14 @@ export interface State {
 }
 
 // Redux Action
+const SET_STATE_ACTION = "@@framework/setState";
+
 export interface Action<P> extends ReduxAction<string> {
-    name?: typeof SET_STATE_ACTION;
     payload: P;
+    name?: typeof SET_STATE_ACTION;
 }
 
 // Redux Action: SetState (to update state.app)
-const SET_STATE_ACTION = "@@framework/setState";
-
 interface SetStateActionPayload {
     module: string;
     state: any;

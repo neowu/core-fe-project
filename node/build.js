@@ -29,7 +29,7 @@ function test() {
 
 function lint() {
     console.info(chalk`{green.bold [task]} {white.bold lint}`);
-    return spawn("tslint", ["-c", "node/tslint.json", "{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
+    return spawn("eslint", ["{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
 }
 
 function cleanup() {
