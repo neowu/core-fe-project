@@ -2,14 +2,13 @@ import {ConnectedRouter} from "connected-react-router";
 import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
-import {withRouter} from "react-router";
 import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
 import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {errorAction} from "../reducer";
-import {ErrorBoundary} from "../util/ErrorBoundary";
+import ErrorBoundary from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {NetworkConnectionException, RuntimeException} from "../Exception";
 import {serializeError} from "../util/error-util";
@@ -45,15 +44,14 @@ function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPrevention
     rootElement.id = "framework-app-root";
     document.body.appendChild(rootElement);
 
-    const RoutedEntryComponent = withRouter(EntryComponent as any);
     ReactDOM.render(
         <Provider store={app.store}>
-            <ErrorBoundary>
-                <ConnectedRouter history={app.browserHistory}>
-                    <NavigationGuard message={navigationPreventionMessage} />
-                    <RoutedEntryComponent />
-                </ConnectedRouter>
-            </ErrorBoundary>
+            <ConnectedRouter history={app.browserHistory}>
+                <NavigationGuard message={navigationPreventionMessage} />
+                <ErrorBoundary>
+                    <EntryComponent />
+                </ErrorBoundary>
+            </ConnectedRouter>
         </Provider>,
         rootElement,
         () => {

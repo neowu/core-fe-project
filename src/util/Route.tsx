@@ -1,7 +1,7 @@
 import React from "react";
 import {RouteProps} from "react-router";
 import {Redirect, Route as ReactRouterDOMRoute} from "react-router-dom";
-import {ErrorBoundary} from "./ErrorBoundary";
+import ErrorBoundary from "./ErrorBoundary";
 
 interface Props extends RouteProps {
     component: React.ComponentType<any>;

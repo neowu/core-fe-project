@@ -1,5 +1,6 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
+import {RouteComponentProps, withRouter} from "react-router";
 import {ReactLifecycleException} from "../Exception";
 import {errorAction} from "../reducer";
 
@@ -8,19 +9,18 @@ interface OwnProps {
     children: React.ReactNode;
 }
 
-interface Props extends OwnProps, DispatchProp {}
+interface Props extends OwnProps, DispatchProp, RouteComponentProps {}
 
 interface State {
     exception: ReactLifecycleException | null;
 }
 
-class Component extends React.PureComponent<Props, State> {
+class ErrorBoundary extends React.PureComponent<Props, State> {
     static defaultProps: Pick<Props, "render"> = {render: () => null};
     state: State = {exception: null};
 
-    componentDidUpdate(prevProps: Props) {
-        // Support page recovery
-        if (this.props.children !== prevProps.children) {
+    componentDidUpdate(prevProps: Readonly<Props>) {
+        if (prevProps.location !== this.props.location && this.state.exception !== null) {
             this.setState({exception: null});
         }
     }
@@ -36,4 +36,4 @@ class Component extends React.PureComponent<Props, State> {
     }
 }
 
-export const ErrorBoundary = connect()(Component);
+export default withRouter(connect()(ErrorBoundary));
