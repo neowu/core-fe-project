@@ -56,6 +56,11 @@ export function ajax<Request, Response>(method: Method, path: string, pathParams
     return axios.request(config).then(response => response.data);
 }
 
+export function uri<Request>(path: string, request: Request): string {
+    const config: AxiosRequestConfig = {method: "GET", url: path, params: request};
+    return axios.getUri(config);
+}
+
 export function urlParams(pattern: string, params: object): string {
     if (!params) {
         return pattern;

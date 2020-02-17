@@ -6,7 +6,7 @@ export {startApp} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
 export {async} from "./util/async";
-export {ajax} from "./util/network";
+export {ajax, uri} from "./util/network";
 export {default as ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 
