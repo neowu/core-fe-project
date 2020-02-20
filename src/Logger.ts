@@ -96,7 +96,7 @@ export class LoggerImpl implements Logger {
             if (exception instanceof APIException) {
                 errorCode = `API_ERROR_${exception.statusCode}`;
                 // Following cases are not treated as frontend issues
-                if ([401, 403, 421, 426, 500, 503].includes(exception.statusCode)) {
+                if ([401, 403, 404, 410, 421, 426, 500, 503].includes(exception.statusCode)) {
                     isWarning = true;
                 } else if (exception.statusCode === 400) {
                     if (exception.errorCode === "VALIDATION_ERROR") {
