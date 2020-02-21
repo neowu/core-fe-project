@@ -8,7 +8,7 @@ export {Module} from "./platform/Module";
 export {async} from "./util/async";
 export {ajax, uri} from "./util/network";
 export {default as ErrorBoundary} from "./util/ErrorBoundary";
-export {Route} from "./util/Route";
+export {default as Route} from "./util/Route";
 
 export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, TimeLimit, Lifecycle, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
