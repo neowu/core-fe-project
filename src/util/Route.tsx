@@ -22,23 +22,19 @@ export default class Route extends React.PureComponent<Props> {
     };
 
     renderRegularRouteComponent = (props: RouteComponentProps<any>): React.ReactElement => {
-        const {component: TargetComponent, accessCondition, unauthorizedRedirectTo, notFound} = this.props;
+        const {component, accessCondition, unauthorizedRedirectTo, notFound, withErrorBoundary} = this.props;
         if (accessCondition) {
-            if (notFound) {
-                const EnhancedComponent = withNotFoundWarning(TargetComponent);
-                return <EnhancedComponent {...props} />;
-            } else {
-                return <TargetComponent {...props} />;
-            }
+            const WrappedComponent = notFound ? withNotFoundWarning(component) : component;
+            const routeNode = <WrappedComponent {...props} />;
+            return withErrorBoundary ? <ErrorBoundary>{routeNode}</ErrorBoundary> : routeNode;
         } else {
             return <Redirect to={unauthorizedRedirectTo} />;
         }
     };
 
     render() {
-        const {withErrorBoundary, component, ...restRouteProps} = this.props;
-        const routeNode = <ReactRouterDOMRoute {...restRouteProps} render={this.renderRegularRouteComponent} />;
-        return withErrorBoundary ? <ErrorBoundary>{routeNode}</ErrorBoundary> : routeNode;
+        const {component, ...restRouteProps} = this.props;
+        return <ReactRouterDOMRoute {...restRouteProps} render={this.renderRegularRouteComponent} />;
     }
 }
 
