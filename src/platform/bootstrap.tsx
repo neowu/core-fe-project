@@ -7,12 +7,11 @@ import {app} from "../app";
 import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
-import {errorAction} from "../reducer";
 import ErrorBoundary from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {NetworkConnectionException, RuntimeException} from "../Exception";
-import {serializeError} from "../util/error-util";
+import {NetworkConnectionException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
+import {SentryBootstrapOption, SentryHelper} from "../SentryHelper";
 
 interface BootstrapOption {
     componentType: React.ComponentType<{}>;
@@ -20,11 +19,12 @@ interface BootstrapOption {
     navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
     ieBrowserAlertMessage?: string;
     logger?: LoggerConfig;
+    sentryConfig?: SentryBootstrapOption;
 }
 
 export function startApp(config: BootstrapOption): void {
     detectIEBrowser(config.ieBrowserAlertMessage);
-    setupGlobalErrorHandler(config.errorListener);
+    SentryHelper.initialize(config.errorListener.onError.bind(config.errorListener), config.sentryConfig);
     setupLogger(config.logger);
     renderDOM(config.componentType, config.navigationPreventionMessage || "Are you sure to leave current page?");
 }
@@ -60,25 +60,6 @@ function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPrevention
             rootElement.style.opacity = "1";
         }
     );
-}
-
-function setupGlobalErrorHandler(errorListener: ErrorListener) {
-    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error): boolean => {
-        const fullMessage = `Message: ${typeof message === "string" ? message : JSON.stringify(message)}\nSource: ${source || "-"}\nLine: ${line || "-"}\nColumn: ${column || "-"}`;
-        if (process.env.NODE_ENV === "development") {
-            console.error("Window Global Error", error, fullMessage);
-        }
-        app.store.dispatch(errorAction(new RuntimeException(fullMessage, error)));
-        return true;
-    };
-    window.onunhandledrejection = (event: PromiseRejectionEvent) => {
-        if (process.env.NODE_ENV === "development") {
-            console.error("Unhandled Promise Rejection", event);
-        }
-        app.store.dispatch(errorAction(new Error("Unhandled Promise Rejection: " + serializeError(event.reason))));
-    };
-
-    app.errorHandler = errorListener.onError.bind(errorListener);
 }
 
 function setupLogger(config: LoggerConfig | undefined) {

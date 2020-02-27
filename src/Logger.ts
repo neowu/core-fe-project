@@ -1,7 +1,6 @@
-import {app} from "./app";
-import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
+import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 import {loggerContext} from "./platform/logger-context";
-import {serializeError} from "./util/error-util";
+import {serializeOriginalError} from "./util/error-util";
 
 interface Log {
     date: Date;
@@ -81,49 +80,39 @@ export class LoggerImpl implements Logger {
     }
 
     exception(exception: Exception, action?: string, extraInfo?: {[key: string]: string}): void {
+        let isWarning: boolean;
+        let errorCode: string;
+        let exceptionInfo: {[key: string]: string};
+
         if (exception instanceof NetworkConnectionException) {
-            const info: {[key: string]: string} = {
-                ...extraInfo,
+            isWarning = true;
+            errorCode = "NETWORK_FAILURE";
+            exceptionInfo = {
                 url: exception.requestURL,
                 originalErrorMessage: exception.originalErrorMessage,
             };
-            return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
-        } else {
-            const info: {[key: string]: string} = {...extraInfo};
-            let isWarning: boolean = false;
-            let errorCode: string = "OTHER_ERROR";
-
-            if (exception instanceof APIException) {
+        } else if (exception instanceof APIException) {
+            if (exception.statusCode === 400 && exception.errorCode === "VALIDATION_ERROR") {
+                isWarning = false;
+                errorCode = "API_VALIDATION_ERROR";
+            } else {
+                isWarning = true;
                 errorCode = `API_ERROR_${exception.statusCode}`;
-                // Following cases are not treated as frontend issues
-                if ([401, 403, 404, 410, 421, 426, 500, 503].includes(exception.statusCode)) {
-                    isWarning = true;
-                } else if (exception.statusCode === 400) {
-                    if (exception.errorCode === "VALIDATION_ERROR") {
-                        errorCode = "API_VALIDATION_ERROR";
-                    } else {
-                        isWarning = true;
-                    }
-                }
-
-                info.requestURL = exception.requestURL;
-                if (exception.errorCode) {
-                    info.errorCode = exception.errorCode;
-                }
-                if (exception.errorId) {
-                    info.errorId = exception.errorId;
-                }
-            } else if (exception instanceof ReactLifecycleException) {
-                errorCode = "LIFECYCLE_ERROR";
-                info.stackTrace = exception.componentStack;
-                info.appState = JSON.stringify(app.store.getState().app);
-            } else if (exception instanceof RuntimeException) {
-                errorCode = "RUNTIME_ERROR";
-                info.errorObject = serializeError(exception.errorObject);
             }
-
-            return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
+            exceptionInfo = {
+                requestURL: exception.requestURL,
+                responseData: JSON.stringify(exception.responseData),
+                apiErrorId: exception.errorId || "-",
+                apiErrorCode: exception.errorCode || "-",
+            };
+        } else {
+            isWarning = false;
+            errorCode = "JAVASCRIPT_ERROR";
+            exceptionInfo = exception instanceof JavaScriptException ? {errorName: exception.name} : {};
         }
+
+        const info = {...extraInfo, ...exceptionInfo};
+        return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
     collect(): Log[] {
@@ -144,8 +133,9 @@ export class LoggerImpl implements Logger {
                 try {
                     evaluatedResult = value();
                 } catch (e) {
-                    evaluatedResult = "[ERROR] " + serializeError(e);
-                    console.warn("Fail to execute logger context: " + serializeError(e));
+                    const {name, message} = serializeOriginalError(e);
+                    evaluatedResult = `[${name}]: ${message}`;
+                    console.warn("Fail to execute logger context: " + message);
                 }
                 completeContext[key] = evaluatedResult.substr(0, 1000);
             }

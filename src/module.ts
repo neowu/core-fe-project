@@ -1,10 +1,10 @@
-import {put} from "redux-saga/effects";
 import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action, errorAction, setStateAction} from "./reducer";
+import {Action, setStateAction} from "./reducer";
 import {SagaIterator} from "./typed-saga";
+import {SentryHelper} from "./SentryHelper";
 
 export interface LifecycleDecoratorFlag {
     isLifecycle?: boolean;
@@ -52,8 +52,8 @@ export function* executeAction(actionName: string, handler: ActionHandler, ...pa
     try {
         yield* handler(...payload);
     } catch (error) {
-        console.error(`Saga Action (${actionName}) Error`, error);
-        yield put(errorAction(error, actionName));
+        // TODO: mask payload
+        SentryHelper.captureError(error, actionName, {payload});
     }
 }
 

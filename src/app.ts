@@ -4,10 +4,9 @@ import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
-import {ActionHandler, ErrorHandler, executeAction} from "./module";
-import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
-import {shouldAlertToUser} from "./util/error-util";
-import {isIEBrowser} from "./util/navigator-util";
+import {SentryHelper} from "./SentryHelper";
+import {ActionHandler, executeAction} from "./module";
+import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
 
 declare const window: any;
 
@@ -17,7 +16,6 @@ interface App {
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly actionHandlers: {[actionType: string]: ActionHandler};
     readonly logger: LoggerImpl;
-    errorHandler: ErrorHandler | null;
     loggerConfig: LoggerConfig | null;
 }
 
@@ -40,62 +38,15 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 function createApp(): App {
     const browserHistory = createBrowserHistory();
     const eventLogger = new LoggerImpl();
-    const sagaMiddleware = createSagaMiddleware();
+    const sagaMiddleware = createSagaMiddleware({
+        onError: (error, info) => SentryHelper.captureError(error, "[Detached Saga]", info),
+    });
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
-
-    /**
-     * Two parallel sagas:
-     * One for handling module actions (non-block, handle all).
-     * One for handling errors (blocked, handle only one at one time).
-     */
     sagaMiddleware.run(function*() {
-        let isHandlingError = false;
         yield takeEvery("*", function*(action: Action<any>) {
-            if (action.type === ERROR_ACTION_TYPE) {
-                /**
-                 * CAVEAT:
-                 * Do not use takeLeading to handle error.
-                 * Otherwise, only one error will be logged.
-                 * Expected behavior is: Log every error, but execute one errorHandler at one time
-                 */
-                const errorAction = action as Action<ExceptionPayload>;
-                if (shouldAlertToUser(errorAction.payload)) {
-                    if (isIEBrowser()) {
-                        app.logger.warn({
-                            action: errorAction.payload.actionName || "-",
-                            errorCode: "IE_BROWSER_ISSUE",
-                            errorMessage: errorAction.payload.exception.message,
-                            info: {errorObject: JSON.stringify(errorAction.payload.exception)},
-                            elapsedTime: 0,
-                        });
-                    } else {
-                        app.logger.exception(errorAction.payload.exception, errorAction.payload.actionName, {userReceived: isHandlingError ? "Skipped" : "Received"});
-                        if (app.errorHandler && !isHandlingError) {
-                            try {
-                                isHandlingError = true;
-                                yield* app.errorHandler(errorAction.payload.exception);
-                            } catch (e) {
-                                console.error("Error Caught In Error Handler");
-                                console.error(e);
-                            } finally {
-                                isHandlingError = false;
-                            }
-                        }
-                    }
-                } else {
-                    app.logger.warn({
-                        action: errorAction.payload.actionName || "-",
-                        errorCode: "EXTERNAL_WARN",
-                        errorMessage: errorAction.payload.exception.message,
-                        info: {errorObject: JSON.stringify(errorAction.payload.exception)},
-                        elapsedTime: 0,
-                    });
-                }
-            } else {
-                const handler = app.actionHandlers[action.type];
-                if (handler) {
-                    yield* executeAction(action.type, handler, ...action.payload);
-                }
+            const handler = app.actionHandlers[action.type];
+            if (handler) {
+                yield* executeAction(action.type, handler, ...action.payload);
             }
         });
     });
@@ -106,7 +57,6 @@ function createApp(): App {
         sagaMiddleware,
         actionHandlers: {},
         logger: eventLogger,
-        errorHandler: null,
         loggerConfig: null,
     };
 }

@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "1.16.4",
+  "version": "1.17.0-rc1",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,9 +16,9 @@
   },
   "devDependencies": {
     "@babel/core": "7.8.4",
-    "@typescript-eslint/eslint-plugin": "2.20.0",
-    "@typescript-eslint/parser": "2.20.0",
     "@types/jest": "25.1.3",
+    "@typescript-eslint/eslint-plugin": "2.21.0",
+    "@typescript-eslint/parser": "2.21.0",
     "chalk": "3.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
@@ -30,7 +30,8 @@
     "yargs": "15.1.0"
   },
   "dependencies": {
-    "@types/node": "13.7.4",
+    "@sentry/browser": "5.12.4",
+    "@types/node": "13.7.6",
     "@types/react": "*",
     "@types/react-dom": "16.9.5",
     "@types/react-redux": "7.1.7",
@@ -49,7 +50,8 @@
     "tslib": "1.10.0"
   },
   "peerDependencies": {
-    "@types/node": "13.7.4",
+    "@sentry/browser": "5.12.4",
+    "@types/node": "13.7.6",
     "@types/react": "*",
     "@types/react-dom": "16.9.5",
     "@types/react-redux": "7.1.7",

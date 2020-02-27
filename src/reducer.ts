@@ -1,7 +1,6 @@
 import {connectRouter, RouterState} from "connected-react-router";
 import {History} from "history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
-import {Exception, RuntimeException} from "./Exception";
 
 // Redux State
 interface LoadingState {
@@ -93,22 +92,6 @@ function navigationPreventionReducer(state: boolean = false, action: Action<Navi
         return payload.isPrevented;
     }
     return state;
-}
-
-// Redux Action: Error (handled by saga)
-export interface ExceptionPayload {
-    exception: Exception;
-    actionName?: string;
-}
-
-export const ERROR_ACTION_TYPE: string = "@@framework/error";
-
-export function errorAction(error: any, actionName?: string): Action<ExceptionPayload> {
-    const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
-    return {
-        type: ERROR_ACTION_TYPE,
-        payload: {exception, actionName},
-    };
 }
 
 // Root Reducer

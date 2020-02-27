@@ -1,17 +1,17 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
-import {ReactLifecycleException} from "../Exception";
-import {errorAction} from "../reducer";
+import {JavaScriptException} from "../Exception";
+import {SentryHelper} from "../SentryHelper";
 
 interface OwnProps {
-    render: (exception: ReactLifecycleException) => React.ReactNode;
+    render: (exception: JavaScriptException) => React.ReactNode;
     children: React.ReactNode;
 }
 
 interface Props extends OwnProps, DispatchProp {}
 
 interface State {
-    exception: ReactLifecycleException | null;
+    exception: JavaScriptException | null;
 }
 
 class ErrorBoundary extends React.PureComponent<Props, State> {
@@ -23,9 +23,8 @@ class ErrorBoundary extends React.PureComponent<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        const exception = new ReactLifecycleException(error.name + ": " + error.message, errorInfo.componentStack);
-        this.props.dispatch(errorAction(exception));
-        this.setState({exception});
+        this.setState({exception: new JavaScriptException(error.message, error.name)});
+        SentryHelper.captureError(error, "<ErrorBoundary>", errorInfo);
     }
 
     render() {
