@@ -31,8 +31,7 @@ export function captureError(error: any, extra: ErrorExtra, action?: string): Ex
 
     const exception = errorToException(error);
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
-    const jsErrorType = error instanceof Error ? error.name : undefined;
-    const info = {...extra, stacktrace: errorStacktrace, jsErrorType};
+    const info = {...extra, stacktrace: errorStacktrace};
 
     if (shouldAlertToUser(exception.message)) {
         app.logger.exception(exception, info, action);
