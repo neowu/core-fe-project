@@ -34,7 +34,7 @@ export function createActionHandlerDecorator<RootState extends State = State, Mo
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then
             boundFn.actionName = (descriptor.value as any).actionName;
-            boundFn.maskedParams = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args) || "[No Parameter]";
+            boundFn.maskedParams = stringifyWithMask(app.loggerConfig?.maskedKeywords || [], "***", ...args) || "[No Parameter]";
             yield* interceptor(boundFn, this as any);
         };
         return descriptor;
