@@ -32,10 +32,19 @@ export function captureError(error: any, extra: ErrorExtra, action?: string): Ex
     const exception = errorToException(error);
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
     const jsErrorType = error instanceof Error ? error.name : undefined;
-    app.logger.exception(exception, {...extra, stacktrace: errorStacktrace, jsErrorType}, action);
+    const info = {...extra, stacktrace: errorStacktrace, jsErrorType};
 
     if (shouldAlertToUser(exception.message)) {
+        app.logger.exception(exception, info, action);
         app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
+    } else {
+        app.logger.warn({
+            info,
+            action: action || "-",
+            elapsedTime: 0,
+            errorMessage: exception.message,
+            errorCode: "EXTERNAL_ERROR",
+        });
     }
 
     return exception;

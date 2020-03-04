@@ -1,7 +1,6 @@
 import {loggerContext} from "./platform/logger-context";
-import {errorToException, shouldAlertToUser} from "./util/error-util";
+import {errorToException} from "./util/error-util";
 import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
-import {app} from "./app";
 
 interface Log {
     date: Date;
@@ -15,11 +14,11 @@ interface Log {
 }
 
 interface ErrorLogEntry {
-    elapsedTime: number;
     action: string;
+    elapsedTime: number;
     errorCode: string;
     errorMessage: string;
-    info: {[key: string]: string};
+    info: {[key: string]: string | undefined};
 }
 
 /**
@@ -107,7 +106,7 @@ export class LoggerImpl implements Logger {
                 info["apiErrorCode"] = exception.errorCode;
             }
         } else if (exception instanceof JavaScriptException) {
-            isWarning = exception.severity === "warning";
+            isWarning = false;
             errorCode = "JAVASCRIPT_ERROR";
         } else {
             console.warn("[framework] Exception class should not be extended, throw Error instead");
@@ -115,7 +114,6 @@ export class LoggerImpl implements Logger {
             errorCode = "JAVASCRIPT_ERROR";
         }
 
-        isWarning = isWarning || !shouldAlertToUser(exception.message);
         this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 

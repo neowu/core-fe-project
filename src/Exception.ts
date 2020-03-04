@@ -19,7 +19,7 @@ export class NetworkConnectionException extends Exception {
 }
 
 export class JavaScriptException extends Exception {
-    constructor(message: string, public severity: "warning" | "error" = "error") {
+    constructor(message: string) {
         super(message);
     }
 }
