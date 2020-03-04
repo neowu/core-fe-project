@@ -42,7 +42,7 @@ function withNotFoundWarning<T extends {}>(WrappedComponent: React.ComponentType
     return class extends React.PureComponent<T> {
         componentDidMount() {
             app.logger.warn({
-                action: "@@router/404",
+                action: "@@framework/route-404",
                 elapsedTime: 0,
                 errorMessage: `${location.href} not supported by <Route>`,
                 errorCode: "ROUTE_NOT_FOUND",

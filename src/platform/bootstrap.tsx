@@ -9,9 +9,9 @@ import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import ErrorBoundary from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {NetworkConnectionException} from "../Exception";
+import {Exception, JavaScriptException, NetworkConnectionException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
-import {SentryBootstrapOption, SentryHelper} from "../SentryHelper";
+import {captureError} from "../util/error-util";
 
 interface BootstrapOption {
     componentType: React.ComponentType<{}>;
@@ -19,14 +19,13 @@ interface BootstrapOption {
     navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
     ieBrowserAlertMessage?: string;
     logger?: LoggerConfig;
-    sentryConfig?: SentryBootstrapOption;
 }
 
-export function startApp(config: BootstrapOption): void {
-    detectIEBrowser(config.ieBrowserAlertMessage);
-    SentryHelper.initialize(config.errorListener.onError.bind(config.errorListener), config.sentryConfig);
-    setupLogger(config.logger);
-    renderDOM(config.componentType, config.navigationPreventionMessage || "Are you sure to leave current page?");
+export function startApp(option: BootstrapOption): void {
+    detectIEBrowser(option.ieBrowserAlertMessage);
+    setupGlobalErrorHandler(option.errorListener);
+    setupLogger(option.logger);
+    renderDOM(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
 function detectIEBrowser(ieBrowserMessage?: string) {
@@ -34,6 +33,12 @@ function detectIEBrowser(ieBrowserMessage?: string) {
         alert(ieBrowserMessage);
         // After alert, still run the following code, just let whatever error happens
     }
+}
+
+function setupGlobalErrorHandler(errorListener: ErrorListener) {
+    app.errorHandler = errorListener.onError.bind(errorListener);
+    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error) => captureError(error || (typeof message === "string" ? new JavaScriptException(message) : message), {triggeredBy: "global"});
+    window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, {triggeredBy: "promise-rejection"});
 }
 
 function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
@@ -79,12 +84,12 @@ function setupLogger(config: LoggerConfig | undefined) {
                 } catch (e) {
                     if (e instanceof NetworkConnectionException) {
                         // Log this case and retry later
-                        app.logger.exception(e, "@@framework/logger");
-                    } else {
+                        app.logger.exception(e, {}, "@@framework/logger");
+                    } else if (e instanceof Exception) {
                         // If not network error, retry always leads to same error, so have to give up
                         const length = app.logger.collect().length;
                         app.logger.empty();
-                        app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
+                        app.logger.exception(e, {droppedLogs: length.toString()}, "@@framework/logger");
                     }
                 }
             }

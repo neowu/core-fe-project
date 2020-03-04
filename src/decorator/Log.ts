@@ -10,7 +10,7 @@ export function Log() {
         try {
             yield* handler();
         } finally {
-            app.logger.info(handler.actionName, {params: handler.maskedParams}, Date.now() - startTime);
+            app.logger.info(handler.actionName, {actionPayload: handler.maskedParams}, Date.now() - startTime);
         }
     });
 }

@@ -4,7 +4,8 @@ import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
 import {Action, setStateAction} from "./reducer";
 import {SagaIterator} from "./typed-saga";
-import {SentryHelper} from "./SentryHelper";
+import {captureError} from "./util/error-util";
+import {stringifyWithMask} from "./util/json-util";
 
 export interface LifecycleDecoratorFlag {
     isLifecycle?: boolean;
@@ -52,8 +53,8 @@ export function* executeAction(actionName: string, handler: ActionHandler, ...pa
     try {
         yield* handler(...payload);
     } catch (error) {
-        // TODO: mask payload
-        SentryHelper.captureError(error, actionName, {payload});
+        const actionPayload = stringifyWithMask(app.loggerConfig?.maskedKeywords || [], "***", ...payload) || "[No Parameter]";
+        captureError(error, {triggeredBy: "saga", actionPayload}, actionName);
     }
 }
 

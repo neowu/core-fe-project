@@ -4,9 +4,9 @@ import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {takeEvery} from "redux-saga/effects";
 import {LoggerConfig, LoggerImpl} from "./Logger";
-import {SentryHelper} from "./SentryHelper";
-import {ActionHandler, executeAction} from "./module";
+import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {captureError} from "./util/error-util";
 
 declare const window: any;
 
@@ -17,6 +17,7 @@ interface App {
     readonly actionHandlers: {[actionType: string]: ActionHandler};
     readonly logger: LoggerImpl;
     loggerConfig: LoggerConfig | null;
+    errorHandler: ErrorHandler;
 }
 
 export const app = createApp();
@@ -39,7 +40,7 @@ function createApp(): App {
     const browserHistory = createBrowserHistory();
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware({
-        onError: (error, info) => SentryHelper.captureError(error, "[Detached Saga]", info),
+        onError: (error, info) => captureError(error, {triggeredBy: "detached-saga", extraStacktrace: info.sagaStack}),
     });
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function*() {
@@ -58,5 +59,6 @@ function createApp(): App {
         actionHandlers: {},
         logger: eventLogger,
         loggerConfig: null,
+        *errorHandler() {},
     };
 }

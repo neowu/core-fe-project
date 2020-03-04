@@ -23,8 +23,8 @@ export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3) {
                         errorCode: "NETWORK_FAILURE_RETRY",
                         errorMessage: `Retry #${retryTime} after ${retryIntervalSecond} seconds: ${e.message}`,
                         info: {
-                            url: e.requestURL,
-                            params: handler.maskedParams,
+                            requestURL: e.requestURL,
+                            actionPayload: handler.maskedParams,
                             originalErrorMessage: e.originalErrorMessage,
                         },
                         elapsedTime: Date.now() - currentRoundStartTime,

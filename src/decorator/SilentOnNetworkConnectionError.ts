@@ -12,10 +12,14 @@ export function SilentOnNetworkConnectionError() {
             yield* handler();
         } catch (e) {
             if (e instanceof NetworkConnectionException) {
-                app.logger.exception(e, handler.actionName, {
-                    params: handler.maskedParams,
-                    isSilent: "true",
-                });
+                app.logger.exception(
+                    e,
+                    {
+                        actionPayload: handler.maskedParams,
+                        isSilent: "true",
+                    },
+                    handler.actionName
+                );
             } else {
                 throw e;
             }

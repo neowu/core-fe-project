@@ -1,13 +1,14 @@
-import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 import {loggerContext} from "./platform/logger-context";
-import {serializeOriginalError} from "./util/error-util";
+import {errorToException, shouldAlertToUser} from "./util/error-util";
+import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
+import {app} from "./app";
 
 interface Log {
     date: Date;
     result: "OK" | "WARN" | "ERROR";
     elapsedTime: number;
     context: {[key: string]: string}; // To store indexed data (for Elastic Search)
-    info: {[key: string]: string}; // To store text data (no index)
+    info: {[key: string]: string | undefined}; // To store text data (no index)
     action?: string;
     errorCode?: string;
     errorMessage?: string;
@@ -68,29 +69,27 @@ export class LoggerImpl implements Logger {
     }
 
     info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
-        return this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
+        this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 
     warn(data: ErrorLogEntry): void {
-        return this.appendLog("WARN", data);
+        this.appendLog("WARN", data);
     }
 
     error(data: ErrorLogEntry): void {
-        return this.appendLog("ERROR", data);
+        this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, action?: string, extraInfo?: {[key: string]: string}): void {
+    exception(exception: Exception, extra: {[key: string]: string | undefined}, action?: string): void {
         let isWarning: boolean;
         let errorCode: string;
-        let exceptionInfo: {[key: string]: string};
+        const info: {[key: string]: string | undefined} = {...extra};
 
         if (exception instanceof NetworkConnectionException) {
             isWarning = true;
             errorCode = "NETWORK_FAILURE";
-            exceptionInfo = {
-                url: exception.requestURL,
-                originalErrorMessage: exception.originalErrorMessage,
-            };
+            info["requestURL"] = exception.requestURL;
+            info["originalErrorMessage"] = exception.originalErrorMessage;
         } else if (exception instanceof APIException) {
             if (exception.statusCode === 400 && exception.errorCode === "VALIDATION_ERROR") {
                 isWarning = false;
@@ -99,20 +98,25 @@ export class LoggerImpl implements Logger {
                 isWarning = true;
                 errorCode = `API_ERROR_${exception.statusCode}`;
             }
-            exceptionInfo = {
-                requestURL: exception.requestURL,
-                responseData: JSON.stringify(exception.responseData),
-                apiErrorId: exception.errorId || "-",
-                apiErrorCode: exception.errorCode || "-",
-            };
+            info["requestURL"] = exception.requestURL;
+            info["responseData"] = JSON.stringify(exception.responseData);
+            if (exception.errorId) {
+                info["apiErrorId"] = exception.errorId;
+            }
+            if (exception.errorCode) {
+                info["apiErrorCode"] = exception.errorCode;
+            }
+        } else if (exception instanceof JavaScriptException) {
+            isWarning = exception.severity === "warning";
+            errorCode = "JAVASCRIPT_ERROR";
         } else {
+            console.warn("[framework] Exception class should not be extended, throw Error instead");
             isWarning = false;
             errorCode = "JAVASCRIPT_ERROR";
-            exceptionInfo = exception instanceof JavaScriptException ? {errorName: exception.name} : {};
         }
 
-        const info = {...extraInfo, ...exceptionInfo};
-        return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
+        isWarning = isWarning || !shouldAlertToUser(exception.message);
+        this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
     collect(): Log[] {
@@ -123,21 +127,19 @@ export class LoggerImpl implements Logger {
         this.logQueue = [];
     }
 
-    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
+    appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             if (typeof value === "string") {
                 completeContext[key] = value.substr(0, 1000);
             } else {
-                let evaluatedResult: string;
                 try {
-                    evaluatedResult = value();
+                    completeContext[key] = value();
                 } catch (e) {
-                    const {name, message} = serializeOriginalError(e);
-                    evaluatedResult = `[${name}]: ${message}`;
-                    console.warn("Fail to execute logger context: " + message);
+                    const message = errorToException(e).message;
+                    completeContext[key] = "[error] " + message;
+                    console.warn("[framework] Fail to execute logger context: " + message);
                 }
-                completeContext[key] = evaluatedResult.substr(0, 1000);
             }
         });
 

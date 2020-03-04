@@ -1,26 +1,44 @@
 import {Exception, JavaScriptException} from "../Exception";
 import {ErrorHandler} from "../module";
+import {app} from "../app";
+import {isIEBrowser} from "./navigator-util";
 
-/**
- * @param originalError should be excluded from Exception type.
- */
-export function serializeOriginalError(originalError: any): {name: string; message: string} {
-    let name = "Error";
-    let message = "Unknown";
-    if (originalError) {
-        name = originalError.name || "-";
-        message = originalError.message || "-";
-    }
-    return {name, message};
+interface ErrorExtra {
+    triggeredBy: "detached-saga" | "saga" | "error-boundary" | "promise-rejection" | "global";
+    actionPayload?: string; // Should be masked
+    extraStacktrace?: string;
 }
 
-export function originalErrorToException(originalError: any): Exception {
-    if (originalError instanceof Exception) {
-        return originalError;
+export function errorToException(error: any): Exception {
+    if (error instanceof Exception) {
+        return error;
+    } else if (error instanceof Error) {
+        return new JavaScriptException(error.message);
     } else {
-        const {name, message} = serializeOriginalError(originalError);
-        return new JavaScriptException(message, name);
+        try {
+            const errorMessage = JSON.stringify(error);
+            return new JavaScriptException(errorMessage);
+        } catch (e) {
+            return new JavaScriptException("[Unknown Error]");
+        }
     }
+}
+
+export function captureError(error: any, extra: ErrorExtra, action?: string): Exception {
+    if (process.env.NODE_ENV === "development") {
+        console.error(`[framework] Error captured from [${extra.triggeredBy}]`, error);
+    }
+
+    const exception = errorToException(error);
+    const errorStacktrace = error instanceof Error ? error.stack : undefined;
+    const jsErrorType = error instanceof Error ? error.name : undefined;
+    app.logger.exception(exception, {...extra, stacktrace: errorStacktrace, jsErrorType}, action);
+
+    if (shouldAlertToUser(exception.message)) {
+        app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
+    }
+
+    return exception;
 }
 
 let isUserErrorHandlerRunning = false;
@@ -31,7 +49,7 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
         isUserErrorHandlerRunning = true;
         yield* handler(exception);
     } catch (e) {
-        console.error("Error Caught In Error Handler", e);
+        console.warn("[framework] Fail to execute user-defined error handler", e);
     } finally {
         isUserErrorHandlerRunning = false;
     }
@@ -39,54 +57,31 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
 
 export function shouldAlertToUser(errorMessage: string): boolean {
     if (process.env.NODE_ENV === "production") {
-        if (errorMessage.includes("Refused to send beacon")) {
+        if (isIEBrowser()) {
+            return false;
+        }
+
+        if (errorMessage.includes("Refused to send beacon") || errorMessage.includes("Refused to evaluate") || errorMessage.includes("is not defined")) {
             /**
-             * Typical issue:
-             * Unhandled Promise Rejection: SecurityError: Failed to execute 'sendBeacon' on 'Navigator': Refused to send beacon to 'https://track.uc.cn/collect?...'
-             *
-             * Happens in Android UC browser, because of auto user-behavior tracking.
+             * Some browsers inject user-behavior tracking script (sendBeacon), or eval expression.
+             * Other examples like: _start is not undefined, hasInject is not undefined
              */
             return false;
         } else if (errorMessage.includes("vivoNewsDetailPage")) {
             /**
-             * Typical issue:
-             * Uncaught TypeError: vivoNewsDetailPage.getNewsReadStatus4Vivo is not a function
-             *
+             * TypeError: vivoNewsDetailPage.getNewsReadStatus4Vivo is not a function
              * Happens in Vivo Android browser, because of its own plugin.
              */
             return false;
         } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
             /**
-             * Typical issue:
-             * http://kube.pinnacle-gaming.com:30107/app/kibana#/doc/event-pattern/event-*?id=6F8351282DC640433269&_g=()
-             * http://kube.jianfengdemo-g.com:30102/app/kibana#/doc/event-pattern/event-*?id=6F656544FD585A83D7A7&_g=()
-             *
              * Network error while downloading JavaScript/CSS (async loading).
-             */
-            return false;
-        } else if (errorMessage.includes("is not defined")) {
-            /**
-             * Typical issue:
-             * _start is not undefined
-             * hasInject is not undefined
-             *
-             * Happens in some Android browser, possibly script injection.
-             */
-            return false;
-        } else if (errorMessage.includes("Refused to evaluate a string as JavaScript")) {
-            /**
-             * Typical issue:
-             * Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src ...".
-             *
-             * Happens in some Mac Chrome, possibly Chrome extensions.
              */
             return false;
         } else if (errorMessage.includes("Script error")) {
             /**
-             * Typical issue:
-             * http://kube.pinnacle-gaming.com:30102/app/kibana#/doc/event-pattern/event-*?id=6DF21AC79CA780471D5A&_g=()
-             *
-             * Happens in Xiaomi Android browser, no extra info.
+             * Some browsers inject cross-domain script, and fail to load.
+             * Ref: Note part of https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
              */
             return false;
         }

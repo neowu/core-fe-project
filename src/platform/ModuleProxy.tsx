@@ -88,7 +88,7 @@ export class ModuleProxy<M extends Module<any>> {
                         app.logger.info(initialRenderActionName, {locationParams: JSON.stringify(props.match.params)}, Date.now() - startTime);
                     } else {
                         const startTime = Date.now();
-                        console.warn(`Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
+                        console.warn(`[framework] Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
                         yield* executeAction(initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
                         app.logger.info(initialRenderActionName, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
                     }

@@ -1,20 +1,21 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
-import {JavaScriptException} from "../Exception";
-import {SentryHelper} from "../SentryHelper";
+import {Exception} from "../Exception";
+import {captureError} from "./error-util";
 
 interface OwnProps {
-    render: (exception: JavaScriptException) => React.ReactNode;
+    render: (exception: Exception) => React.ReactNode;
     children: React.ReactNode;
 }
 
 interface Props extends OwnProps, DispatchProp {}
 
 interface State {
-    exception: JavaScriptException | null;
+    exception: Exception | null;
 }
 
 class ErrorBoundary extends React.PureComponent<Props, State> {
+    static displayName = "ErrorBoundary";
     static defaultProps: Pick<Props, "render"> = {render: () => null};
 
     constructor(props: Props) {
@@ -23,8 +24,8 @@ class ErrorBoundary extends React.PureComponent<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        this.setState({exception: new JavaScriptException(error.message, error.name)});
-        SentryHelper.captureError(error, "<ErrorBoundary>", errorInfo);
+        const exception = captureError(error, {triggeredBy: "error-boundary", extraStacktrace: errorInfo.componentStack});
+        this.setState({exception});
     }
 
     render() {
