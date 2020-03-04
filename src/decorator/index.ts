@@ -5,12 +5,6 @@ import {State} from "../reducer";
 import {app} from "../app";
 import {stringifyWithMask} from "../util/json-util";
 
-/**
- * For latest decorator spec, please ref following:
- *      https://tc39.github.io/proposal-decorators/#sec-decorator-functions-element-descriptor
- *      https://github.com/tc39/proposal-decorators/blob/master/METAPROGRAMMING.md
- */
-
 export {Interval} from "./Interval";
 export {Lifecycle} from "./Lifecycle";
 export {Loading} from "./Loading";
