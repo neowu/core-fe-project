@@ -2,6 +2,20 @@ import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
+type HeaderMap = {[key: string]: string};
+type RequestHeaderInterceptor = (headers: HeaderMap) => void | Promise<void>;
+type ResponseHeaderInterceptor = (headers: Readonly<HeaderMap>) => void | Promise<void>;
+
+const networkInterceptor: {request?: RequestHeaderInterceptor; response?: ResponseHeaderInterceptor} = {};
+
+export function setRequestHeaderInterceptor(_: RequestHeaderInterceptor) {
+    networkInterceptor.request = _;
+}
+
+export function setResponseHeaderInterceptor(_: ResponseHeaderInterceptor) {
+    networkInterceptor.response = _;
+}
+
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
@@ -39,13 +53,14 @@ axios.interceptors.response.use(
                 throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL, error.message);
             }
         } else {
-            throw new NetworkConnectionException(`Un-categorized network error`, `[No URL retrieved]`, e);
+            throw new NetworkConnectionException(`unknown network error`, `[No URL retrieved]`, e.toString());
         }
     }
 );
 
-export function ajax<Request, Response>(method: Method, path: string, pathParams: object, request: Request): Promise<Response> {
-    const config: AxiosRequestConfig = {method, url: urlParams(path, pathParams)};
+export async function ajax<Request, Response>(method: Method, path: string, pathParams: object, request: Request): Promise<Response> {
+    const fullURL = urlParams(path, pathParams);
+    const config: AxiosRequestConfig = {method, url: fullURL};
 
     if (method === "GET" || method === "DELETE") {
         config.params = request;
@@ -53,7 +68,21 @@ export function ajax<Request, Response>(method: Method, path: string, pathParams
         config.data = request;
     }
 
-    return axios.request(config).then(response => response.data);
+    const requestHeaderMap: HeaderMap = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+    };
+    if (networkInterceptor.request) {
+        await networkInterceptor.request(requestHeaderMap);
+    }
+    config.headers = requestHeaderMap;
+
+    const response = await axios.request(config);
+    const responseHeaderMap: HeaderMap = response.headers;
+    if (networkInterceptor.response) {
+        await networkInterceptor.response(responseHeaderMap);
+    }
+    return response.data;
 }
 
 export function uri<Request>(path: string, request: Request): string {
