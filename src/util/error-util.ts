@@ -4,7 +4,6 @@ import {app} from "../app";
 import {isIEBrowser} from "./navigator-util";
 
 interface ErrorExtra {
-    triggeredBy: "detached-saga" | "saga" | "error-boundary" | "promise-rejection" | "global";
     actionPayload?: string; // Should be masked
     extraStacktrace?: string;
 }
@@ -24,9 +23,9 @@ export function errorToException(error: any): Exception {
     }
 }
 
-export function captureError(error: any, extra: ErrorExtra, action?: string): Exception {
+export function captureError(error: any, action: string, extra: ErrorExtra = {}): Exception {
     if (process.env.NODE_ENV === "development") {
-        console.error(`[framework] Error captured from [${extra.triggeredBy}]`, error);
+        console.error(`[framework] Error captured from [${action}]`, error);
     }
 
     const exception = errorToException(error);

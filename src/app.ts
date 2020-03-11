@@ -40,7 +40,7 @@ function createApp(): App {
     const browserHistory = createBrowserHistory();
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware({
-        onError: (error, info) => captureError(error, {triggeredBy: "detached-saga", extraStacktrace: info.sagaStack}),
+        onError: (error, info) => captureError(error, "@@framework/detached-saga", {extraStacktrace: info.sagaStack}),
     });
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function*() {

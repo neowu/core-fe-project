@@ -79,7 +79,7 @@ export class LoggerImpl implements Logger {
         this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, extra: {[key: string]: string | undefined}, action?: string): void {
+    exception(exception: Exception, extra: {[key: string]: string | undefined}, action: string): void {
         let isWarning: boolean;
         let errorCode: string;
         const info: {[key: string]: string | undefined} = {...extra};

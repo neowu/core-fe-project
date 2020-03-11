@@ -37,8 +37,8 @@ function detectIEBrowser(ieBrowserMessage?: string) {
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
     app.errorHandler = errorListener.onError.bind(errorListener);
-    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error) => captureError(error || (typeof message === "string" ? new JavaScriptException(message) : message), {triggeredBy: "global"});
-    window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, {triggeredBy: "promise-rejection"});
+    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error) => captureError(error || (typeof message === "string" ? new JavaScriptException(message) : message), "@@framework/global");
+    window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, "@@framework/promise-rejection");
 }
 
 function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {

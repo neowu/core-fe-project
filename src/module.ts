@@ -54,7 +54,7 @@ export function* executeAction(actionName: string, handler: ActionHandler, ...pa
         yield* handler(...payload);
     } catch (error) {
         const actionPayload = stringifyWithMask(app.loggerConfig?.maskedKeywords || [], "***", ...payload) || "[No Parameter]";
-        captureError(error, {triggeredBy: "saga", actionPayload}, actionName);
+        captureError(error, actionName, {actionPayload});
     }
 }
 
