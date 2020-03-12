@@ -74,7 +74,8 @@ export class ModuleProxy<M extends Module<any>> {
             private *lifecycleSaga() {
                 /**
                  * CAVEAT:
-                 * If lifecycleSagaTask is cancelled executeAction, it will only cancel the action (onRender/onTick...) itself but proceeds with following code.
+                 * If lifecycleSagaTask is cancelled during executeAction,
+                 * It will only cancel the action (onRender/onTick...) itself, but proceeds with following code.
                  * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
                  * https://github.com/redux-saga/redux-saga/issues/1986
                  */
