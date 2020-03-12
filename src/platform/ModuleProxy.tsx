@@ -79,7 +79,6 @@ export class ModuleProxy<M extends Module<any>> {
                  * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
                  * https://github.com/redux-saga/redux-saga/issues/1986
                  */
-
                 const props = this.props as RouteComponentProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;
@@ -117,10 +116,10 @@ export class ModuleProxy<M extends Module<any>> {
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
                         yield* executeAction(tickActionName, boundTicker);
+                        this.successTickCount++;
                         if (this.lifecycleSagaTask.isCancelled()) {
                             return;
                         }
-                        this.successTickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
