@@ -1,7 +1,7 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay} from "redux-saga/effects";
+import {delay, cancelled} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
@@ -22,6 +22,7 @@ export class ModuleProxy<M extends Module<any>> {
         return class extends React.PureComponent<P> {
             static displayName = `ModuleBoundary(${moduleName})`;
             private readonly lifecycleSagaTask: Task;
+            private lastDidUpdateSagaTask: Task | null = null;
             private successTickCount: number = 0;
             private mountedTime: number = Date.now();
 
@@ -36,7 +37,8 @@ export class ModuleProxy<M extends Module<any>> {
                 const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger onRender if current component is connected to <Route>
-                    app.sagaMiddleware.run(function*() {
+                    this.lastDidUpdateSagaTask?.cancel();
+                    this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function*() {
                         const locationChangeRenderActionName = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
                         const startTime = Date.now();
                         yield* executeAction(locationChangeRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
@@ -57,6 +59,7 @@ export class ModuleProxy<M extends Module<any>> {
                     app.store.dispatch(navigationPreventionAction(false));
                 }
 
+                this.lastDidUpdateSagaTask?.cancel();
                 this.lifecycleSagaTask.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
@@ -69,6 +72,13 @@ export class ModuleProxy<M extends Module<any>> {
             }
 
             private *lifecycleSaga() {
+                /**
+                 * CAVEAT:
+                 * If lifecycleSagaTask is cancelled executeAction, it will only cancel the action (onRender/onTick...) itself but proceeds with following code.
+                 * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
+                 * https://github.com/redux-saga/redux-saga/issues/1986
+                 */
+
                 const props = this.props as RouteComponentProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;
@@ -76,6 +86,9 @@ export class ModuleProxy<M extends Module<any>> {
                     const startTime = Date.now();
                     yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
+                    if (this.lifecycleSagaTask.isCancelled()) {
+                        return;
+                    }
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
@@ -93,6 +106,9 @@ export class ModuleProxy<M extends Module<any>> {
                         app.logger.info(initialRenderActionName, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
                     }
                 }
+                if (this.lifecycleSagaTask.isCancelled()) {
+                    return;
+                }
 
                 if (lifecycleListener.onTick.isLifecycle) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
@@ -100,6 +116,9 @@ export class ModuleProxy<M extends Module<any>> {
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
                         yield* executeAction(tickActionName, boundTicker);
+                        if (this.lifecycleSagaTask.isCancelled()) {
+                            return;
+                        }
                         this.successTickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
