@@ -1,7 +1,7 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay, cancelled} from "redux-saga/effects";
+import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
