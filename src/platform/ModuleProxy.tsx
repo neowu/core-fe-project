@@ -86,7 +86,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const startTime = Date.now();
                     yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
-                    if (this.lifecycleSagaTask.isCancelled()) {
+                    if (this.lifecycleSagaTask?.isCancelled()) {
                         return;
                     }
                 } else {
@@ -106,7 +106,7 @@ export class ModuleProxy<M extends Module<any>> {
                         app.logger.info(initialRenderActionName, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
                     }
                 }
-                if (this.lifecycleSagaTask.isCancelled()) {
+                if (this.lifecycleSagaTask?.isCancelled()) {
                     return;
                 }
 
@@ -117,7 +117,7 @@ export class ModuleProxy<M extends Module<any>> {
                     while (true) {
                         yield* executeAction(tickActionName, boundTicker);
                         this.successTickCount++;
-                        if (this.lifecycleSagaTask.isCancelled()) {
+                        if (this.lifecycleSagaTask?.isCancelled()) {
                             return;
                         }
                         yield delay(tickIntervalInMillisecond);
