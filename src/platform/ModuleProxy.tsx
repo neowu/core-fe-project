@@ -21,13 +21,12 @@ export class ModuleProxy<M extends Module<any>> {
 
         return class extends React.PureComponent<P> {
             static displayName = `ModuleBoundary(${moduleName})`;
-            private readonly lifecycleSagaTask: Task;
+            private lifecycleSagaTask: Task | null = null;
             private lastDidUpdateSagaTask: Task | null = null;
             private successTickCount: number = 0;
             private mountedTime: number = Date.now();
 
-            constructor(props: P) {
-                super(props);
+            componentDidMount() {
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
             }
 
@@ -60,7 +59,7 @@ export class ModuleProxy<M extends Module<any>> {
                 }
 
                 this.lastDidUpdateSagaTask?.cancel();
-                this.lifecycleSagaTask.cancel();
+                this.lifecycleSagaTask?.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
