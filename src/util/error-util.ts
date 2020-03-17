@@ -70,24 +70,25 @@ export function shouldAlertToUser(errorMessage: string): boolean {
 
         if (errorMessage.includes("Refused to send beacon") || errorMessage.includes("Refused to evaluate") || errorMessage.includes("is not defined")) {
             /**
-             * Some browsers inject user-behavior tracking script (sendBeacon), or eval expression.
-             * Other examples like: _start is not undefined, hasInject is not undefined
+             * Some browsers inject user-behavior tracking script (sendBeacon), or eval expression
+             * Other examples like: _start is not defined, hasInject is not defined
              */
             return false;
-        } else if (errorMessage.includes("vivoNewsDetailPage")) {
+        } else if (errorMessage.includes("vivoNewsDetailPage") || errorMessage.includes("updateBookMallStatus")) {
             /**
              * TypeError: vivoNewsDetailPage.getNewsReadStatus4Vivo is not a function
-             * Happens in Vivo Android browser, because of its own plugin.
+             * TypeError: Cannot read property 'updateBookMallStatus' of undefined
+             * Happens in Vivo Android browser, because of its own plugin
              */
             return false;
         } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
             /**
-             * Network error while downloading JavaScript/CSS (async loading).
+             * Network error while downloading JavaScript/CSS (async loading)
              */
             return false;
         } else if (errorMessage.includes("Script error")) {
             /**
-             * Some browsers inject cross-domain script, and fail to load.
+             * Some browsers inject cross-domain script, and fail to load
              * Ref: Note part of https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
              */
             return false;
