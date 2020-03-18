@@ -1,7 +1,7 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay} from "redux-saga/effects";
+import {delay, call as rawCall} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
@@ -40,7 +40,7 @@ export class ModuleProxy<M extends Module<any>> {
                     this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function*() {
                         const locationChangeRenderActionName = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
                         const startTime = Date.now();
-                        yield* executeAction(locationChangeRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
+                        yield rawCall(executeAction, locationChangeRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
                         app.logger.info(locationChangeRenderActionName, {locationParams: JSON.stringify(currentRouteParams)}, Date.now() - startTime);
                     });
                     app.store.dispatch(navigationPreventionAction(false));
@@ -73,9 +73,9 @@ export class ModuleProxy<M extends Module<any>> {
             private *lifecycleSaga() {
                 /**
                  * CAVEAT:
-                 * If lifecycleSagaTask is cancelled during executeAction,
-                 * It will only cancel the action (onRender/onTick...) itself, but proceeds with following code.
-                 * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
+                 * Do not use <yield* executeAction> for lifecycle actions.
+                 * It will lead to cancellation issue, which cannot stop the lifecycleSaga as expected.
+                 *
                  * https://github.com/redux-saga/redux-saga/issues/1986
                  */
                 const props = this.props as RouteComponentProps | {};
@@ -83,11 +83,8 @@ export class ModuleProxy<M extends Module<any>> {
                 const enterActionName = `${moduleName}/@@ENTER`;
                 if (lifecycleListener.onEnter.isLifecycle) {
                     const startTime = Date.now();
-                    yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
+                    yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
-                    if (this.lifecycleSagaTask?.isCancelled()) {
-                        return;
-                    }
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
@@ -96,17 +93,14 @@ export class ModuleProxy<M extends Module<any>> {
                     const initialRenderActionName = `${moduleName}/@@INITIAL_RENDER`;
                     if ("match" in props && "location" in props) {
                         const startTime = Date.now();
-                        yield* executeAction(initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
+                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
                         app.logger.info(initialRenderActionName, {locationParams: JSON.stringify(props.match.params)}, Date.now() - startTime);
                     } else {
                         const startTime = Date.now();
                         console.warn(`[framework] Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
-                        yield* executeAction(initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
+                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
                         app.logger.info(initialRenderActionName, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
                     }
-                }
-                if (this.lifecycleSagaTask?.isCancelled()) {
-                    return;
                 }
 
                 if (lifecycleListener.onTick.isLifecycle) {
@@ -114,11 +108,8 @@ export class ModuleProxy<M extends Module<any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        yield* executeAction(tickActionName, boundTicker);
+                        yield rawCall(executeAction, tickActionName, boundTicker);
                         this.successTickCount++;
-                        if (this.lifecycleSagaTask?.isCancelled()) {
-                            return;
-                        }
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
