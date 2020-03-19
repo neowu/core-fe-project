@@ -87,18 +87,23 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
      *
      * https://github.com/react-boilerplate/react-boilerplate/issues/1281
      */
-    pushHistory(url: string, state?: HistoryState): SagaIterator;
+    pushHistory(url: string): SagaIterator;
+    pushHistory(url: string, stateMode: "keep-state"): SagaIterator;
+    pushHistory<T extends {}>(url: string, state: T): SagaIterator; // Recommended explicitly pass the generic type
     pushHistory(state: HistoryState): SagaIterator;
-    *pushHistory(urlOrState: HistoryState | string, state?: HistoryState): SagaIterator {
+
+    *pushHistory(urlOrState: HistoryState | string, state?: object | "keep-state"): SagaIterator {
         if (typeof urlOrState === "string") {
-            if (state === null) {
-                yield put(push(urlOrState));
+            const url: string = urlOrState;
+            if (state) {
+                yield put(push(url, state === "keep-state" ? app.browserHistory.location.state : state));
             } else {
-                yield put(push(urlOrState, state));
+                yield put(push(url));
             }
         } else {
             const currentURL = location.pathname + location.search;
-            yield put(push(currentURL, urlOrState));
+            const state: HistoryState = urlOrState;
+            yield put(push(currentURL, state));
         }
     }
 }
