@@ -58,12 +58,13 @@ export class ModuleProxy<M extends Module<any>> {
                     app.store.dispatch(navigationPreventionAction(false));
                 }
 
-                this.lastDidUpdateSagaTask?.cancel();
-                this.lifecycleSagaTask?.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                 });
+
+                this.lastDidUpdateSagaTask?.cancel();
+                this.lifecycleSagaTask?.cancel();
             }
 
             render() {
@@ -97,9 +98,9 @@ export class ModuleProxy<M extends Module<any>> {
                         app.logger.info(initialRenderActionName, {locationParams: JSON.stringify(props.match.params)}, Date.now() - startTime);
                     } else {
                         const startTime = Date.now();
-                        console.warn(`[framework] Module [${moduleName}] is not attached to routers, use onEnter() lifecycle instead`);
+                        console.warn(`[framework] Module ${moduleName} is not attached to routers, use onEnter() lifecycle instead`);
                         yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
-                        app.logger.info(initialRenderActionName, {locationParams: "[Not Route Component]"}, Date.now() - startTime);
+                        app.logger.info(initialRenderActionName, {locationParams: "[Non-Route]"}, Date.now() - startTime);
                     }
                 }
 

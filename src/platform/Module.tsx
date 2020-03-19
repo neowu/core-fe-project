@@ -1,6 +1,7 @@
 import {push} from "connected-react-router";
 import {Location} from "history";
 import {SagaIterator} from "../typed-saga";
+import {put} from "redux-saga/effects";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
@@ -69,19 +70,35 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
         app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
-    setHistory(urlOrState: HistoryState | string, state: HistoryState | null = null) {
+    /**
+     * CAVEAT:
+     * (1)
+     * Calling this.pushHistory to other module should cancel the following logic.
+     * Using store.dispatch here will lead to error while cancelling in lifecycle.
+     *
+     * Because the whole process is in sync mode:
+     * dispatch push action -> location change -> router component will un-mount -> lifecycle saga cancel
+     *
+     * Cancelling the current sync-running saga will throw "TypeError: Generator is already executing".
+     *
+     * (2)
+     * Adding yield cancel() in pushHistory is also incorrect.
+     * If this.pushHistory is only to change state rather than URL, it will lead to the whole lifecycle saga cancelled.
+     *
+     * https://github.com/react-boilerplate/react-boilerplate/issues/1281
+     */
+    pushHistory(url: string, state?: HistoryState): SagaIterator;
+    pushHistory(state: HistoryState): SagaIterator;
+    *pushHistory(urlOrState: HistoryState | string, state?: HistoryState): SagaIterator {
         if (typeof urlOrState === "string") {
             if (state === null) {
-                app.store.dispatch(push(urlOrState));
+                yield put(push(urlOrState));
             } else {
-                app.store.dispatch(push(urlOrState, state));
+                yield put(push(urlOrState, state));
             }
         } else {
-            if (state !== null) {
-                throw new Error("Second argument [state] should not bet set here");
-            }
             const currentURL = location.pathname + location.search;
-            app.store.dispatch(push(currentURL, urlOrState));
+            yield put(push(currentURL, urlOrState));
         }
     }
 }
