@@ -21,15 +21,15 @@ type HandlerDecorator = (target: object, propertyKey: string, descriptor: TypedP
 
 type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
 
-type HandlerInterceptor<RootState extends State = State, ModuleState extends {} = {}> = (handler: ActionHandlerWithMetaData, thisModule: Module<ModuleState, {}, {}, RootState>) => SagaIterator;
+type HandlerInterceptor<RootState extends State = State> = (handler: ActionHandlerWithMetaData, thisModule: Module<RootState, any>) => SagaIterator;
 
 /**
  * A helper for ActionHandler functions (Saga).
  */
-export function createActionHandlerDecorator<RootState extends State = State, ModuleState extends {} = {}>(interceptor: HandlerInterceptor<RootState, ModuleState>): HandlerDecorator {
+export function createActionHandlerDecorator<RootState extends State = State>(interceptor: HandlerInterceptor<RootState>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
-        descriptor.value = function*(...args: any[]): SagaIterator {
+        descriptor.value = function* (...args: any[]): SagaIterator {
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then

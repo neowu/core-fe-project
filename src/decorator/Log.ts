@@ -5,7 +5,7 @@ import {createActionHandlerDecorator} from "./index";
  * To add a log item for action, with execution duration, action name, and masked action parameters.
  */
 export function Log() {
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         const startTime = Date.now();
         try {
             yield* handler();

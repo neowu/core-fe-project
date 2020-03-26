@@ -6,7 +6,7 @@ import {createActionHandlerDecorator} from "./index";
  */
 export function Mutex() {
     let isLocked = false;
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         if (!isLocked) {
             try {
                 isLocked = true;

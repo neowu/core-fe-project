@@ -2,7 +2,7 @@ import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action, setStateAction} from "./reducer";
+import {Action, setStateAction, State} from "./reducer";
 import {SagaIterator} from "./typed-saga";
 import {captureError} from "./util/error-util";
 import {stringifyWithMask} from "./util/json-util";
@@ -27,7 +27,7 @@ type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? (...args:
 type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
 export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
-export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
+export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> {
     const moduleName = module.name;
     if (!app.store.getState().app[moduleName]) {
         // To get private property
@@ -36,7 +36,7 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
 
     // Transform every method into ActionCreator
     const actions: any = {};
-    getKeys(module).forEach(actionType => {
+    getKeys(module).forEach((actionType) => {
         // Attach action name, for @Log / error handler reflection
         const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
@@ -58,7 +58,7 @@ export function* executeAction(actionName: string, handler: ActionHandler, ...pa
     }
 }
 
-function getKeys<M extends Module<any>>(module: M) {
+function getKeys<M extends Module<any, any>>(module: M) {
     // Do not use Object.keys(Object.getPrototypeOf(module)), because class methods are not enumerable
     const keys: string[] = [];
     for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(module))) {

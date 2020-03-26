@@ -44,8 +44,8 @@ function createApp(): App {
         onError: (error, info) => captureError(error, "@@framework/detached-saga", {extraStacktrace: info.sagaStack}),
     });
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
-    sagaMiddleware.run(function*() {
-        yield takeEvery("*", function*(action: Action<any>) {
+    sagaMiddleware.run(function* () {
+        yield takeEvery("*", function* (action: Action<any>) {
             const handler = app.actionHandlers[action.type];
             if (handler) {
                 yield* executeAction(action.type, handler, ...action.payload);

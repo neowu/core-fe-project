@@ -6,7 +6,7 @@ import {loadingAction} from "../reducer";
  * To mark state.loading[identifier] during action execution.
  */
 export function Loading(identifier: string = "global") {
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         try {
             yield put(loadingAction(true, identifier));
             yield* handler();

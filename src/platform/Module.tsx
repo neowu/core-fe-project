@@ -14,8 +14,8 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryStat
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
 }
 
-export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryState extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam, HistoryState> {
-    constructor(readonly name: string, readonly initialState: ModuleState) {}
+export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends {} = {}, HistoryState extends {} = {}> implements ModuleLifecycleListener<RouteParam, HistoryState> {
+    constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
     *onEnter(entryComponentProps: any): SagaIterator {
         /**
@@ -45,7 +45,7 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
          */
     }
 
-    get state(): Readonly<ModuleState> {
+    get state(): Readonly<RootState["app"][ModuleName]> {
         return this.rootState.app[this.name];
     }
 
@@ -63,11 +63,11 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, HistoryS
 
     /**
      * CAVEAT:
-     * Do not use Partial<ModuleState> as parameter.
+     * Do not use Partial<> as parameter.
      * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
      */
-    setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
-        app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
+    setState<K extends keyof RootState["app"][ModuleName]>(newState: Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]) {
+        app.store.dispatch(setStateAction(this.name, newState as object, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 
     /**

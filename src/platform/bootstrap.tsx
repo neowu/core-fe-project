@@ -72,7 +72,7 @@ function setupLogger(config: LoggerConfig | undefined) {
 
     if (config) {
         app.loggerConfig = config;
-        app.sagaMiddleware.run(function*() {
+        app.sagaMiddleware.run(function* () {
             while (true) {
                 yield delay(config.sendingFrequency * 1000);
                 try {

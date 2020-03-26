@@ -6,12 +6,12 @@ function generateUniqueId() {
     return new Date().getTime().toString(16) + "-" + Math.floor(Math.random() * 9999900 + 1000).toString(16);
 }
 
+// TODO
 /**
  * CAVEAT:
- * In Safari, the user may block localStorage access via setting "Block All Cookies".
- * The following code will throw error in such case.
- *
- * Ref: https://codingrepo.com/javascript/2018/11/15/safari-securityerror-dom-exception-18-thrown-by-localstorage-or-cookies-are-blocked/
+ * In Apple Safari, localStorage/client-side cookie values are subject to 7-day expiration.
+ * Therefore, in order for real persistence, we prefer using server-side cookie, over localStorage.
+ * Ref: https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/
  */
 function getVisitorId() {
     try {
@@ -29,6 +29,12 @@ function getVisitorId() {
     }
 }
 
+/**
+ * CAVEAT:
+ * In Apple Safari, the user may block sessionStorage access via setting "Block All Cookies".
+ * The following code will throw error in such case.
+ * Ref: https://codingrepo.com/javascript/2018/11/15/safari-securityerror-dom-exception-18-thrown-by-localstorage-or-cookies-are-blocked/
+ */
 function getSessionId() {
     try {
         const token = "@@framework-session-id";

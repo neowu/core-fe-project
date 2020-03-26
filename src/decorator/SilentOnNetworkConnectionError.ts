@@ -7,7 +7,7 @@ import {app} from "../app";
  * Mainly used for background tasks.
  */
 export function SilentOnNetworkConnectionError() {
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         try {
             yield* handler();
         } catch (e) {

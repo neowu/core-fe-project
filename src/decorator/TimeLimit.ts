@@ -7,7 +7,7 @@ import {race} from "../typed-saga";
  * Throws NetworkConnectionException if the action executes longer than specified second.
  */
 export function TimeLimit(second: number) {
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         // Auto cancelled if lost in race
         const raceResult = yield* race({
             actionExecution: call(handler),

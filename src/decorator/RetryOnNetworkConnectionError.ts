@@ -8,7 +8,7 @@ import {createActionHandlerDecorator} from "./index";
  * A warning log will be also created, for each retry.
  */
 export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3) {
-    return createActionHandlerDecorator(function*(handler) {
+    return createActionHandlerDecorator(function* (handler) {
         let retryTime = 0;
         while (true) {
             const currentRoundStartTime = Date.now();

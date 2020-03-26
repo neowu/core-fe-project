@@ -25,8 +25,8 @@ axios.defaults.transformResponse = (data, headers) => {
 };
 
 axios.interceptors.response.use(
-    response => response,
-    e => {
+    (response) => response,
+    (e) => {
         // eslint-disable-next-line no-prototype-builtins
         if (e && typeof e === "object" && e.hasOwnProperty("isAxiosError")) {
             const error = e as AxiosError;

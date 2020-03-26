@@ -7,7 +7,7 @@ import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
-export class ModuleProxy<M extends Module<any>> {
+export class ModuleProxy<M extends Module<any, any>> {
     constructor(private module: M, private actions: ActionCreators<M>) {}
 
     getActions(): ActionCreators<M> {
@@ -15,7 +15,7 @@ export class ModuleProxy<M extends Module<any>> {
     }
 
     attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
-        const moduleName = this.module.name;
+        const moduleName = this.module.name as string;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
 
@@ -37,7 +37,7 @@ export class ModuleProxy<M extends Module<any>> {
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger onRender if current component is connected to <Route>
                     this.lastDidUpdateSagaTask?.cancel();
-                    this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function*() {
+                    this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function* () {
                         const locationChangeRenderActionName = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
                         const startTime = Date.now();
                         yield rawCall(executeAction, locationChangeRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);

@@ -8,13 +8,13 @@ export function stringifyWithMask(maskedKeywords: RegExp[], maskedOutput: string
         if (typeof value === "function" || typeof value === "symbol") {
             return undefined;
         }
-        if (maskedKeywords.some(_ => _.test(key))) {
+        if (maskedKeywords.some((_) => _.test(key))) {
             return maskedOutput;
         }
         return value;
     };
 
-    const serializableArgs = args.filter(_ => typeof _ !== "function" && typeof _ !== "symbol");
+    const serializableArgs = args.filter((_) => typeof _ !== "function" && typeof _ !== "symbol");
     switch (serializableArgs.length) {
         case 0:
             return undefined;
