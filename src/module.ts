@@ -2,7 +2,7 @@ import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action, setStateAction, State} from "./reducer";
+import {Action, setStateAction} from "./reducer";
 import {SagaIterator} from "./typed-saga";
 import {captureError} from "./util/error-util";
 import {stringifyWithMask} from "./util/json-util";
@@ -28,7 +28,7 @@ type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIter
 export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
 export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> {
-    const moduleName = module.name;
+    const moduleName: string = module.name;
     if (!app.store.getState().app[moduleName]) {
         // To get private property
         app.store.dispatch(setStateAction(moduleName, module.initialState, `@@${moduleName}/@@init`));

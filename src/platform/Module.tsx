@@ -63,7 +63,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
 
     /**
      * CAVEAT:
-     * Do not use Partial<> as parameter.
+     * Do not use Partial<State> as parameter.
      * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
      */
     setState<K extends keyof RootState["app"][ModuleName]>(newState: Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]) {
