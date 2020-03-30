@@ -58,9 +58,9 @@ axios.interceptors.response.use(
     }
 );
 
-export async function ajax<Request, Response>(method: Method, path: string, pathParams: object, request: Request): Promise<Response> {
+export async function ajax<Request, Response>(method: Method, path: string, pathParams: object, request: Request, extraConfig: Partial<AxiosRequestConfig> = {}): Promise<Response> {
     const fullURL = urlParams(path, pathParams);
-    const config: AxiosRequestConfig = {method, url: fullURL};
+    const config: AxiosRequestConfig = {...extraConfig, method, url: fullURL};
 
     if (method === "GET" || method === "DELETE") {
         config.params = request;

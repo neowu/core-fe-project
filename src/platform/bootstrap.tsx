@@ -78,7 +78,14 @@ function setupLogger(config: LoggerConfig | undefined) {
                 try {
                     const logs = app.logger.collect();
                     if (logs.length > 0) {
-                        yield call(ajax, "POST", config.serverURL, {}, {events: logs});
+                        /**
+                         * Event server URL may be different from current domain (supposing abc.com)
+                         *
+                         * In order to support this, we must ensure:
+                         * - Event server allows cross-origin request from current domain
+                         * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
+                         */
+                        yield call(ajax, "POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
                         app.logger.empty();
                     }
                 } catch (e) {
