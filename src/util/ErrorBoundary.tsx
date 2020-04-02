@@ -1,20 +1,17 @@
 import React from "react";
-import {connect, DispatchProp} from "react-redux";
 import {Exception} from "../Exception";
 import {captureError} from "./error-util";
 
-interface OwnProps {
+interface Props {
     render: (exception: Exception) => React.ReactNode;
     children: React.ReactNode;
 }
-
-interface Props extends OwnProps, DispatchProp {}
 
 interface State {
     exception: Exception | null;
 }
 
-class ErrorBoundary extends React.PureComponent<Props, State> {
+export default class ErrorBoundary extends React.PureComponent<Props, State> {
     static displayName = "ErrorBoundary";
     static defaultProps: Pick<Props, "render"> = {render: () => null};
 
@@ -29,8 +26,6 @@ class ErrorBoundary extends React.PureComponent<Props, State> {
     }
 
     render() {
-        return this.state.exception ? this.props.render(this.state.exception) : this.props.children;
+        return this.state.exception ? this.props.render(this.state.exception) : this.props.children || null;
     }
 }
-
-export default connect()(ErrorBoundary);
