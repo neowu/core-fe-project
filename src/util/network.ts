@@ -2,20 +2,6 @@ import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
-type HeaderMap = {[key: string]: string};
-type RequestHeaderInterceptor = (headers: HeaderMap) => void | Promise<void>;
-type ResponseHeaderInterceptor = (headers: Readonly<HeaderMap>) => void | Promise<void>;
-
-const networkInterceptor: {request?: RequestHeaderInterceptor; response?: ResponseHeaderInterceptor} = {};
-
-export function setRequestHeaderInterceptor(_: RequestHeaderInterceptor) {
-    networkInterceptor.request = _;
-}
-
-export function setResponseHeaderInterceptor(_: ResponseHeaderInterceptor) {
-    networkInterceptor.response = _;
-}
-
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
@@ -68,20 +54,12 @@ export async function ajax<Request, Response>(method: Method, path: string, path
         config.data = request;
     }
 
-    const requestHeaderMap: HeaderMap = {
+    config.headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
     };
-    if (networkInterceptor.request) {
-        await networkInterceptor.request(requestHeaderMap);
-    }
-    config.headers = requestHeaderMap;
 
     const response = await axios.request(config);
-    const responseHeaderMap: HeaderMap = response.headers;
-    if (networkInterceptor.response) {
-        await networkInterceptor.response(responseHeaderMap);
-    }
     return response.data;
 }
 
