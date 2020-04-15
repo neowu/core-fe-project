@@ -77,12 +77,12 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
                     // Wrap into a void function, in case updater() might return anything
                     updater(draftState as any);
                 },
-                (patches) => {
-                    if (process.env.NODE_ENV === "development") {
-                        // No need to read "op", in will only be "replace"
-                        patchDescriptions = patches.map((_) => _.path.join("."));
-                    }
-                }
+                process.env.NODE_ENV === "development"
+                    ? (patches) => {
+                          // No need to read "op", in will only be "replace"
+                          patchDescriptions = patches.map((_) => _.path.join("."));
+                      }
+                    : undefined
             );
             if (newState !== originalState) {
                 const description = `@@${this.name}/setState${patchDescriptions ? `[${patchDescriptions.join("/")}]` : ``}`;
