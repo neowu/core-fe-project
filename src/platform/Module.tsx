@@ -2,10 +2,15 @@ import {push} from "connected-react-router";
 import {Location} from "history";
 import {SagaIterator} from "../typed-saga";
 import {put} from "redux-saga/effects";
+import {produce, enablePatches} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {navigationPreventionAction, setStateAction, State} from "../reducer";
+
+if (process.env.NODE_ENV === "development") {
+    enablePatches();
+}
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
     onEnter: ((entryComponentProps?: any) => SagaIterator) & LifecycleDecoratorFlag;
@@ -61,13 +66,32 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
         app.store.dispatch(navigationPreventionAction(isPrevented));
     }
 
-    /**
-     * CAVEAT:
-     * Do not use Partial<State> as parameter.
-     * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
-     */
-    setState<K extends keyof RootState["app"][ModuleName]>(newState: Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]) {
-        app.store.dispatch(setStateAction(this.name, newState as object, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
+    setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]): void {
+        if (typeof stateOrUpdater === "function") {
+            const originalState = this.state;
+            const updater = stateOrUpdater as (state: RootState["app"][ModuleName]) => void;
+            let patchDescriptions: string[] | undefined;
+            const newState = produce(
+                originalState,
+                (draftState) => {
+                    // Wrap into a void function, in case updater() might return anything
+                    updater(draftState as any);
+                },
+                (patches) => {
+                    if (process.env.NODE_ENV === "development") {
+                        // No need to read "op", in will only be "replace"
+                        patchDescriptions = patches.map((_) => _.path.join("."));
+                    }
+                }
+            );
+            if (newState !== originalState) {
+                const description = `@@${this.name}/setState${patchDescriptions ? `[${patchDescriptions.join("/")}]` : ``}`;
+                app.store.dispatch(setStateAction(this.name, newState, description));
+            }
+        } else {
+            const partialState = stateOrUpdater as object;
+            this.setState((state) => Object.assign(state, partialState));
+        }
     }
 
     /**

@@ -7,7 +7,7 @@ import {app} from "../app";
 import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
-import ErrorBoundary from "../util/ErrorBoundary";
+import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {Exception, JavaScriptException, NetworkConnectionException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";

@@ -1,6 +1,6 @@
 import React from "react";
 import {Redirect, Route as ReactRouterDOMRoute, RouteComponentProps, RouteProps} from "react-router-dom";
-import ErrorBoundary from "./ErrorBoundary";
+import {ErrorBoundary} from "./ErrorBoundary";
 import {app} from "../app";
 
 interface Props extends RouteProps {
@@ -12,7 +12,7 @@ interface Props extends RouteProps {
     notFound: boolean;
 }
 
-export default class Route extends React.PureComponent<Props> {
+export class Route extends React.PureComponent<Props> {
     static defaultProps: Pick<Props, "exact" | "withErrorBoundary" | "accessCondition" | "unauthorizedRedirectTo" | "notFound"> = {
         exact: true,
         withErrorBoundary: true,

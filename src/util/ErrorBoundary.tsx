@@ -11,7 +11,7 @@ interface State {
     exception: Exception | null;
 }
 
-export default class ErrorBoundary extends React.PureComponent<Props, State> {
+export class ErrorBoundary extends React.PureComponent<Props, State> {
     static displayName = "ErrorBoundary";
     static defaultProps: Pick<Props, "render"> = {render: () => null};
 
