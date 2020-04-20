@@ -32,17 +32,17 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
     const info = {...extra, stacktrace: errorStacktrace};
 
-    if (shouldAlertToUser(exception.message)) {
-        app.logger.exception(exception, info, action);
-        app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
-    } else {
+    if (shouldErrorBeIgnored(exception.message, errorStacktrace)) {
         app.logger.warn({
             info,
             action: action || "-",
             elapsedTime: 0,
             errorMessage: exception.message,
-            errorCode: "EXTERNAL_ERROR",
+            errorCode: "IGNORED_ERROR",
         });
+    } else {
+        app.logger.exception(exception, info, action);
+        app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
     }
 
     return exception;
@@ -62,30 +62,29 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
     }
 }
 
-export function shouldAlertToUser(errorMessage: string): boolean {
+export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string): boolean {
     if (process.env.NODE_ENV === "production") {
         if (isIEBrowser()) {
-            return false;
-        }
-
-        if (errorMessage.includes("Refused to evaluate")) {
-            /**
-             * Some browsers inject its own tracking script snippet / JS file.
-             * If it violates CSP, it will trigger such errors.
-             */
-            return false;
+            return true;
         } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
             /**
              * Network error while downloading JavaScript/CSS (async loading).
              */
-            return false;
+            return true;
         } else if (errorMessage.includes("Script error")) {
             /**
-             * Some browsers inject cross-domain script, and fail to load.
+             * Some browsers inject cross-domain script, and fail to load due to violation of CSP.
              * Ref: Note part of https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
              */
-            return false;
+            return true;
+        } else {
+            /**
+             * Check if the script source is within allowed origins.
+             */
+            if (app.loggerConfig && app.loggerConfig.allowedJSOrigins && stacktrace) {
+                return app.loggerConfig.allowedJSOrigins.every((_) => !stacktrace.includes(_));
+            }
         }
     }
-    return true;
+    return false;
 }

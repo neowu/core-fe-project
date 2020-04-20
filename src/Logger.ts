@@ -33,6 +33,7 @@ export interface LoggerConfig {
     serverURL: string;
     sendingFrequency: number;
     maskedKeywords?: RegExp[];
+    allowedJSOrigins?: string[];
 }
 
 export interface Logger {
