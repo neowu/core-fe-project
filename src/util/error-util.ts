@@ -77,6 +77,12 @@ export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string):
              * Ref: Note part of https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
              */
             return true;
+        } else if (errorMessage.includes("Refused to evaluate")) {
+            /**
+             * Some browsers inject its own tracking script snippet / JS file.
+             * If it violates CSP, it will trigger such errors.
+             */
+            return true;
         } else {
             /**
              * Check if the script source is within allowed origins.
