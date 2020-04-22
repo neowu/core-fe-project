@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "1.19.3",
+  "version": "1.19.4",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -30,7 +30,7 @@
     "yargs": "15.3.1"
   },
   "dependencies": {
-    "@types/node": "13.13.0",
+    "@types/node": "13.13.2",
     "@types/react": "*",
     "@types/react-dom": "16.9.6",
     "@types/react-redux": "7.1.7",
@@ -50,7 +50,7 @@
     "tslib": "1.11.1"
   },
   "peerDependencies": {
-    "@types/node": "13.13.0",
+    "@types/node": "13.13.2",
     "@types/react": "*",
     "@types/react-dom": "16.9.6",
     "@types/react-redux": "7.1.7",
