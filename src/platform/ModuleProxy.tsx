@@ -36,7 +36,11 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger onRender if current component is connected to <Route>
-                    this.lastDidUpdateSagaTask?.cancel();
+                    try {
+                        this.lastDidUpdateSagaTask?.cancel();
+                    } catch (e) {
+                        // In rare case, it may throw error, just ignore
+                    }
                     this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function* () {
                         const locationChangeRenderActionName = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
                         const startTime = Date.now();
@@ -63,8 +67,12 @@ export class ModuleProxy<M extends Module<any, any>> {
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                 });
 
-                this.lastDidUpdateSagaTask?.cancel();
-                this.lifecycleSagaTask?.cancel();
+                try {
+                    this.lastDidUpdateSagaTask?.cancel();
+                    this.lifecycleSagaTask?.cancel();
+                } catch (e) {
+                    // In rare case, it may throw error, just ignore
+                }
             }
 
             render() {
