@@ -3,8 +3,7 @@ import {Exception} from "../Exception";
 import {captureError} from "./error-util";
 
 interface Props {
-    render: (exception: Exception) => React.ReactNode;
-    children: React.ReactNode;
+    render: (exception: Exception) => React.ReactElement | null;
 }
 
 interface State {
