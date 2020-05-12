@@ -63,25 +63,31 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
 }
 
 export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string): boolean {
+    if (errorMessage.includes("ResizeObserver loop limit exceeded")) {
+        /**
+         * Current known issue of Ant V4.
+         * Happen both in dev and prod environment, safe to ignore.
+         *
+         * https://github.com/ant-design/ant-design/issues/23246
+         * https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+         */
+        return true;
+    } else if (errorMessage.includes("Script error")) {
+        /**
+         * Unexpected cross-domain script issues.
+         * May still happen for Ant V4 cases, safe to ignore.
+         *
+         * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+         */
+        return true;
+    }
+
     if (process.env.NODE_ENV === "production") {
         if (isIEBrowser()) {
             return true;
         } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
             /**
              * Network error while downloading JavaScript/CSS (async loading).
-             */
-            return true;
-        } else if (errorMessage.includes("ResizeObserver loop limit exceeded")) {
-            /**
-             * Current known issue of Ant V4, safe to ignore.
-             * https://github.com/ant-design/ant-design/issues/23246
-             * https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
-             */
-            return true;
-        } else if (errorMessage.includes("Script error")) {
-            /**
-             * Some browsers inject cross-domain script, and fail to load due to violation of CSP.
-             * Ref: Note part of https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
              */
             return true;
         } else if (errorMessage.includes("Refused to evaluate")) {
