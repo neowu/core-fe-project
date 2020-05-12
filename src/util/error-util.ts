@@ -71,6 +71,13 @@ export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string):
              * Network error while downloading JavaScript/CSS (async loading).
              */
             return true;
+        } else if (errorMessage.includes("ResizeObserver loop limit exceeded")) {
+            /**
+             * Current known issue of Ant V4, safe to ignore.
+             * https://github.com/ant-design/ant-design/issues/23246
+             * https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+             */
+            return true;
         } else if (errorMessage.includes("Script error")) {
             /**
              * Some browsers inject cross-domain script, and fail to load due to violation of CSP.
