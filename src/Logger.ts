@@ -31,7 +31,6 @@ interface ErrorLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
-    sendingFrequency: number;
     maskedKeywords?: RegExp[];
     allowedJSOrigins?: string[];
 }

@@ -63,7 +63,7 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
 }
 
 export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string): boolean {
-    if (errorMessage.includes("ResizeObserver loop limit exceeded")) {
+    if (errorMessage.includes("ResizeObserver loop")) {
         /**
          * Current known issue of Ant V4.
          * Happen both in dev and prod environment, safe to ignore.
