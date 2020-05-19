@@ -1,6 +1,6 @@
 {
   "name": "core-fe",
-  "version": "1.19.9",
+  "version": "1.19.10",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,16 +16,16 @@
   },
   "devDependencies": {
     "@babel/core": "7.9.6",
-    "@types/jest": "25.2.2",
-    "@typescript-eslint/eslint-plugin": "2.33.0",
-    "@typescript-eslint/parser": "2.33.0",
+    "@types/jest": "25.2.3",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
+    "@typescript-eslint/parser": "2.34.0",
     "chalk": "4.0.0",
     "eslint": "7.0.0",
     "eslint-config-prettier": "6.11.0",
     "fs-extra": "9.0.0",
     "jest": "26.0.1",
     "prettier": "2.0.5",
-    "ts-jest": "25.5.1",
+    "ts-jest": "26.0.0",
     "typescript": "3.9.2",
     "yargs": "15.3.1"
   },

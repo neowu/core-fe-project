@@ -90,10 +90,10 @@ export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string):
              * Network error while downloading JavaScript/CSS (async loading).
              */
             return true;
-        } else if (errorMessage.includes("Refused to evaluate")) {
+        } else if (errorMessage.includes("Content Security Policy")) {
             /**
-             * Some browsers inject its own tracking script snippet / JS file.
-             * If it violates CSP, it will trigger such errors.
+             * Some browsers inject its own tracking script snippet / JS file, which violates CSP.
+             * In this case, stacktrace may still include allowed origins, e.g: triggered by pushHistory.
              */
             return true;
         } else {
