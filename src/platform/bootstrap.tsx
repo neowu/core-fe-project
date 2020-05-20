@@ -36,7 +36,7 @@ export function startApp(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.logger?.serverURL);
     runBackgroundLoop(option.logger, option.updateReminder);
-    renderRootDOM(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
+    renderRoot(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
 function detectIEBrowser(ieBrowserMessage?: string) {
@@ -52,7 +52,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, "@@framework/promise-rejection");
 }
 
-function renderRootDOM(EntryComponent: React.ComponentType, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
+function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
