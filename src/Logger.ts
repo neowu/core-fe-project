@@ -68,7 +68,7 @@ export class LoggerImpl implements Logger {
         this.environmentContext = {...this.environmentContext, ...context};
     }
 
-    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
+    info(action: string, info: {[key: string]: string | undefined}, elapsedTime?: number): void {
         this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 

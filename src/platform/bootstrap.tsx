@@ -2,19 +2,19 @@ import {ConnectedRouter} from "connected-react-router";
 import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
-import {call, delay} from "redux-saga/effects";
 import {app} from "../app";
 import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
-import {ErrorListener} from "../module";
+import {ErrorListener, executeAction} from "../module";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {Exception, JavaScriptException, NetworkConnectionException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
-import {SagaIterator} from "../typed-saga";
+import {SagaIterator, call, delay} from "../typed-saga";
 
-interface NoRefreshReminderConfig {
+interface UpdateReminderConfig {
+    updateCheckURL: string; // Must be GET Method, returning JSON
     thresholdHours: number;
     onRemind: () => SagaIterator;
 }
@@ -25,15 +25,18 @@ interface BootstrapOption {
     navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
     ieBrowserAlertMessage?: string;
     logger?: LoggerConfig;
-    noRefreshReminder?: NoRefreshReminderConfig;
+    updateReminder?: UpdateReminderConfig;
 }
+
+const LOGGER_ACTION = "@@framework/logger";
+const UPDATE_REMINDER_ACTION = "@@framework/update-reminder";
 
 export function startApp(option: BootstrapOption): void {
     detectIEBrowser(option.ieBrowserAlertMessage);
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.logger?.serverURL);
-    runBackgroundLoop(option.logger, option.noRefreshReminder);
-    renderDOM(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
+    runBackgroundLoop(option.logger, option.updateReminder);
+    renderRootDOM(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
 function detectIEBrowser(ieBrowserMessage?: string) {
@@ -49,7 +52,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, "@@framework/promise-rejection");
 }
 
-function renderDOM(EntryComponent: React.ComponentType<{}>, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
+function renderRootDOM(EntryComponent: React.ComponentType, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -100,24 +103,41 @@ function setupAppExitListener(eventServerURL?: string) {
     }
 }
 
-function runBackgroundLoop(loggerConfig?: LoggerConfig, noRefreshReminderConfig?: NoRefreshReminderConfig) {
-    const appStartTimestamp = Date.now();
+function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: UpdateReminderConfig) {
     app.logger.info("@@ENTER", {});
     app.loggerConfig = loggerConfig || null;
     app.sagaMiddleware.run(function* () {
+        let lastChecksumTimestamp = 0;
+        let lastChecksum: string | null = null;
         while (true) {
-            yield delay(20000); // Loop on every 20 second
+            // Loop on every 20 second
+            yield delay(20000);
+
+            // Send collected log to event server
             if (loggerConfig) {
-                yield* sendEventLogs(loggerConfig);
+                yield* call(sendEventLogs, loggerConfig);
             }
-            if (noRefreshReminderConfig) {
-                yield* remindRefreshToUser(appStartTimestamp, noRefreshReminderConfig);
+
+            // Check if staying too long, then check if need refresh by comparing server-side checksum
+            if (updateReminderConfig) {
+                const stayingHours = (Date.now() - lastChecksumTimestamp) / 3600 / 1000;
+                if (stayingHours > updateReminderConfig.thresholdHours) {
+                    const newChecksum = yield* call(fetchAppChecksum, updateReminderConfig.updateCheckURL);
+                    if (newChecksum) {
+                        if (lastChecksum !== null && newChecksum !== lastChecksum) {
+                            app.logger.info(UPDATE_REMINDER_ACTION, {newChecksum, lastChecksum, stayingHours: stayingHours.toFixed(2)});
+                            yield* executeAction(UPDATE_REMINDER_ACTION, updateReminderConfig.onRemind);
+                        }
+                        lastChecksum = newChecksum;
+                        lastChecksumTimestamp = Date.now();
+                    }
+                }
             }
         }
     });
 }
 
-function* sendEventLogs(config: LoggerConfig) {
+async function sendEventLogs(config: LoggerConfig): Promise<void> {
     try {
         const logs = app.logger.collect();
         if (logs.length > 0) {
@@ -128,36 +148,35 @@ function* sendEventLogs(config: LoggerConfig) {
              * - Event server allows cross-origin request from current domain
              * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
              */
-            yield call(ajax, "POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
+            await call(ajax, "POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
             app.logger.empty();
         }
     } catch (e) {
         if (e instanceof NetworkConnectionException) {
             // Log this case and retry later
-            app.logger.exception(e, {}, "@@framework/logger");
+            app.logger.exception(e, {}, LOGGER_ACTION);
         } else if (e instanceof Exception) {
             // If not network error, retry always leads to same error, so have to give up
             const length = app.logger.collect().length;
             app.logger.empty();
-            app.logger.exception(e, {droppedLogs: length.toString()}, "@@framework/logger");
+            app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);
         }
     }
 }
 
-function* remindRefreshToUser(appStartTimestamp: number, noRefreshReminderConfig: NoRefreshReminderConfig) {
+/**
+ * Only call this function if necessary, i.e: initial checksum, or after long-staying check
+ * Return latest checksum, or null for failure.
+ */
+async function fetchAppChecksum(url: string): Promise<string | null> {
     try {
-        const stayingHours = (Date.now() - appStartTimestamp) / 3600 / 1000;
-        if (stayingHours > noRefreshReminderConfig.thresholdHours) {
-            app.logger.warn({
-                action: "@@framework/no-refresh-reminder",
-                elapsedTime: 0,
-                errorCode: "LONG_SESSION_NO_REFRESH",
-                errorMessage: `No refresh for ${stayingHours.toFixed(2)} hours, exceeding threshold ${noRefreshReminderConfig.thresholdHours}`,
-                info: {},
-            });
-            yield* noRefreshReminderConfig.onRemind();
-        }
+        const startTimestamp = Date.now();
+        const response = await ajax("GET", url, {}, null);
+        const checksum = JSON.stringify(response);
+        app.logger.info(UPDATE_REMINDER_ACTION, {checksum}, Date.now() - startTimestamp);
+        return checksum;
     } catch (e) {
-        app.logger.exception(errorToException(e), {}, "@@framework/no-refresh-reminder");
+        app.logger.exception(errorToException(e), {}, UPDATE_REMINDER_ACTION);
+        return null;
     }
 }
