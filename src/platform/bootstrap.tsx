@@ -148,7 +148,7 @@ async function sendEventLogs(config: LoggerConfig): Promise<void> {
              * - Event server allows cross-origin request from current domain
              * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
              */
-            await call(ajax, "POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
+            await ajax("POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
             app.logger.empty();
         }
     } catch (e) {
