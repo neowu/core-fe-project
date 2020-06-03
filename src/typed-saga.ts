@@ -1,5 +1,4 @@
-import {StrictEffect} from "redux-saga/effects";
-import {call as rawCall, Effect, race as rawRace, spawn, all as rawAll, delay, put} from "redux-saga/effects";
+import {StrictEffect, call as rawCall, Effect, race as rawRace, spawn, all as rawAll, delay, put} from "redux-saga/effects";
 
 type StrictObject<T extends {}> = T extends any[] ? never : T;
 

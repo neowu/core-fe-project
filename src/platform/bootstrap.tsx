@@ -8,7 +8,7 @@ import {LoggerConfig} from "../Logger";
 import {ErrorListener, executeAction} from "../module";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {Exception, JavaScriptException, NetworkConnectionException} from "../Exception";
+import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaIterator, call, delay} from "../typed-saga";
@@ -48,8 +48,37 @@ function detectIEBrowser(ieBrowserMessage?: string) {
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
     app.errorHandler = errorListener.onError.bind(errorListener);
-    window.onerror = (message: string | Event, source?: string, line?: number, column?: number, error?: Error) => captureError(error || (typeof message === "string" ? new JavaScriptException(message) : message), "@@framework/global");
-    window.onunhandledrejection = (event: PromiseRejectionEvent) => captureError(event.reason, "@@framework/promise-rejection");
+    window.addEventListener(
+        "error",
+        (event) => {
+            if (!event.error && !event.message && event.target && event.target !== window) {
+                /**
+                 * If event.error/message is undefined, it is probably triggered by an invalid source of image/video tag.
+                 * This error will be reported to event server, but silent to user.
+                 *
+                 * Using window.onerror cannot capture such errors.
+                 */
+                const element = event.target as HTMLElement;
+                app.logger.error({
+                    info: {},
+                    action: "@@framework/DOM",
+                    elapsedTime: 0,
+                    errorMessage: `Failed to load: ${element.outerHTML}`,
+                    errorCode: "DOM_SOURCE_ERROR",
+                });
+            } else {
+                captureError(event.error || event.message || `Unrecognized error, serialized as ${JSON.stringify(event)}`, "@@framework/global");
+            }
+        },
+        true
+    );
+    window.addEventListener(
+        "unhandledrejection",
+        (event) => {
+            captureError(event.reason, "@@framework/promise-rejection");
+        },
+        true
+    );
 }
 
 function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
@@ -110,12 +139,12 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: U
         let lastChecksumTimestamp = 0;
         let lastChecksum: string | null = null;
         while (true) {
-            // Loop on every 20 second
-            yield delay(20000);
+            // Loop on every 30 second
+            yield delay(30000);
 
             // Send collected log to event server
             if (loggerConfig) {
-                yield* call(sendEventLogs, loggerConfig);
+                yield* call(sendEventLogs, loggerConfig.serverURL);
             }
 
             // Check if staying too long, then check if need refresh by comparing server-side checksum
@@ -137,7 +166,7 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: U
     });
 }
 
-async function sendEventLogs(config: LoggerConfig): Promise<void> {
+export async function sendEventLogs(serverURL: string): Promise<void> {
     try {
         const logs = app.logger.collect();
         if (logs.length > 0) {
@@ -148,15 +177,12 @@ async function sendEventLogs(config: LoggerConfig): Promise<void> {
              * - Event server allows cross-origin request from current domain
              * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
              */
-            await ajax("POST", config.serverURL, {}, {events: logs}, {withCredentials: true});
+            await ajax("POST", serverURL, {}, {events: logs}, {withCredentials: true});
             app.logger.empty();
         }
     } catch (e) {
-        if (e instanceof NetworkConnectionException) {
-            // Log this case and retry later
-            app.logger.exception(e, {}, LOGGER_ACTION);
-        } else if (e instanceof Exception) {
-            // If not network error, retry always leads to same error, so have to give up
+        if (e instanceof APIException) {
+            // For APIException, retry always leads to same error, so have to give up
             const length = app.logger.collect().length;
             app.logger.empty();
             app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);

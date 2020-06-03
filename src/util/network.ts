@@ -26,9 +26,9 @@ axios.interceptors.response.use(
                 if (!errorId && (error.response.status === 502 || error.response.status === 504)) {
                     // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
                     // Note: Status 503 is maintenance
-                    throw new NetworkConnectionException(`gateway error (${error.response.status})`, requestURL, error.message);
+                    throw new NetworkConnectionException(`Gateway error (${error.response.status})`, requestURL, error.message);
                 } else {
-                    const errorMessage: string = responseData && responseData.message ? responseData.message : `[No response message]`;
+                    const errorMessage: string = responseData && responseData.message ? responseData.message : `[No Response]`;
                     throw new APIException(errorMessage, error.response.status, requestURL, responseData, errorId, errorCode);
                 }
             } else {
@@ -36,10 +36,10 @@ axios.interceptors.response.use(
                  * It could be network failure, or CORS pre-flight failure. We cannot distinguish here.
                  * Ref: https://github.com/axios/axios/issues/838
                  */
-                throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL, error.message);
+                throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, error.message);
             }
         } else {
-            throw new NetworkConnectionException(`unknown network error`, `[No URL retrieved]`, e.toString());
+            throw new NetworkConnectionException(`Unknown network error`, `[No URL]`, e.toString());
         }
     }
 );
