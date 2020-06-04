@@ -51,24 +51,14 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.addEventListener(
         "error",
         (event) => {
-            if (!event.error && !event.message && event.target && event.target !== window) {
-                /**
-                 * If event.error/message is undefined, it is probably triggered by an invalid source of image/video tag.
-                 * This error will be reported to event server, but silent to user.
-                 *
-                 * Using window.onerror cannot capture such errors.
-                 */
-                const element = event.target as HTMLElement;
-                app.logger.error({
-                    info: {},
-                    action: "@@framework/DOM",
-                    elapsedTime: 0,
-                    errorMessage: `Failed to load: ${element.outerHTML}`,
-                    errorCode: "DOM_SOURCE_ERROR",
-                });
-            } else {
-                captureError(event.error || event.message || `Unrecognized error, serialized as ${JSON.stringify(event)}`, "@@framework/global");
-            }
+            const analyzeByTarget = (): string => {
+                if (event.target && event.target !== window) {
+                    const element = event.target as HTMLElement;
+                    return `DOM source error: ${element.outerHTML}`;
+                }
+                return `Unrecognized error, serialized as ${JSON.stringify(event)}`;
+            };
+            captureError(event.error || event.message || analyzeByTarget(), "@@framework/global");
         },
         true
     );

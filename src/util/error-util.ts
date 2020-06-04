@@ -2,6 +2,8 @@ import {Exception, JavaScriptException} from "../Exception";
 import {ErrorHandler} from "../module";
 import {app} from "../app";
 import {isIEBrowser} from "./navigator-util";
+import {spawn} from "../typed-saga";
+import {sendEventLogs} from "../platform/bootstrap";
 
 interface ErrorExtra {
     actionPayload?: string; // Should be masked
@@ -11,15 +13,22 @@ interface ErrorExtra {
 export function errorToException(error: any): Exception {
     if (error instanceof Exception) {
         return error;
-    } else if (error instanceof Error) {
-        return new JavaScriptException(error.message);
     } else {
-        try {
-            const errorMessage = JSON.stringify(error);
-            return new JavaScriptException(errorMessage);
-        } catch (e) {
-            return new JavaScriptException("[Unknown Error]");
+        let message: string;
+        if (!error) {
+            message = "[No Message]";
+        } else if (typeof error === "string") {
+            message = error;
+        } else if (error instanceof Error) {
+            message = error.message;
+        } else {
+            try {
+                message = JSON.stringify(error);
+            } catch (e) {
+                message = "[Unknown]";
+            }
         }
+        return new JavaScriptException(message);
     }
 }
 
@@ -50,6 +59,10 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
 
 let isUserErrorHandlerRunning = false;
 export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
+    if (app.loggerConfig) {
+        // For app, report errors to event server ASAP, in case of sudden termination
+        yield spawn(sendEventLogs, app.loggerConfig.serverURL);
+    }
     if (isUserErrorHandlerRunning) return;
 
     try {
@@ -78,6 +91,11 @@ export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string):
          * May still happen for Ant V4 cases, safe to ignore.
          *
          * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+         */
+        return true;
+    } else if (errorMessage.startsWith("DOM source error")) {
+        /**
+         * Triggered by framework, when detecting source errors, like <img src="/bad-url" />
          */
         return true;
     }
