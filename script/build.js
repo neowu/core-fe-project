@@ -19,12 +19,12 @@ function spawn(command, args, errorMessage) {
 
 function checkCodeStyle() {
     console.info(chalk`{green.bold [task]} {white.bold check code style}`);
-    return spawn("prettier", ["--config", "node/prettier.json", "--list-different", "{src,test}/**/*.{ts,tsx}"], "check code style failed, please format above files");
+    return spawn("prettier", ["--config", "config/prettier.json", "--list-different", "{src,test}/**/*.{ts,tsx}"], "check code style failed, please format above files");
 }
 
 function test() {
     console.info(chalk`{green.bold [task]} {white.bold test}`);
-    return spawn("jest", ["--config", "node/jest.json"], "test failed, please fix");
+    return spawn("jest", ["--config", "config/jest.json"], "test failed, please fix");
 }
 
 function lint() {
@@ -39,7 +39,7 @@ function cleanup() {
 
 function compile() {
     console.info(chalk`{green.bold [task]} {white.bold compile}`);
-    return spawn("tsc", ["-p", "node/tsconfig.json"], "compile failed, please fix");
+    return spawn("tsc", ["-p", "config/tsconfig.json"], "compile failed, please fix");
 }
 
 function distribute() {

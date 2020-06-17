@@ -1,4 +1,5 @@
 import {ConnectedRouter} from "connected-react-router";
+import {Location} from "history";
 import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
@@ -13,36 +14,56 @@ import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaIterator, call, delay} from "../typed-saga";
 
-interface UpdateReminderConfig {
-    updateCheckURL: string; // Must be GET Method, returning JSON
-    thresholdHours: number;
+/**
+ * Configuration for frontend version check.
+ * If the version changes (by sending GET request to `versionCheckURL`) over `thresholdHours` (default: 24), `onRemind` will be executed.
+ *
+ * Suggested Approach:
+ * - onRemind: Alert to end-user for page refresh
+ * - versionCheckURL: Respond a JSON based on computed bundled index.html content, whose contained JS/CSS file name changes when version changes.
+ */
+interface VersionConfig {
     onRemind: () => SagaIterator;
+    versionCheckURL: string; // Must be GET Method, returning whatever JSON
+    thresholdHours?: number; // Default: 24
+}
+
+/**
+ * Configuration for browser related features.
+ * - onIE: Alert to user or redirect when using IE browser, because framework does not support IE.
+ * - onLocationChange: A global event handler for any location change events.
+ * - navigationPreventionMessage: Only useful if you are leaving some page, whose "setNavigationPrevented" is toggled as true.
+ */
+interface BrowserConfig {
+    onIE?: () => void;
+    onLocationChange?: (location: Location) => void;
+    navigationPreventionMessage?: string;
 }
 
 interface BootstrapOption {
     componentType: React.ComponentType;
     errorListener: ErrorListener;
-    navigationPreventionMessage?: ((isSamePage: boolean) => string) | string;
-    ieBrowserAlertMessage?: string;
-    logger?: LoggerConfig;
-    updateReminder?: UpdateReminderConfig;
+    browserConfig?: BrowserConfig;
+    loggerConfig?: LoggerConfig;
+    versionConfig?: VersionConfig;
 }
 
 const LOGGER_ACTION = "@@framework/logger";
-const UPDATE_REMINDER_ACTION = "@@framework/update-reminder";
+const VERSION_CHECK_ACTION = "@@framework/version-check";
 
 export function startApp(option: BootstrapOption): void {
-    detectIEBrowser(option.ieBrowserAlertMessage);
+    detectIEBrowser(option.browserConfig?.onIE);
     setupGlobalErrorHandler(option.errorListener);
-    setupAppExitListener(option.logger?.serverURL);
-    runBackgroundLoop(option.logger, option.updateReminder);
-    renderRoot(option.componentType, option.navigationPreventionMessage || "Are you sure to leave current page?");
+    setupAppExitListener(option.loggerConfig?.serverURL);
+    setupLocationChangeListener(option.browserConfig?.onLocationChange);
+    runBackgroundLoop(option.loggerConfig, option.versionConfig);
+    renderRoot(option.componentType, option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
-function detectIEBrowser(ieBrowserMessage?: string) {
-    if (ieBrowserMessage && isIEBrowser()) {
-        alert(ieBrowserMessage);
-        // After alert, still run the following code, just let whatever error happens
+function detectIEBrowser(onIE?: () => void) {
+    if (onIE && isIEBrowser()) {
+        onIE();
+        // After that, the following code may still run
     }
 }
 
@@ -71,7 +92,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     );
 }
 
-function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMessage: ((isSamePage: boolean) => string) | string) {
+function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMessage: string) {
     const rootElement: HTMLDivElement = document.createElement("div");
     rootElement.style.transition = "all 150ms ease-in 100ms";
     rootElement.style.opacity = "0";
@@ -122,7 +143,13 @@ function setupAppExitListener(eventServerURL?: string) {
     }
 }
 
-function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: UpdateReminderConfig) {
+function setupLocationChangeListener(listener?: (location: Location) => void) {
+    if (listener) {
+        app.browserHistory.listen(listener);
+    }
+}
+
+function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
     app.logger.info("@@ENTER", {});
     app.loggerConfig = loggerConfig || null;
     app.sagaMiddleware.run(function* () {
@@ -140,12 +167,12 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: U
             // Check if staying too long, then check if need refresh by comparing server-side checksum
             if (updateReminderConfig) {
                 const stayingHours = (Date.now() - lastChecksumTimestamp) / 3600 / 1000;
-                if (stayingHours > updateReminderConfig.thresholdHours) {
-                    const newChecksum = yield* call(fetchAppChecksum, updateReminderConfig.updateCheckURL);
+                if (stayingHours > (updateReminderConfig.thresholdHours || 24)) {
+                    const newChecksum = yield* call(fetchVersionChecksum, updateReminderConfig.versionCheckURL);
                     if (newChecksum) {
                         if (lastChecksum !== null && newChecksum !== lastChecksum) {
-                            app.logger.info(UPDATE_REMINDER_ACTION, {newChecksum, lastChecksum, stayingHours: stayingHours.toFixed(2)});
-                            yield* executeAction(UPDATE_REMINDER_ACTION, updateReminderConfig.onRemind);
+                            app.logger.info(VERSION_CHECK_ACTION, {newChecksum, lastChecksum, stayingHours: stayingHours.toFixed(2)});
+                            yield* executeAction(VERSION_CHECK_ACTION, updateReminderConfig.onRemind);
                         }
                         lastChecksum = newChecksum;
                         lastChecksumTimestamp = Date.now();
@@ -173,6 +200,7 @@ export async function sendEventLogs(serverURL: string): Promise<void> {
     } catch (e) {
         if (e instanceof APIException) {
             // For APIException, retry always leads to same error, so have to give up
+            // Do not log network exceptions
             const length = app.logger.collect().length;
             app.logger.empty();
             app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);
@@ -184,15 +212,18 @@ export async function sendEventLogs(serverURL: string): Promise<void> {
  * Only call this function if necessary, i.e: initial checksum, or after long-staying check
  * Return latest checksum, or null for failure.
  */
-async function fetchAppChecksum(url: string): Promise<string | null> {
+async function fetchVersionChecksum(url: string): Promise<string | null> {
     try {
         const startTimestamp = Date.now();
         const response = await ajax("GET", url, {}, null);
         const checksum = JSON.stringify(response);
-        app.logger.info(UPDATE_REMINDER_ACTION, {checksum}, Date.now() - startTimestamp);
+        app.logger.info(VERSION_CHECK_ACTION, {checksum}, Date.now() - startTimestamp);
         return checksum;
     } catch (e) {
-        app.logger.exception(errorToException(e), {}, UPDATE_REMINDER_ACTION);
+        if (e instanceof APIException) {
+            // Do not log network exceptions
+            app.logger.exception(errorToException(e), {}, VERSION_CHECK_ACTION);
+        }
         return null;
     }
 }
