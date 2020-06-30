@@ -72,21 +72,46 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     window.addEventListener(
         "error",
         (event) => {
-            const analyzeByTarget = (): string => {
-                if (event.target && event.target !== window) {
-                    const element = event.target as HTMLElement;
-                    return `DOM source error: ${element.outerHTML}`;
-                }
-                return `Unrecognized error, serialized as ${JSON.stringify(event)}`;
-            };
-            captureError(event.error || event.message || analyzeByTarget(), "@@framework/global");
+            try {
+                const analyzeByTarget = (): string => {
+                    if (event.target && event.target !== window) {
+                        const element = event.target as HTMLElement;
+                        return `DOM source error: ${element.outerHTML}`;
+                    }
+                    return `Unrecognized error, serialized as ${JSON.stringify(event)}`;
+                };
+                captureError(event.error || event.message || analyzeByTarget(), "@@framework/global");
+            } catch (e) {
+                /**
+                 * This should not happen normally.
+                 * However, global error handler might catch external webpage errors, and fail to parse error due to cross-origin limitations.
+                 * A typical example is: Permission denied to access property `foo`
+                 */
+                app.logger.warn({
+                    action: "@@framework/global",
+                    errorCode: "ERROR_HANDLER_FAILURE",
+                    errorMessage: errorToException(e).message,
+                    elapsedTime: 0,
+                    info: {},
+                });
+            }
         },
         true
     );
     window.addEventListener(
         "unhandledrejection",
         (event) => {
-            captureError(event.reason, "@@framework/promise-rejection");
+            try {
+                captureError(event.reason, "@@framework/promise-rejection");
+            } catch (e) {
+                app.logger.warn({
+                    action: "@@framework/promise-rejection",
+                    errorCode: "ERROR_HANDLER_FAILURE",
+                    errorMessage: errorToException(e).message,
+                    elapsedTime: 0,
+                    info: {},
+                });
+            }
         },
         true
     );
@@ -171,7 +196,13 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: V
                     const newChecksum = yield* call(fetchVersionChecksum, updateReminderConfig.versionCheckURL);
                     if (newChecksum) {
                         if (lastChecksum !== null && newChecksum !== lastChecksum) {
-                            app.logger.info(VERSION_CHECK_ACTION, {newChecksum, lastChecksum, stayingHours: stayingHours.toFixed(2)});
+                            app.logger.warn({
+                                action: VERSION_CHECK_ACTION,
+                                errorMessage: `Frontend version changed, page no refresh for ${stayingHours.toFixed(2)} hrs`,
+                                errorCode: "VERSION_CHANGED",
+                                elapsedTime: 0,
+                                info: {newChecksum, lastChecksum},
+                            });
                             yield* executeAction(VERSION_CHECK_ACTION, updateReminderConfig.onRemind);
                         }
                         lastChecksum = newChecksum;
