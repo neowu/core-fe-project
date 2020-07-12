@@ -147,7 +147,11 @@ export class LoggerImpl implements Logger {
             date: new Date(),
             result,
             context: completeContext,
-            ...data,
+            action: data.action,
+            info: data.info,
+            errorCode: data.errorCode,
+            errorMessage: data.errorMessage?.substr(0, 1000),
+            elapsedTime: data.elapsedTime,
         };
         this.logQueue.push(event);
     }
