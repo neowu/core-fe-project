@@ -14,7 +14,7 @@ export class ModuleProxy<M extends Module<any, any>> {
         return this.actions;
     }
 
-    attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
+    attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name as string;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
@@ -87,7 +87,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                  *
                  * https://github.com/redux-saga/redux-saga/issues/1986
                  */
-                const props = this.props as RouteComponentProps | {};
+                const props = this.props as RouteComponentProps & P;
 
                 const enterActionName = `${moduleName}/@@ENTER`;
                 if (lifecycleListener.onEnter.isLifecycle) {

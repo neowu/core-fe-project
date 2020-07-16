@@ -11,7 +11,7 @@ export interface State {
     loading: LoadingState;
     router: RouterState;
     navigationPrevented: boolean;
-    app: {};
+    app: object;
 }
 
 // Redux Action
