@@ -13,14 +13,14 @@ if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
-export interface ModuleLifecycleListener<RouteParam extends {} = {}, HistoryState extends {} = {}> {
+export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
     onEnter: ((entryComponentProps?: any) => SagaIterator) & LifecycleDecoratorFlag;
     onRender: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
 }
 
-export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends {} = {}, HistoryState extends {} = {}> implements ModuleLifecycleListener<RouteParam, HistoryState> {
+export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object, HistoryState extends object = object> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
     *onEnter(entryComponentProps: any): SagaIterator {
@@ -114,7 +114,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
      */
     pushHistory(url: string): SagaIterator;
     pushHistory(url: string, stateMode: "keep-state"): SagaIterator;
-    pushHistory<T extends {}>(url: string, state: T): SagaIterator; // Recommended explicitly pass the generic type
+    pushHistory<T extends object>(url: string, state: T): SagaIterator; // Recommended explicitly pass the generic type
     pushHistory(state: HistoryState): SagaIterator;
 
     *pushHistory(urlOrState: HistoryState | string, state?: object | "keep-state"): SagaIterator {
