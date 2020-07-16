@@ -72,11 +72,11 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             const originalState = this.state;
             const updater = stateOrUpdater as (state: RootState["app"][ModuleName]) => void;
             let patchDescriptions: string[] | undefined;
-            const newState = produce(
+            const newState = produce<Readonly<RootState["app"][ModuleName]>, RootState["app"][ModuleName]>(
                 originalState,
                 (draftState) => {
                     // Wrap into a void function, in case updater() might return anything
-                    updater(draftState as any);
+                    updater(draftState);
                 },
                 process.env.NODE_ENV === "development"
                     ? (patches) => {
