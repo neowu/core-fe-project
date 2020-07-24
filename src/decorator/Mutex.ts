@@ -5,14 +5,20 @@ import {createActionHandlerDecorator} from "./index";
  * For error handler action, mutex logic is auto added.
  */
 export function Mutex() {
-    let isLocked = false;
-    return createActionHandlerDecorator(function* (handler) {
-        if (!isLocked) {
+    let lockTime: number | null = null;
+    return createActionHandlerDecorator(function* (handler, thisModule) {
+        if (lockTime) {
+            thisModule.logger.info(handler.actionName, {
+                actionPayload: handler.maskedParams,
+                mutexLocked: "true",
+                lockedDuration: (Date.now() - lockTime).toString(),
+            });
+        } else {
             try {
-                isLocked = true;
+                lockTime = Date.now();
                 yield* handler();
             } finally {
-                isLocked = false;
+                lockTime = null;
             }
         }
     });

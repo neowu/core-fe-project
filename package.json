@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.20.2",
+    "version": "1.20.3",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -15,22 +15,22 @@
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
     },
     "devDependencies": {
-        "@babel/core": "7.10.4",
-        "@types/jest": "26.0.4",
-        "@typescript-eslint/eslint-plugin": "3.6.0",
-        "@typescript-eslint/parser": "3.6.0",
+        "@babel/core": "7.10.5",
+        "@types/jest": "26.0.7",
+        "@typescript-eslint/eslint-plugin": "3.7.0",
+        "@typescript-eslint/parser": "3.7.0",
         "chalk": "4.1.0",
-        "eslint": "7.4.0",
+        "eslint": "7.5.0",
         "eslint-config-prettier": "6.11.0",
         "fs-extra": "9.0.1",
         "jest": "26.1.0",
         "prettier": "2.0.5",
-        "ts-jest": "26.1.1",
+        "ts-jest": "26.1.3",
         "typescript": "3.9.6",
         "yargs": "15.4.1"
     },
     "dependencies": {
-        "@types/node": "14.0.22",
+        "@types/node": "14.0.25",
         "@types/react": "*",
         "@types/react-dom": "16.9.8",
         "@types/react-redux": "7.1.9",
@@ -46,11 +46,11 @@
         "react-router-dom": "5.2.0",
         "redux": "4.0.5",
         "redux-saga": "1.1.3",
-        "regenerator-runtime": "0.13.5",
+        "regenerator-runtime": "0.13.7",
         "tslib": "2.0.0"
     },
     "peerDependencies": {
-        "@types/node": "14.0.22",
+        "@types/node": "14.0.25",
         "@types/react": "*",
         "@types/react-dom": "16.9.8",
         "@types/react-redux": "7.1.9",
@@ -66,7 +66,7 @@
         "react-router-dom": "5.2.0",
         "redux": "4.0.5",
         "redux-saga": "1.1.3",
-        "regenerator-runtime": "0.13.5",
+        "regenerator-runtime": "0.13.7",
         "tslib": "2.0.0"
     }
 }
