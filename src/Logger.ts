@@ -32,7 +32,6 @@ interface ErrorLogEntry {
 export interface LoggerConfig {
     serverURL: string;
     maskedKeywords?: RegExp[];
-    allowedJSOrigins?: string[];
 }
 
 export interface Logger {

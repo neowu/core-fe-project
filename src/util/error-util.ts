@@ -3,7 +3,7 @@ import {ErrorHandler} from "../module";
 import {app} from "../app";
 import {isIEBrowser} from "./navigator-util";
 import {spawn} from "../typed-saga";
-import {sendEventLogs} from "../platform/bootstrap";
+import {GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION, sendEventLogs} from "../platform/bootstrap";
 
 interface ErrorExtra {
     actionPayload?: string; // Should be masked
@@ -41,7 +41,7 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
     const info = {...extra, stacktrace: errorStacktrace};
 
-    if (shouldErrorBeIgnored(exception.message, errorStacktrace)) {
+    if (shouldErrorBeIgnored(exception, action, errorStacktrace)) {
         app.logger.warn({
             info,
             action: action || "-",
@@ -75,53 +75,25 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
     }
 }
 
-export function shouldErrorBeIgnored(errorMessage: string, stacktrace?: string): boolean {
-    if (errorMessage.includes("ResizeObserver loop")) {
-        /**
-         * Current known issue of Ant V4.
-         * Happen both in dev and prod environment, safe to ignore.
-         *
-         * https://github.com/ant-design/ant-design/issues/23246
-         * https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
-         */
+export function shouldErrorBeIgnored(exception: Exception, action: string, stacktrace?: string): boolean {
+    const errorMessage = exception.message;
+    const ignoredPatterns = [
+        // Network error while downloading JavaScript/CSS (webpack async loading)
+        "Loading chunk",
+        "Loading CSS chunk",
+        // CSP issues
+        "Content Security Policy",
+        // UC weird injected, mostly still with stacktrace
+        "ucbrowser",
+    ];
+
+    if (isIEBrowser()) {
         return true;
-    } else if (errorMessage.includes("Script error")) {
-        /**
-         * Unexpected cross-domain script issues.
-         * May still happen for Ant V4 cases, safe to ignore.
-         *
-         * https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-         */
+    } else if (ignoredPatterns.some((_) => errorMessage.includes(_))) {
         return true;
-    } else if (errorMessage.startsWith("DOM source error")) {
-        /**
-         * Triggered by framework, when detecting source errors, like <img src="/bad-url" />
-         */
+    } else if (!stacktrace && exception instanceof JavaScriptException && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
         return true;
     }
 
-    if (process.env.NODE_ENV === "production") {
-        if (isIEBrowser()) {
-            return true;
-        } else if (errorMessage.includes("Loading chunk") || errorMessage.includes("Loading CSS chunk")) {
-            /**
-             * Network error while downloading JavaScript/CSS (async loading).
-             */
-            return true;
-        } else if (errorMessage.includes("Content Security Policy")) {
-            /**
-             * Some browsers inject its own tracking script snippet / JS file, which violates CSP.
-             * In this case, stacktrace may still include allowed origins, e.g: triggered by pushHistory.
-             */
-            return true;
-        } else {
-            /**
-             * Check if the script source is within allowed origins.
-             */
-            if (app.loggerConfig && app.loggerConfig.allowedJSOrigins && stacktrace) {
-                return app.loggerConfig.allowedJSOrigins.every((_) => !stacktrace.includes(_));
-            }
-        }
-    }
     return false;
 }

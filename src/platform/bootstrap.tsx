@@ -48,8 +48,10 @@ interface BootstrapOption {
     versionConfig?: VersionConfig;
 }
 
-const LOGGER_ACTION = "@@framework/logger";
-const VERSION_CHECK_ACTION = "@@framework/version-check";
+export const LOGGER_ACTION = "@@framework/logger";
+export const VERSION_CHECK_ACTION = "@@framework/version-check";
+export const GLOBAL_ERROR_ACTION = "@@framework/global";
+export const GLOBAL_PROMISE_REJECTION_ACTION = "@@framework/promise-rejection";
 
 export function startApp(option: BootstrapOption): void {
     detectIEBrowser(option.browserConfig?.onIE);
@@ -61,8 +63,19 @@ export function startApp(option: BootstrapOption): void {
 }
 
 function detectIEBrowser(onIE?: () => void) {
-    if (onIE && isIEBrowser()) {
-        onIE();
+    if (isIEBrowser()) {
+        if (onIE) {
+            onIE();
+        } else {
+            let ieAlertMessage: string;
+            const navigatorLanguage = navigator.languages ? navigator.languages[0] : navigator.language;
+            if (navigatorLanguage.startsWith("zh")) {
+                ieAlertMessage = "对不起，本网站不支持 IE 浏览器\n请使用 Chrome/Firefox/360 浏览器再访问";
+            } else {
+                ieAlertMessage = "This website does not support IE browser.\nPlease use Chrome/Safari/Firefox to visit.\nSorry for the inconvenience.";
+            }
+            alert(ieAlertMessage);
+        }
         // After that, the following code may still run
     }
 }
@@ -80,7 +93,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
                     }
                     return `Unrecognized error, serialized as ${JSON.stringify(event)}`;
                 };
-                captureError(event.error || event.message || analyzeByTarget(), "@@framework/global");
+                captureError(event.error || event.message || analyzeByTarget(), GLOBAL_ERROR_ACTION);
             } catch (e) {
                 /**
                  * This should not happen normally.
@@ -88,7 +101,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
                  * A typical example is: Permission denied to access property `foo`
                  */
                 app.logger.warn({
-                    action: "@@framework/global",
+                    action: GLOBAL_ERROR_ACTION,
                     errorCode: "ERROR_HANDLER_FAILURE",
                     errorMessage: errorToException(e).message,
                     elapsedTime: 0,
@@ -102,10 +115,10 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
         "unhandledrejection",
         (event) => {
             try {
-                captureError(event.reason, "@@framework/promise-rejection");
+                captureError(event.reason, GLOBAL_PROMISE_REJECTION_ACTION);
             } catch (e) {
                 app.logger.warn({
-                    action: "@@framework/promise-rejection",
+                    action: GLOBAL_PROMISE_REJECTION_ACTION,
                     errorCode: "ERROR_HANDLER_FAILURE",
                     errorMessage: errorToException(e).message,
                     elapsedTime: 0,
