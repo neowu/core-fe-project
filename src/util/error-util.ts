@@ -75,25 +75,43 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
     }
 }
 
-export function shouldErrorBeIgnored(exception: Exception, action: string, stacktrace?: string): boolean {
+function shouldErrorBeIgnored(exception: Exception, action: string, stacktrace?: string): boolean {
     const errorMessage = exception.message;
     const ignoredPatterns = [
         // Network error while downloading JavaScript/CSS (webpack async loading)
         "Loading chunk",
         "Loading CSS chunk",
-        // CSP issues
+        // CORS or CSP issues
         "Content Security Policy",
-        // UC weird injected, mostly still with stacktrace
+        "Script error",
+        // Vendor injected, mostly still with stacktrace
         "ucbrowser",
+        "vivo",
+        "Vivo",
     ];
 
     if (isIEBrowser()) {
         return true;
     } else if (ignoredPatterns.some((_) => errorMessage.includes(_))) {
         return true;
-    } else if (!stacktrace && exception instanceof JavaScriptException && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
+    } else if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
         return true;
     }
 
+    return false;
+}
+
+function isValidStacktrace(stacktrace?: string): boolean {
+    if (stacktrace) {
+        const validSources: string[] = [];
+        document.querySelectorAll("script").forEach((scriptNode) => {
+            if (scriptNode.src) {
+                validSources.push(scriptNode.src);
+            }
+        });
+        if (validSources.some((_) => stacktrace.includes(_))) {
+            return true;
+        }
+    }
     return false;
 }
