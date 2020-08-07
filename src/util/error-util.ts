@@ -109,9 +109,8 @@ function isValidStacktrace(stacktrace?: string): boolean {
                 validSources.push(scriptNode.src);
             }
         });
-        if (validSources.some((_) => stacktrace.includes(_))) {
-            return true;
-        }
+        // If validSources is [], it return false
+        return validSources.some((_) => stacktrace.includes(_));
     }
     return false;
 }
