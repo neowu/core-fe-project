@@ -41,13 +41,14 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
     const info = {...extra, stacktrace: errorStacktrace};
 
-    if (shouldErrorBeIgnored(exception, action, errorStacktrace)) {
+    const errorCode = specialErrorCode(exception, action, errorStacktrace);
+    if (errorCode) {
         app.logger.warn({
             info,
-            action: action || "-",
+            action,
             elapsedTime: 0,
             errorMessage: exception.message,
-            errorCode: "IGNORED_ERROR",
+            errorCode,
         });
     } else {
         app.logger.exception(exception, info, action);
@@ -75,34 +76,46 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
     }
 }
 
-function shouldErrorBeIgnored(exception: Exception, action: string, stacktrace?: string): boolean {
-    const errorMessage = exception.message;
+function specialErrorCode(exception: Exception, action: string, stacktrace?: string): string | null {
+    const errorMessage = exception.message.toLowerCase();
     const ignoredPatterns = [
         // Network error while downloading JavaScript/CSS (webpack async loading)
-        "Loading chunk",
-        "Loading CSS chunk",
+        {pattern: "loading chunk", errorCode: "JS_CHUNK"},
+        {pattern: "loading css chunk", errorCode: "CSS_CHUNK"},
         // CORS or CSP issues
-        "Content Security Policy",
-        "Script error",
+        {pattern: "content security policy", errorCode: "CSP"},
+        {pattern: "script error", errorCode: "CORS"},
         // Vendor injected, mostly still with stacktrace
-        "ucbrowser",
-        "vivo",
-        "Vivo",
+        {pattern: "ucbrowser", errorCode: "UC"},
+        {pattern: "vivo", errorCode: "VIVO"},
+        {pattern: "huawei", errorCode: "HUAWEI"},
     ];
 
     if (isIEBrowser()) {
-        return true;
-    } else if (ignoredPatterns.some((_) => errorMessage.includes(_))) {
-        return true;
-    } else if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
-        return true;
+        return "IE_BROWSER_ISSUE";
     }
 
-    return false;
+    const matchedPattern = ignoredPatterns.find(({pattern}) => errorMessage.includes(pattern));
+    if (matchedPattern) {
+        return `IGNORED_${matchedPattern.errorCode}_ISSUE`;
+    }
+    if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
+        return "IGNORED_EXTERNAL_INJECTION";
+    }
+    if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage === "Cannot read property 'offsetWidth' of null" && stacktrace.split("\n").filter((_) => _.includes("Array.forEach")).length === 2) {
+        // This is a known Ant Design Tabs issue
+        return "IGNORED_ANTD_TAB_ISSUE";
+    }
+    return null;
 }
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
+        const ignoredPatterns = ["chrome-extension://"];
+        if (ignoredPatterns.some((_) => stacktrace.includes(_))) {
+            return false;
+        }
+
         const validSources: string[] = [];
         document.querySelectorAll("script").forEach((scriptNode) => {
             if (scriptNode.src) {
