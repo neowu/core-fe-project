@@ -100,7 +100,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         return `IGNORED_${matchedPattern.errorCode}_ISSUE`;
     }
     if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
-        return "IGNORED_EXTERNAL_INJECTION";
+        return "IGNORED_UNCATEGORIZED_ISSUE";
     }
     if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage === "Cannot read property 'offsetWidth' of null" && stacktrace.split("\n").filter((_) => _.includes("Array.forEach")).length === 2) {
         // This is a known Ant Design Tabs issue
