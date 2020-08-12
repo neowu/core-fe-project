@@ -86,9 +86,9 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         {pattern: "content security policy", errorCode: "CSP"},
         {pattern: "script error", errorCode: "CORS"},
         // Vendor injected, mostly still with stacktrace
-        {pattern: "ucbrowser", errorCode: "UC"},
-        {pattern: "vivo", errorCode: "VIVO"},
-        {pattern: "huawei", errorCode: "HUAWEI"},
+        {pattern: "ucbrowser", errorCode: "VENDOR"},
+        {pattern: "vivo", errorCode: "VENDOR"},
+        {pattern: "huawei", errorCode: "VENDOR"},
     ];
 
     if (isIEBrowser()) {
