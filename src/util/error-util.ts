@@ -102,7 +102,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
     if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
         return "IGNORED_UNCATEGORIZED_ISSUE";
     }
-    if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage === "Cannot read property 'offsetWidth' of null" && stacktrace.split("\n").filter((_) => _.includes("Array.forEach")).length === 2) {
+    if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage.includes("'offsetWidth' of null") && stacktrace.includes("Array.forEach")) {
         // This is a known Ant Design Tabs issue
         return "IGNORED_ANTD_TAB_ISSUE";
     }
