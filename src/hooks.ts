@@ -2,6 +2,7 @@ import React from "react";
 import {Action, State} from "./reducer";
 import {useDispatch, useSelector} from "react-redux";
 
+// TODO: has buug if null or undefined
 type DeferLiteralArrayCheck<T> = T extends Array<string | number | boolean | null | undefined> ? T : never;
 
 export function useLoadingStatus(identifier: string = "global"): boolean {

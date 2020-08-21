@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
 import {all, call, race} from "../src/typed-saga";
 import {call as rawCall, delay} from "redux-saga/effects";
 

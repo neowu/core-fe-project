@@ -13,6 +13,7 @@ import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaIterator, call, delay} from "../typed-saga";
+import {registerPerformanceTracker} from "./performance-tracker";
 
 /**
  * Configuration for frontend version check.
@@ -190,6 +191,10 @@ function setupLocationChangeListener(listener?: (location: Location) => void) {
 function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
     app.logger.info("@@ENTER", {});
     app.loggerConfig = loggerConfig || null;
+    if (loggerConfig?.performanceLogging) {
+        registerPerformanceTracker();
+    }
+
     app.sagaMiddleware.run(function* () {
         let lastChecksumTimestamp = 0;
         let lastChecksum: string | null = null;

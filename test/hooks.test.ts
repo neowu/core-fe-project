@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
-import {SagaIterator, useModuleAction as useModuleActionImpl} from "../src";
+import {useModuleAction} from "../src/hooks";
 import {Action} from "../src/reducer";
+
+jest.mock("../src/hooks", () => ({
+    useModuleAction: () => () => {},
+}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
 
 // Only test type
-const useModuleAction: typeof useModuleActionImpl = (() => () => {}) as any;
+// const useModuleAction: typeof useModuleActionImpl = (() => () => {}) as any;
 
 describe("useModuleAction(type test)", () => {
     test("Should accept ActionCreator with only primitive dependency", () => {
@@ -22,7 +24,7 @@ describe("useModuleAction(type test)", () => {
         // @ts-expect-error
         const expectWrongParamToFail = curry2("s");
 
-        const allCurry = useModuleAction(allPrimitiveActionCreator, 1, "", 3);
+        const allCurry = useModuleAction(allPrimitiveActionCreator, 1, "", false);
         const expectAllCurryToPass = allCurry();
     });
 
@@ -68,7 +70,7 @@ describe("useModuleAction(type test)", () => {
     });
 
     test("String literal union with multiple param", () => {
-        const createTabChangeAction: ActionCreator<["a" | "b" | "c", {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
+        const createTabChangeAction: ActionCreator<["a" | "b" | "c" | undefined, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
         const changeToA = useModuleAction(createTabChangeAction, "a");
         const changeToB = useModuleAction(createTabChangeAction, "b");
         const changeToC = useModuleAction(createTabChangeAction, "c");

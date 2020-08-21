@@ -50,6 +50,7 @@
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
+        "@typescript-eslint/ban-ts-comment": "off",
         "no-console": ["error", {"allow": ["info", "warn", "error"]}],
         "no-duplicate-imports": ["error"],
         "no-useless-computed-key": ["error"],

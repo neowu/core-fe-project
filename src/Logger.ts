@@ -31,6 +31,7 @@ interface ErrorLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
+    performanceLogging?: boolean;
     maskedKeywords?: RegExp[];
 }
 
