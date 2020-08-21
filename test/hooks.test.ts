@@ -14,9 +14,13 @@ describe("useModuleAction(type test)", () => {
 
         const curry1 = useModuleAction(allPrimitiveActionCreator, 1);
         const expectCurry1ToPass = curry1("", 3);
+        // @ts-expect-error
+        const expectWrongParamToFail = curry1(3, "s");
 
         const curry2 = useModuleAction(allPrimitiveActionCreator, 1, "2");
         const expectCurry2ToPass = curry2(3);
+        // @ts-expect-error
+        const expectWrongParamToFail = curry2("s");
 
         const allCurry = useModuleAction(allPrimitiveActionCreator, 1, "", 3);
         const expectAllCurryToPass = allCurry();
