@@ -2,6 +2,8 @@ import React from "react";
 import {Action, State} from "./reducer";
 import {useDispatch, useSelector} from "react-redux";
 
+type DeferLiteralArrayCheck<T> = T extends Array<string | number | boolean | null | undefined> ? T : never;
+
 export function useLoadingStatus(identifier: string = "global"): boolean {
     return useSelector((state: State) => state.loading[identifier] > 0);
 }
@@ -22,7 +24,7 @@ export function useLoadingStatus(identifier: string = "global"): boolean {
  * useModuleAction(foo, 100, "", true) will return:
  * () => void;
  */
-export function useModuleAction<T extends Array<string | number | boolean | null | undefined>, U extends any[]>(actionCreator: (...args: [...T, ...U]) => Action<[...T, ...U]>, ...deps: T): (...args: U) => void {
+export function useModuleAction<T extends any[], U extends any[]>(actionCreator: (...args: [...T, ...U]) => Action<[...DeferLiteralArrayCheck<T>, ...U]>, ...deps: T): (...args: U) => void {
     const dispatch = useDispatch();
     return React.useCallback((...args: U) => dispatch(actionCreator(...deps, ...args)), [dispatch, actionCreator, ...deps]);
 }
