@@ -68,14 +68,19 @@ describe("useModuleAction(type test)", () => {
     });
 
     test("String literal union with multiple param", () => {
-        const createTabChangeAction: ActionCreator<["a" | "b" | "c" | null, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
+        const createTabChangeAction: ActionCreator<["a" | "b" | "c" | null | undefined | 100, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
         const changeToA = useModuleAction(createTabChangeAction, "a");
         const changeToB = useModuleAction(createTabChangeAction, "b");
         const changeToC = useModuleAction(createTabChangeAction, "c");
+        const changeToNull = useModuleAction(createTabChangeAction, null);
+        const changeToUndefined = useModuleAction(createTabChangeAction, undefined);
+        const changeTo100 = useModuleAction(createTabChangeAction, 100);
 
         const expectChangeToAToPass = changeToA({data: "test"});
 
         // @ts-expect-error
-        const expectToFail = changeToA("");
+        const expectToFail1 = changeToA();
+        // @ts-expect-error
+        const expectToFail2 = changeToA("");
     });
 });
