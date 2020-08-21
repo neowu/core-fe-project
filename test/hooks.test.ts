@@ -1,14 +1,12 @@
 import {useModuleAction} from "../src/hooks";
 import {Action} from "../src/reducer";
 
-jest.mock("../src/hooks", () => ({
-    useModuleAction: () => () => {},
-}));
+/**
+ * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
+ */
+jest.mock("../src/hooks", () => ({useModuleAction: () => () => {}}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
-
-// Only test type
-// const useModuleAction: typeof useModuleActionImpl = (() => () => {}) as any;
 
 describe("useModuleAction(type test)", () => {
     test("Should accept ActionCreator with only primitive dependency", () => {
@@ -70,7 +68,7 @@ describe("useModuleAction(type test)", () => {
     });
 
     test("String literal union with multiple param", () => {
-        const createTabChangeAction: ActionCreator<["a" | "b" | "c" | undefined, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
+        const createTabChangeAction: ActionCreator<["a" | "b" | "c" | null, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
         const changeToA = useModuleAction(createTabChangeAction, "a");
         const changeToB = useModuleAction(createTabChangeAction, "b");
         const changeToC = useModuleAction(createTabChangeAction, "c");
