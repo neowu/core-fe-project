@@ -38,3 +38,18 @@ test('stringifyWithMask (with mask "password")', () => {
     expect(stringifyWithMask(mask, maskedOutput, {name: "jim", pwd: "123456"})).toEqual(`{"name":"jim","pwd":"123456"}`);
     expect(stringifyWithMask(mask, maskedOutput)).toEqual(undefined);
 });
+
+test("stringifyWithMask (cyclic reference)", () => {
+    const circularReference: {data: number; self?: any} = {data: 123};
+    circularReference.self = circularReference;
+
+    expect(stringifyWithMask([], "", circularReference)).toEqual(`{"data":123}`);
+
+    circularReference.self = {};
+    circularReference.self.topSelf = circularReference;
+    circularReference.self.anotherSelf = circularReference.self;
+    expect(stringifyWithMask([], "", circularReference)).toEqual(`{"data":123,"self":{}}`);
+
+    delete circularReference.self;
+    expect(stringifyWithMask([], "", circularReference)).toEqual(`{"data":123}`);
+});
