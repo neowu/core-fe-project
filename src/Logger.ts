@@ -59,6 +59,7 @@ export interface Logger {
 export class LoggerImpl implements Logger {
     private environmentContext: {[key: string]: string | (() => string)} = {};
     private logQueue: Log[] = [];
+    private collectPosition = 0;
 
     constructor() {
         this.environmentContext = loggerContext;
@@ -119,33 +120,46 @@ export class LoggerImpl implements Logger {
         this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
-    collect(): Log[] {
-        return this.logQueue;
+    collect(maxSize: number = 0): ReadonlyArray<Log> {
+        const totalLength = this.logQueue.length;
+        if (maxSize > 0 && maxSize < totalLength) {
+            this.collectPosition = maxSize;
+            return this.logQueue.slice(0, maxSize);
+        } else {
+            this.collectPosition = totalLength;
+            return this.logQueue;
+        }
     }
 
-    empty(): void {
-        this.logQueue = [];
+    emptyLastCollection(): void {
+        this.logQueue = this.logQueue.slice(this.collectPosition);
     }
 
-    appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
-        const completeContext = {};
+    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
+        let contextEntryLength = 0;
+        const completeContext: {[key: string]: string} = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
-            if (typeof value === "string") {
-                completeContext[key] = value.substr(0, 1000);
-            } else {
-                try {
-                    completeContext[key] = value();
-                } catch (e) {
-                    const message = errorToException(e).message;
-                    completeContext[key] = "ERR# " + message;
-                    console.warn("[framework] Fail to execute logger context: " + message);
+            if (contextEntryLength < 20) {
+                if (typeof value === "string") {
+                    completeContext[key] = value.substr(0, 1000);
+                } else {
+                    try {
+                        completeContext[key] = value();
+                    } catch (e) {
+                        const message = errorToException(e).message;
+                        completeContext[key] = "ERR# " + message;
+                        console.warn("[framework] Fail to execute logger context: " + message);
+                    }
                 }
+                contextEntryLength++;
             }
         });
 
+        let infoEntryLength = 0;
         const trimmedInfo: {[key: string]: string} = {};
         Object.entries(data.info).map(([key, value]) => {
-            if (value !== undefined) {
+            if (value !== undefined && infoEntryLength < 20) {
+                infoEntryLength++;
                 trimmedInfo[key] = value.substr(0, 1000);
             }
         });

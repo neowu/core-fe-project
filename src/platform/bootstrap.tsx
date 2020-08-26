@@ -203,9 +203,7 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: V
             yield delay(30000);
 
             // Send collected log to event server
-            if (loggerConfig) {
-                yield* call(sendEventLogs, loggerConfig.serverURL);
-            }
+            yield* call(sendEventLogs);
 
             // Check if staying too long, then check if need refresh by comparing server-side checksum
             if (updateReminderConfig) {
@@ -232,27 +230,29 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: V
     });
 }
 
-export async function sendEventLogs(serverURL: string): Promise<void> {
-    try {
-        const logs = app.logger.collect();
-        if (logs.length > 0) {
-            /**
-             * Event server URL may be different from current domain (supposing abc.com)
-             *
-             * In order to support this, we must ensure:
-             * - Event server allows cross-origin request from current domain
-             * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
-             */
-            await ajax("POST", serverURL, {}, {events: logs}, {withCredentials: true});
-            app.logger.empty();
-        }
-    } catch (e) {
-        if (e instanceof APIException) {
-            // For APIException, retry always leads to same error, so have to give up
-            // Do not log network exceptions
-            const length = app.logger.collect().length;
-            app.logger.empty();
-            app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);
+export async function sendEventLogs(): Promise<void> {
+    if (app.loggerConfig) {
+        const logs = app.logger.collect(200);
+        const logLength = logs.length;
+        if (logLength > 0) {
+            try {
+                /**
+                 * Event server URL may be different from current domain (supposing abc.com)
+                 *
+                 * In order to support this, we must ensure:
+                 * - Event server allows cross-origin request from current domain
+                 * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
+                 */
+                await ajax("POST", app.loggerConfig.serverURL, {}, {events: logs}, {withCredentials: true});
+                app.logger.emptyLastCollection();
+            } catch (e) {
+                if (e instanceof APIException) {
+                    // For APIException, retry always leads to same error, so have to give up
+                    // Do not log network exceptions
+                    app.logger.emptyLastCollection();
+                    app.logger.exception(e, {droppedLogs: logLength.toString()}, LOGGER_ACTION);
+                }
+            }
         }
     }
 }
@@ -271,7 +271,7 @@ async function fetchVersionChecksum(url: string): Promise<string | null> {
     } catch (e) {
         if (e instanceof APIException) {
             // Do not log network exceptions
-            app.logger.exception(errorToException(e), {}, VERSION_CHECK_ACTION);
+            app.logger.exception(e, {}, VERSION_CHECK_ACTION);
         }
         return null;
     }

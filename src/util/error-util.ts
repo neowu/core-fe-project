@@ -60,10 +60,8 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
 
 let isUserErrorHandlerRunning = false;
 export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
-    if (app.loggerConfig) {
-        // For app, report errors to event server ASAP, in case of sudden termination
-        yield spawn(sendEventLogs, app.loggerConfig.serverURL);
-    }
+    // For app, report errors to event server ASAP, in case of sudden termination
+    yield spawn(sendEventLogs);
     if (isUserErrorHandlerRunning) return;
 
     try {
