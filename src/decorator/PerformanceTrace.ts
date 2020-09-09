@@ -26,11 +26,11 @@ export function PerformanceTrace(warningThresholdSecond: number = 5) {
             };
 
             try {
-                createTimingTrack("business_start");
+                createTimingTrack("action_start");
                 yield* handler();
             } finally {
                 const duration = Date.now() - baseTime;
-                createTimingTrack("business_end");
+                createTimingTrack("action_end");
                 createTimingTrack("request_start", perfTiming.requestStart);
                 createTimingTrack("response_end", perfTiming.responseEnd);
                 createTimingTrack("dom_start", perfTiming.domLoading);
@@ -39,6 +39,7 @@ export function PerformanceTrace(warningThresholdSecond: number = 5) {
                 if (duration / 1000 >= warningThresholdSecond) {
                     thisModule.logger.warn({
                         action: PERFORMANCE_TRACE_ACTION,
+                        elapsedTime: duration,
                         info: {traced_action: handler.actionName},
                         stats: relativeTiming,
                         errorCode: "POOR_PERFORMANCE",
@@ -47,6 +48,7 @@ export function PerformanceTrace(warningThresholdSecond: number = 5) {
                 } else {
                     thisModule.logger.info({
                         action: PERFORMANCE_TRACE_ACTION,
+                        elapsedTime: duration,
                         info: {traced_action: handler.actionName},
                         stats: relativeTiming,
                     });
