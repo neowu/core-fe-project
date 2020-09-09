@@ -10,7 +10,7 @@ export {ajax, uri} from "./util/network";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 
-export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, TimeLimit, Lifecycle, Log} from "./decorator";
+export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, PerformanceTrace, Lifecycle, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

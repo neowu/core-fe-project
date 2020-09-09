@@ -8,10 +8,12 @@ export function Mutex() {
     let lockTime: number | null = null;
     return createActionHandlerDecorator(function* (handler, thisModule) {
         if (lockTime) {
-            thisModule.logger.info(handler.actionName, {
-                actionPayload: handler.maskedParams,
-                mutexLocked: "true",
-                lockedDuration: (Date.now() - lockTime).toString(),
+            thisModule.logger.info({
+                action: handler.actionName,
+                info: {
+                    payload: handler.maskedParams,
+                    mutex_locked_duration: (Date.now() - lockTime).toString(),
+                },
             });
         } else {
             try {

@@ -20,7 +20,7 @@ export class ModuleProxy<M extends Module<any, any>> {
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P> {
-            static displayName = `ModuleBoundary(${moduleName})`;
+            static displayName = `Module[${moduleName}]`;
             private lifecycleSagaTask: Task | null = null;
             private lastDidUpdateSagaTask: Task | null = null;
             private successTickCount: number = 0;
@@ -32,8 +32,9 @@ export class ModuleProxy<M extends Module<any, any>> {
 
             componentDidUpdate(prevProps: Readonly<P>) {
                 const prevLocation = (prevProps as any).location;
-                const currentLocation = (this.props as any).location;
-                const currentRouteParams = (this.props as any).match ? (this.props as any).match.params : null;
+                const props = this.props as RouteComponentProps & P;
+                const currentLocation = props.location;
+                const currentRouteParams = props.match ? props.match.params : null;
                 if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
                     // Only trigger onRender if current component is connected to <Route>
                     try {
@@ -42,10 +43,18 @@ export class ModuleProxy<M extends Module<any, any>> {
                         // In rare case, it may throw error, just ignore
                     }
                     this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function* () {
-                        const locationChangeRenderActionName = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
+                        const action = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
                         const startTime = Date.now();
-                        yield rawCall(executeAction, locationChangeRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
-                        app.logger.info(locationChangeRenderActionName, {locationParams: JSON.stringify(currentRouteParams)}, Date.now() - startTime);
+                        yield rawCall(executeAction, action, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
+                        app.logger.info({
+                            action,
+                            elapsedTime: Date.now() - startTime,
+                            info: {
+                                // URL params should not contain any sensitive or complicated objects
+                                route_params: JSON.stringify(currentRouteParams),
+                                history_state: JSON.stringify(currentLocation.state),
+                            },
+                        });
                     });
                     app.store.dispatch(navigationPreventionAction(false));
                 }
@@ -62,9 +71,12 @@ export class ModuleProxy<M extends Module<any, any>> {
                     app.store.dispatch(navigationPreventionAction(false));
                 }
 
-                app.logger.info(`${moduleName}/@@DESTROY`, {
-                    successTickCount: this.successTickCount.toString(),
-                    stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                app.logger.info({
+                    action: `${moduleName}/@@DESTROY`,
+                    info: {
+                        success_tick: this.successTickCount.toString(),
+                        staying_second: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                    },
                 });
 
                 try {
@@ -93,22 +105,44 @@ export class ModuleProxy<M extends Module<any, any>> {
                 if (lifecycleListener.onEnter.isLifecycle) {
                     const startTime = Date.now();
                     yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
-                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
+                    app.logger.info({
+                        action: enterActionName,
+                        elapsedTime: Date.now() - startTime,
+                        info: {
+                            component_props: JSON.stringify(props),
+                        },
+                    });
                 } else {
-                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
+                    app.logger.info({
+                        action: enterActionName,
+                        info: {
+                            component_props: JSON.stringify(props),
+                        },
+                    });
                 }
 
                 if (lifecycleListener.onRender.isLifecycle) {
                     const initialRenderActionName = `${moduleName}/@@INITIAL_RENDER`;
                     if ("match" in props && "location" in props) {
                         const startTime = Date.now();
-                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), props.match.params, props.location);
-                        app.logger.info(initialRenderActionName, {locationParams: JSON.stringify(props.match.params)}, Date.now() - startTime);
+                        const routeParams = props.match.params;
+                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), routeParams, props.location);
+                        app.logger.info({
+                            action: initialRenderActionName,
+                            elapsedTime: Date.now() - startTime,
+                            info: {
+                                route_params: JSON.stringify(props.match.params),
+                                history_state: JSON.stringify(props.location.state),
+                            },
+                        });
                     } else {
+                        console.warn(`[framework] Module [${moduleName}] is non-Route, use onEnter() instead of onRender()`);
                         const startTime = Date.now();
-                        console.warn(`[framework] Module ${moduleName} is not attached to routers, use onEnter() lifecycle instead`);
-                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory);
-                        app.logger.info(initialRenderActionName, {locationParams: "[Non-Route]"}, Date.now() - startTime);
+                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory.location);
+                        app.logger.info({
+                            action: initialRenderActionName,
+                            elapsedTime: Date.now() - startTime,
+                        });
                     }
                 }
 

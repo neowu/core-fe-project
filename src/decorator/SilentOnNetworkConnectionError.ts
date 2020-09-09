@@ -15,8 +15,8 @@ export function SilentOnNetworkConnectionError() {
                 app.logger.exception(
                     e,
                     {
-                        actionPayload: handler.maskedParams,
-                        isSilent: "true",
+                        payload: handler.maskedParams,
+                        process_method: "silent",
                     },
                     handler.actionName
                 );

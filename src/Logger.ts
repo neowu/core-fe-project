@@ -5,21 +5,26 @@ import {APIException, Exception, JavaScriptException, NetworkConnectionException
 
 interface Log {
     date: Date;
+    action: string;
     result: "OK" | "WARN" | "ERROR";
     elapsedTime: number;
-    context: {[key: string]: string}; // To store indexed data (for Elastic Search)
-    info: {[key: string]: string | undefined}; // To store text data (no index)
-    action?: string;
-    errorCode?: string;
+    context: {[key: string]: string}; // Indexed data for Elastic Search, key in lowercase with underscore, e.g: some_field
+    info: {[key: string]: string}; // Text data for view only, key in lowercase with underscore, e.g: some_field
+    stats: {[key: string]: number}; // Numerical data for Elastic Search and statistics, key in lowercase with underscore, e.g: some_field
+    errorCode?: string; // Naming in uppercase with underscore, e.g: SOME_ERROR
     errorMessage?: string;
 }
 
-interface ErrorLogEntry {
+interface InfoLogEntry {
     action: string;
-    elapsedTime: number;
+    elapsedTime?: number;
+    info?: {[key: string]: string | undefined};
+    stats?: {[key: string]: number | undefined};
+}
+
+interface ErrorLogEntry extends InfoLogEntry {
     errorCode: string;
     errorMessage: string;
-    info: {[key: string]: string | undefined};
 }
 
 /**
@@ -31,66 +36,56 @@ interface ErrorLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
-    performanceLogging?: boolean;
     maskedKeywords?: RegExp[];
 }
 
 export interface Logger {
     addContext(context: {[key: string]: string | (() => string)}): void;
-
-    /**
-     * Add a log item, whose result is OK
-     */
-    info(action: string, info: {[key: string]: string | undefined}, elapsedTime?: number): void;
-
-    /**
-     * Add a log item, whose result is WARN
-     * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
-     */
+    info(entry: InfoLogEntry): void;
     warn(data: ErrorLogEntry): void;
-
-    /**
-     * Add a log item, whose result is ERROR
-     * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
-     */
     error(data: ErrorLogEntry): void;
 }
 
 export class LoggerImpl implements Logger {
-    private environmentContext: {[key: string]: string | (() => string)} = {};
+    private contextMap: {[key: string]: string | (() => string)} = {};
     private logQueue: Log[] = [];
     private collectPosition = 0;
 
     constructor() {
-        this.environmentContext = loggerContext;
+        this.contextMap = loggerContext;
     }
 
     addContext(context: {[key: string]: string | (() => string)}): void {
-        this.environmentContext = {...this.environmentContext, ...context};
+        const newContextMap = {...this.contextMap, ...context};
+        const contextSize = Object.keys(newContextMap).length;
+        if (contextSize > 20) {
+            console.warn(`[framework] Logger context size ${contextSize} is too large`);
+        }
+        this.contextMap = newContextMap;
     }
 
-    info(action: string, info: {[key: string]: string | undefined}, elapsedTime?: number): void {
-        this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
+    info(entry: InfoLogEntry): void {
+        this.createLog("OK", entry);
     }
 
-    warn(data: ErrorLogEntry): void {
-        this.appendLog("WARN", data);
+    warn(entry: ErrorLogEntry): void {
+        this.createLog("WARN", entry);
     }
 
-    error(data: ErrorLogEntry): void {
-        this.appendLog("ERROR", data);
+    error(entry: ErrorLogEntry): void {
+        this.createLog("ERROR", entry);
     }
 
-    exception(exception: Exception, extra: {[key: string]: string | undefined}, action: string): void {
+    exception(exception: Exception, extraInfo: {[key: string]: string | undefined}, action: string): void {
         let isWarning: boolean;
         let errorCode: string;
-        const info: {[key: string]: string | undefined} = {...extra};
+        const info: {[key: string]: string | undefined} = {...extraInfo};
 
         if (exception instanceof NetworkConnectionException) {
             isWarning = true;
             errorCode = "NETWORK_FAILURE";
-            info["requestURL"] = exception.requestURL;
-            info["originalErrorMessage"] = exception.originalErrorMessage;
+            info["api_url"] = exception.requestURL;
+            info["original_message"] = exception.originalErrorMessage;
         } else if (exception instanceof APIException) {
             if (exception.statusCode === 400 && exception.errorCode === "VALIDATION_ERROR") {
                 isWarning = false;
@@ -99,25 +94,25 @@ export class LoggerImpl implements Logger {
                 isWarning = true;
                 errorCode = `API_ERROR_${exception.statusCode}`;
             }
-            info["requestURL"] = exception.requestURL;
-            info["responseData"] = JSON.stringify(exception.responseData);
+            info["api_url"] = exception.requestURL;
+            info["api_response"] = JSON.stringify(exception.responseData);
             if (exception.errorId) {
-                info["apiErrorId"] = exception.errorId;
+                info["api_error_id"] = exception.errorId;
             }
             if (exception.errorCode) {
-                info["apiErrorCode"] = exception.errorCode;
+                info["api_error_code"] = exception.errorCode;
             }
         } else if (exception instanceof JavaScriptException) {
             isWarning = false;
             errorCode = "JAVASCRIPT_ERROR";
-            info["appState"] = JSON.stringify(app.store.getState().app);
+            info["app_state"] = JSON.stringify(app.store.getState().app);
         } else {
             console.warn("[framework] Exception class should not be extended, throw Error instead");
             isWarning = false;
             errorCode = "JAVASCRIPT_ERROR";
         }
 
-        this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
+        this.createLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
     collect(maxSize: number = 0): ReadonlyArray<Log> {
@@ -135,44 +130,53 @@ export class LoggerImpl implements Logger {
         this.logQueue = this.logQueue.slice(this.collectPosition);
     }
 
-    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
-        let contextEntryLength = 0;
-        const completeContext: {[key: string]: string} = {};
-        Object.entries(this.environmentContext).map(([key, value]) => {
-            if (contextEntryLength < 20) {
-                if (typeof value === "string") {
-                    completeContext[key] = value.substr(0, 1000);
-                } else {
-                    try {
-                        completeContext[key] = value();
-                    } catch (e) {
-                        const message = errorToException(e).message;
-                        completeContext[key] = "ERR# " + message;
-                        console.warn("[framework] Fail to execute logger context: " + message);
-                    }
+    private createLog(result: "OK" | "WARN" | "ERROR", entry: InfoLogEntry | ErrorLogEntry): void {
+        // Generate context
+        const context: {[key: string]: string} = {};
+        Object.entries(this.contextMap).map(([key, value]) => {
+            if (typeof value === "string") {
+                context[key] = value.substr(0, 1000);
+            } else {
+                try {
+                    context[key] = value();
+                } catch (e) {
+                    const message = errorToException(e).message;
+                    context[key] = "ERR# " + message;
+                    console.warn("[framework] Fail to execute logger context: " + message);
                 }
-                contextEntryLength++;
             }
         });
 
-        let infoEntryLength = 0;
-        const trimmedInfo: {[key: string]: string} = {};
-        Object.entries(data.info).map(([key, value]) => {
-            if (value !== undefined && infoEntryLength < 20) {
-                infoEntryLength++;
-                trimmedInfo[key] = value.substr(0, 1000);
-            }
-        });
+        // Generate info
+        const info: {[key: string]: string} = {};
+        if (entry.info) {
+            Object.entries(entry.info).map(([key, value]) => {
+                if (value !== undefined) {
+                    info[key] = key === "app_state" ? value : value.substr(0, 1000);
+                }
+            });
+        }
+
+        // Generate stats
+        const stats: {[key: string]: number} = {};
+        if (entry.stats) {
+            Object.entries(entry.stats).map(([key, value]) => {
+                if (value !== undefined) {
+                    stats[key] = value;
+                }
+            });
+        }
 
         const event: Log = {
             date: new Date(),
+            action: entry.action,
+            elapsedTime: entry.elapsedTime || 0,
             result,
-            context: completeContext,
-            action: data.action,
-            info: trimmedInfo,
-            errorCode: data.errorCode,
-            errorMessage: data.errorMessage?.substr(0, 1000),
-            elapsedTime: data.elapsedTime,
+            context,
+            info,
+            stats,
+            errorCode: "errorCode" in entry ? entry.errorCode : undefined,
+            errorMessage: "errorMessage" in entry ? entry.errorMessage.substr(0, 1000) : undefined,
         };
         this.logQueue.push(event);
     }

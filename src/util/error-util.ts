@@ -10,7 +10,7 @@ interface ErrorExtra {
     extraStacktrace?: string;
 }
 
-export function errorToException(error: any): Exception {
+export function errorToException(error: unknown): Exception {
     if (error instanceof Exception) {
         return error;
     } else {
@@ -32,21 +32,25 @@ export function errorToException(error: any): Exception {
     }
 }
 
-export function captureError(error: any, action: string, extra: ErrorExtra = {}): Exception {
+export function captureError(error: unknown, action: string, extra: ErrorExtra = {}): Exception {
     if (process.env.NODE_ENV === "development") {
         console.error(`[framework] Error captured from [${action}]`, error);
     }
 
     const exception = errorToException(error);
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
-    const info = {...extra, stacktrace: errorStacktrace};
+    const info: {[key: string]: string | undefined} = {
+        payload: extra.actionPayload,
+        extra_stacktrace: extra.extraStacktrace,
+        stacktrace: errorStacktrace,
+    };
 
     const errorCode = specialErrorCode(exception, action, errorStacktrace);
     if (errorCode) {
         app.logger.warn({
-            info,
             action,
             elapsedTime: 0,
+            info,
             errorMessage: exception.message,
             errorCode,
         });

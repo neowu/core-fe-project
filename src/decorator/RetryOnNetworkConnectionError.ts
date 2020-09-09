@@ -1,5 +1,5 @@
-import {NetworkConnectionException} from "../Exception";
 import {app} from "../app";
+import {NetworkConnectionException} from "../Exception";
 import {delay} from "redux-saga/effects";
 import {createActionHandlerDecorator} from "./index";
 
@@ -11,24 +11,20 @@ export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3) {
     return createActionHandlerDecorator(function* (handler) {
         let retryTime = 0;
         while (true) {
-            const currentRoundStartTime = Date.now();
             try {
                 yield* handler();
                 break;
             } catch (e) {
                 if (e instanceof NetworkConnectionException) {
                     retryTime++;
-                    app.logger.warn({
-                        action: handler.actionName,
-                        errorCode: "NETWORK_FAILURE_RETRY",
-                        errorMessage: `Retry #${retryTime} after ${retryIntervalSecond} seconds: ${e.message}`,
-                        info: {
-                            requestURL: e.requestURL,
-                            actionPayload: handler.maskedParams,
-                            originalErrorMessage: e.originalErrorMessage,
+                    app.logger.exception(
+                        e,
+                        {
+                            payload: handler.maskedParams,
+                            process_method: `will retry #${retryTime}`,
                         },
-                        elapsedTime: Date.now() - currentRoundStartTime,
-                    });
+                        handler.actionName
+                    );
                     yield delay(retryIntervalSecond * 1000);
                 } else {
                     throw e;

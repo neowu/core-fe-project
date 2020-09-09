@@ -13,7 +13,6 @@ import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaIterator, call, delay} from "../typed-saga";
-import {registerPerformanceTracker} from "./performance-tracker";
 
 /**
  * Configuration for frontend version check.
@@ -165,7 +164,7 @@ function setupAppExitListener(eventServerURL?: string) {
             isIOS ? "pagehide" : "unload",
             () => {
                 try {
-                    app.logger.info("@@EXIT", {});
+                    app.logger.info({action: "@@EXIT"});
                     const logs = app.logger.collect();
                     /**
                      * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
@@ -189,18 +188,15 @@ function setupLocationChangeListener(listener?: (location: Location) => void) {
 }
 
 function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
-    app.logger.info("@@ENTER", {});
+    app.logger.info({action: "@@ENTER"});
     app.loggerConfig = loggerConfig || null;
-    if (loggerConfig?.performanceLogging) {
-        registerPerformanceTracker();
-    }
 
     app.sagaMiddleware.run(function* () {
         let lastChecksumTimestamp = 0;
         let lastChecksum: string | null = null;
         while (true) {
-            // Loop on every 30 second
-            yield delay(30000);
+            // Loop on every 15 second
+            yield delay(15000);
 
             // Send collected log to event server
             yield* call(sendEventLogs);
@@ -263,10 +259,14 @@ export async function sendEventLogs(): Promise<void> {
  */
 async function fetchVersionChecksum(url: string): Promise<string | null> {
     try {
-        const startTimestamp = Date.now();
+        const startTime = Date.now();
         const response = await ajax("GET", url, {}, null);
         const checksum = JSON.stringify(response);
-        app.logger.info(VERSION_CHECK_ACTION, {checksum}, Date.now() - startTimestamp);
+        app.logger.info({
+            action: VERSION_CHECK_ACTION,
+            elapsedTime: Date.now() - startTime,
+            info: {checksum},
+        });
         return checksum;
     } catch (e) {
         if (e instanceof APIException) {
