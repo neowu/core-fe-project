@@ -1,15 +1,10 @@
-import {useAction, useObjectKeyAction, useUnaryAction} from "../src";
-import {Action as ReduxAction} from "redux";
+import {useAction, useObjectKeyAction, useUnaryAction} from "../src/hooks";
+import {Action} from "../src/reducer";
 
 /**
  * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
  */
-jest.mock("../src/hooks", () => ({useModuleAction: () => () => {}}));
-
-interface Action<P> extends ReduxAction<string> {
-    payload: P;
-    name?: undefined;
-}
+jest.mock("../src/hooks", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
 
