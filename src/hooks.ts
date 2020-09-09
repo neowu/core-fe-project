@@ -9,23 +9,6 @@ export function useLoadingStatus(identifier: string = "global"): boolean {
 }
 
 /**
- * For actions like:
- * *foo(a: number, b: string, c: boolean): SagaIterator {..}
- *
- * useModuleAction(foo) will return:
- * (a: number, b: string, c: boolean) => void;
- *
- * useModuleAction(foo, 100) will return:
- * (b: string, c: boolean) => void;
- *
- * useModuleAction(foo, 100, "") will return:
- * (c: boolean) => void;
- *
- * useModuleAction(foo, 100, "", true) will return:
- * () => void;
- */
-
-/**
  * Action parameters must be of primitive types, so that the dependency check can work well.
  * No need add dispatch to dep list, because it is always fixed.
  */
@@ -34,6 +17,13 @@ export function useAction<P extends Array<string | number | boolean | null | und
     return React.useCallback(() => dispatch(actionCreator(...deps)), deps);
 }
 
+/**
+ * For actions like:
+ * *foo(a: number, b: string, c: boolean): SagaIterator {..}
+ *
+ * useModuleAction(foo, 100, "") will return:
+ * (c: boolean) => void;
+ */
 export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...P, U]) => Action<[...DeferLiteralArrayCheck<P>, U]>, ...deps: P): (arg: U) => void {
     const dispatch = useDispatch();
     return React.useCallback((arg: U) => dispatch(actionCreator(...deps, arg)), deps);
