@@ -9,24 +9,24 @@ export function useLoadingStatus(identifier: string = "global"): boolean {
 }
 
 /**
+ * Action parameters must be of primitive types, so that the dependency check can work well.
+ * No need add dispatch to dep list, because it is always fixed.
+ */
+export function useAction<P extends Array<string | number | boolean | null | undefined>>(actionCreator: (...args: P) => Action<P>, ...deps: P): () => void {
+    const dispatch = useDispatch();
+    return React.useCallback(() => dispatch(actionCreator(...deps)), deps);
+}
+
+/**
  * For actions like:
  * *foo(a: number, b: string, c: boolean): SagaIterator {..}
  *
- * useModuleAction(foo) will return:
- * (a: number, b: string, c: boolean) => void;
- *
- * useModuleAction(foo, 100) will return:
- * (b: string, c: boolean) => void;
- *
  * useModuleAction(foo, 100, "") will return:
  * (c: boolean) => void;
- *
- * useModuleAction(foo, 100, "", true) will return:
- * () => void;
  */
-export function useModuleAction<T extends any[], U extends any[]>(actionCreator: (...args: [...T, ...U]) => Action<[...DeferLiteralArrayCheck<T>, ...U]>, ...deps: T): (...args: U) => void {
+export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...P, U]) => Action<[...DeferLiteralArrayCheck<P>, U]>, ...deps: P): (arg: U) => void {
     const dispatch = useDispatch();
-    return React.useCallback((...args: U) => dispatch(actionCreator(...deps, ...args)), [dispatch, actionCreator, ...deps]);
+    return React.useCallback((arg: U) => dispatch(actionCreator(...deps, arg)), deps);
 }
 
 /**
@@ -36,7 +36,7 @@ export function useModuleAction<T extends any[], U extends any[]>(actionCreator:
  * useModuleObjectAction(foo, "key") will return:
  * (objectValue: number) => void;
  */
-export function useModuleObjectAction<T extends object, K extends keyof T>(actionCreator: (arg: T) => Action<[T]>, objectKey: K): (objectValue: T[K]) => void {
+export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg: T) => Action<[T]>, objectKey: K): (objectValue: T[K]) => void {
     const dispatch = useDispatch();
     return React.useCallback((objectValue: T[K]) => dispatch(actionCreator({[objectKey]: objectValue} as T)), [dispatch, actionCreator, objectKey]);
 }

@@ -14,6 +14,6 @@ export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkCo
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
-export {useLoadingStatus, useModuleAction, useModuleObjectAction} from "./hooks";
+export {useLoadingStatus, useAction, useObjectKeyAction, useUnaryAction} from "./hooks";
 export {SagaIterator, call, put, spawn, delay, all, race} from "./typed-saga";
 export {logger} from "./app";
