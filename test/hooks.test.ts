@@ -59,6 +59,12 @@ describe("useAction(type test)", () => {
 });
 
 describe("useUnaryAction(type test)", () => {
+    test("Misuse no-arg action", () => {
+        const noArgAction: ActionCreator<[]> = () => ({type: "test", payload: []});
+        // @ts-expect-error
+        const curried = useUnaryAction(noArgAction);
+    });
+
     test("Should curry id", () => {
         const updateAction: ActionCreator<[string, {value: number}]> = (id: string, data: {value: number}) => ({type: "test", payload: [id, data]});
         const updateObjectWithId = useUnaryAction(updateAction, "id");
@@ -66,6 +72,13 @@ describe("useUnaryAction(type test)", () => {
 
         // @ts-expect-error
         updateObjectWithId({value: "s"});
+    });
+
+    test("Cannot use object as dependency", () => {
+        const updateAction: ActionCreator<[string, {value: number}, number]> = (id: string, data: {value: number}, number: number) => ({type: "test", payload: [id, data, number]});
+
+        //  @ts-expect-error
+        const cannotUseObjectAsDeps = useUnaryAction(updateAction, "", {value: 1});
     });
 
     test("String literal union with multiple param", () => {
