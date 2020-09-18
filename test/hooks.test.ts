@@ -1,10 +1,10 @@
-import {useAction, useObjectKeyAction, useUnaryAction} from "../src/hooks";
+import {useAction, useBinaryAction, useObjectKeyAction, useUnaryAction} from "../src/hooks";
 import {Action} from "../src/reducer";
 
 /**
  * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
  */
-jest.mock("../src/hooks", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
+jest.mock("../src/hooks", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useBinaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
 
@@ -95,6 +95,51 @@ describe("useUnaryAction(type test)", () => {
 
         // @ts-expect-error
         changeTab({});
+    });
+});
+
+describe("useBinaryAction(type test)", () => {
+    test("Curry two params", () => {
+        const updateAction: ActionCreator<[string, number]> = (id: string, data: number) => ({type: "test", payload: [id, data]});
+        const updateObjectWithId = useBinaryAction(updateAction);
+
+        updateObjectWithId("54", 50);
+
+        // @ts-expect-error
+        const updateObjectUnaryParam = useBinaryAction(updateAction, "10");
+        // @ts-expect-error
+        const updateObjectBinaryParam = useBinaryAction(updateAction, "10", 5);
+
+        // @ts-expect-error
+        updateObjectWithId("5", "100");
+        // @ts-expect-error
+        updateObjectWithId(5, "10");
+        // @ts-expect-error
+        updateObjectWithId(5, 100);
+
+        // @ts-expect-error
+        updateObjectWithId("5", {value: "5"});
+    });
+
+    test("Curry union type params", () => {
+        const action: ActionCreator<["a" | "b" | "c" | null | undefined | 100, {data: string}]> = (tab, data) => ({type: "String Union test", payload: [tab, data]});
+
+        const update = useBinaryAction(action);
+        update("a", {data: "100"});
+        update(null, {data: "100"});
+        update(100, {data: "100"});
+
+        // @ts-expect-error
+        const updateObject1 = useBinaryAction(action, 100);
+        // @ts-expect-error
+        const updateObject2 = useBinaryAction(action, "a");
+
+        // @ts-expect-error
+        update("d");
+        // @ts-expect-error
+        update("a", {data: 5});
+        // @ts-expect-error
+        update("d", {data: "100"});
     });
 });
 

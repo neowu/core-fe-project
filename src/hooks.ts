@@ -21,12 +21,24 @@ export function useAction<P extends Array<string | number | boolean | null | und
  * For actions like:
  * *foo(a: number, b: string, c: boolean): SagaIterator {..}
  *
- * useModuleAction(foo, 100, "") will return:
+ * useUnaryAction(foo, 100, "") will return:
  * (c: boolean) => void;
  */
 export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...P, U]) => Action<[...DeferLiteralArrayCheck<P>, U]>, ...deps: P): (arg: U) => void {
     const dispatch = useDispatch();
     return React.useCallback((arg: U) => dispatch(actionCreator(...deps, arg)), deps);
+}
+
+/**
+ * For actions like:
+ * *foo(a: number, b: string, c: boolean): SagaIterator {..}
+ *
+ * useBinaryAction(foo, 100) will return:
+ * (b: string, c: boolean) => void;
+ */
+export function useBinaryAction<P extends any[], U, K>(actionCreator: (...args: [...P, U, K]) => Action<[...DeferLiteralArrayCheck<P>, U, K]>, ...deps: P): (arg1: U, arg2: K) => void {
+    const dispatch = useDispatch();
+    return React.useCallback((arg1: U, arg2: K) => dispatch(actionCreator(...deps, arg1, arg2)), deps);
 }
 
 /**
