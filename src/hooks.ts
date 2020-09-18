@@ -33,8 +33,8 @@ export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...
  * For actions like:
  * *foo(a: number, b: string, c: boolean): SagaIterator {..}
  *
- * useBinaryAction(foo, 100, "") will return:
- * (c: boolean) => void;
+ * useBinaryAction(foo, 100) will return:
+ * (b: string, c: boolean) => void;
  */
 export function useBinaryAction<P extends any[], U, K>(actionCreator: (...args: [...P, U, K]) => Action<[...DeferLiteralArrayCheck<P>, U, K]>, ...deps: P): (arg1: U, arg2: K) => void {
     const dispatch = useDispatch();
