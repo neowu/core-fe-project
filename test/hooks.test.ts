@@ -65,6 +65,11 @@ describe("useUnaryAction(type test)", () => {
         const curried = useUnaryAction(noArgAction);
     });
 
+    test("single-arg action", () => {
+        const noArgAction: ActionCreator<[string]> = () => ({type: "test", payload: [""]});
+        const curried = useUnaryAction(noArgAction);
+    });
+
     test("Should curry id", () => {
         const updateAction: ActionCreator<[string, {value: number}]> = (id: string, data: {value: number}) => ({type: "test", payload: [id, data]});
         const updateObjectWithId = useUnaryAction(updateAction, "id");

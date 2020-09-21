@@ -4,8 +4,6 @@ import {useDispatch, useSelector} from "react-redux";
 
 type DeferLiteralArrayCheck<T> = T extends Array<string | number | boolean | null | undefined> ? T : never;
 
-type NonEmptyAction<P extends any[], U> = Action<[...P, U] extends [] | [any] ? never : any[]>;
-
 export function useLoadingStatus(identifier: string = "global"): boolean {
     return useSelector((state: State) => state.loading[identifier] > 0);
 }
@@ -26,7 +24,7 @@ export function useAction<P extends Array<string | number | boolean | null | und
  * useUnaryAction(foo, 100, "") will return:
  * (c: boolean) => void;
  */
-export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...P, U]) => NonEmptyAction<DeferLiteralArrayCheck<P>, U>, ...deps: P): (arg: U) => void {
+export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...P, U]) => Action<[...DeferLiteralArrayCheck<P>, U]>, ...deps: P): (arg: U) => void {
     const dispatch = useDispatch();
     return React.useCallback((arg: U) => dispatch(actionCreator(...deps, arg)), deps);
 }
