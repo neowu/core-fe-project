@@ -154,6 +154,19 @@ describe("useBinaryAction(type test)", () => {
         // @ts-expect-error
         update("d", {data: "100"});
     });
+
+    test("Misuse no-arg action", () => {
+        const noArgAction: ActionCreator<[]> = () => ({type: "test", payload: []});
+        // @ts-expect-error
+        useBinaryAction(noArgAction);
+    });
+    test("Misuse 1-arg action", () => {
+        const oneArgAction: ActionCreator<[number]> = (id) => ({type: "test", payload: [id]});
+        // @ts-expect-error
+        useBinaryAction(oneArgAction, 1);
+        // @ts-expect-error
+        useBinaryAction(oneArgAction);
+    });
 });
 
 describe("useModuleObjectKeyAction(type test)", () => {
