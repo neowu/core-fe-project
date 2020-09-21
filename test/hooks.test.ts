@@ -179,6 +179,18 @@ describe("useBinaryAction(type test)", () => {
         updateObject2("d", {data: "100"});
     });
 
+    test("Curry union type union arg test", () => {
+        const action: ActionCreator<[string, "a" | "b" | "c" | null | undefined | 100, {data: string}]> = (moreData, tab, data) => ({type: "String Union test", payload: [moreData, tab, data]});
+
+        const update = useBinaryAction(action, "null");
+        update("a", {data: "payload"});
+        update("b", {data: "payload"});
+        update("c", {data: "payload"});
+        update(null, {data: "payload"});
+        update(undefined, {data: "payload"});
+        update(100, {data: "payload"});
+    });
+
     test("Misuse no-arg action", () => {
         const noArgAction: ActionCreator<[]> = () => ({type: "test", payload: []});
         // @ts-expect-error
