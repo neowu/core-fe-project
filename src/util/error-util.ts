@@ -5,6 +5,8 @@ import {isIEBrowser} from "./navigator-util";
 import {spawn} from "../typed-saga";
 import {GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION, sendEventLogs} from "../platform/bootstrap";
 
+let errorHandlerRunning = false;
+
 interface ErrorExtra {
     actionPayload?: string; // Should be masked
     extraStacktrace?: string;
@@ -62,19 +64,22 @@ export function captureError(error: unknown, action: string, extra: ErrorExtra =
     return exception;
 }
 
-let isUserErrorHandlerRunning = false;
+export function isErrorHandlingRunning(): boolean {
+    return errorHandlerRunning;
+}
+
 export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
     // For app, report errors to event server ASAP, in case of sudden termination
     yield spawn(sendEventLogs);
-    if (isUserErrorHandlerRunning) return;
+    if (errorHandlerRunning) return;
 
     try {
-        isUserErrorHandlerRunning = true;
+        errorHandlerRunning = true;
         yield* handler(exception);
     } catch (e) {
-        console.warn("[framework] Fail to execute user-defined error handler", e);
+        console.warn("[framework] Fail to execute error handler", e);
     } finally {
-        isUserErrorHandlerRunning = false;
+        errorHandlerRunning = false;
     }
 }
 

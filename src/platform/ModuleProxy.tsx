@@ -6,9 +6,16 @@ import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
+import {isErrorHandlingRunning} from "../util/error-util";
+
+let startupModuleName: string | null = null;
 
 export class ModuleProxy<M extends Module<any, any>> {
-    constructor(private module: M, private actions: ActionCreators<M>) {}
+    constructor(private module: M, private actions: ActionCreators<M>) {
+        if (!startupModuleName) {
+            startupModuleName = module.name;
+        }
+    }
 
     getActions(): ActionCreators<M> {
         return this.actions;
@@ -146,17 +153,62 @@ export class ModuleProxy<M extends Module<any, any>> {
                     }
                 }
 
+                if (moduleName === startupModuleName) {
+                    createStartupPerformanceLog(`${moduleName}/@@STARTUP_PERF`);
+                }
+
                 if (lifecycleListener.onTick.isLifecycle) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        yield rawCall(executeAction, tickActionName, boundTicker);
-                        this.successTickCount++;
+                        if (!isErrorHandlingRunning()) {
+                            yield rawCall(executeAction, tickActionName, boundTicker);
+                            this.successTickCount++;
+                        }
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
             }
         };
+    }
+}
+
+function createStartupPerformanceLog(actionName: string): void {
+    if (performance && performance.timing) {
+        // For performance timing API, please refer: https://www.w3.org/blog/2012/09/performance-timing-information/
+        const now = Date.now();
+        const perfTiming = performance.timing;
+        const baseTime = perfTiming.navigationStart;
+        const duration = now - baseTime;
+        const stats: {[key: string]: number} = {};
+
+        const createStats = (key: string, startTimestamp: number, endTimestamp: number) => {
+            if (startTimestamp >= baseTime && endTimestamp >= startTimestamp) {
+                stats[`${key}_start`] = startTimestamp - baseTime;
+                stats[`${key}_end`] = endTimestamp - baseTime;
+            }
+        };
+
+        createStats("http", perfTiming.requestStart, perfTiming.responseEnd);
+        createStats("dom", perfTiming.domLoading, perfTiming.loadEventEnd);
+        createStats("dom_content", perfTiming.domContentLoadedEventStart, perfTiming.domContentLoadedEventEnd);
+
+        const slowStartupThreshold = app.loggerConfig?.slowStartupThreshold || 5;
+        if (duration / 1000 >= slowStartupThreshold) {
+            app.logger.warn({
+                action: actionName,
+                elapsedTime: duration,
+                stats,
+                errorCode: "SLOW_STARTUP",
+                errorMessage: `Startup took ${(duration / 1000).toFixed(2)} sec, longer than ${slowStartupThreshold}`,
+            });
+        } else {
+            app.logger.info({
+                action: actionName,
+                elapsedTime: duration,
+                stats,
+            });
+        }
     }
 }

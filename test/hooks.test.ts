@@ -33,9 +33,9 @@ describe("useAction(type test)", () => {
         const expectPassC = changeToC();
 
         // @ts-expect-error
-        const expectToFail = useAction(createTabChangeAction, "not valid");
+        const expectToFail1 = useAction(createTabChangeAction, "not valid");
         // @ts-expect-error
-        const expectToFail = useAction(createTabChangeAction, null);
+        const expectToFail2 = useAction(createTabChangeAction, null);
         // @ts-expect-error
         const shouldNotHaveParam = changeToA(1);
     });
@@ -161,7 +161,7 @@ describe("useBinaryAction(type test)", () => {
     });
 
     test("Curry union null dep type params", () => {
-        const action: ActionCreator<["a" | "b" | "c" | null | undefined | 100, {data: string}, moreData: string]> = (tab, data) => ({type: "String Union test", payload: [tab, data, "more-data"]});
+        const action: ActionCreator<["a" | "b" | "c" | null | undefined | 100, {data: string}, string]> = (tab, data) => ({type: "String Union test", payload: [tab, data, "more-data"]});
 
         const update = useBinaryAction(action, null);
         update({data: "100"}, "moreData");

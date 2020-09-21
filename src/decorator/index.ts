@@ -12,7 +12,6 @@ export {Log} from "./Log";
 export {Mutex} from "./Mutex";
 export {RetryOnNetworkConnectionError} from "./RetryOnNetworkConnectionError";
 export {SilentOnNetworkConnectionError} from "./SilentOnNetworkConnectionError";
-export {PerformanceTrace} from "./PerformanceTrace";
 
 /**
  * Decorator type declaration, required by TypeScript.
