@@ -183,16 +183,17 @@ function createStartupPerformanceLog(actionName: string): void {
         const duration = now - baseTime;
         const stats: {[key: string]: number} = {};
 
-        const createStats = (key: string, startTimestamp: number, endTimestamp: number) => {
-            if (startTimestamp >= baseTime && endTimestamp >= startTimestamp) {
-                stats[`${key}_start`] = startTimestamp - baseTime;
-                stats[`${key}_end`] = endTimestamp - baseTime;
+        const createStat = (key: string, timeStamp: number) => {
+            if (timeStamp >= baseTime) {
+                stats[key] = timeStamp;
             }
         };
 
-        createStats("http", perfTiming.requestStart, perfTiming.responseEnd);
-        createStats("dom", perfTiming.domLoading, perfTiming.loadEventEnd);
-        createStats("dom_content", perfTiming.domContentLoadedEventStart, perfTiming.domContentLoadedEventEnd);
+        createStat("http_start", perfTiming.requestStart);
+        createStat("http_end", perfTiming.responseEnd);
+        createStat("dom_start", perfTiming.domLoading);
+        createStat("dom_content", perfTiming.domContentLoadedEventEnd); // Mostly same time with domContentLoadedEventStart
+        createStat("dom_end", perfTiming.loadEventEnd); // Mostly same with domComplete/loadEventStart
 
         const slowStartupThreshold = app.loggerConfig?.slowStartupThreshold || 5;
         if (duration / 1000 >= slowStartupThreshold) {
