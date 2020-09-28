@@ -11,11 +11,7 @@ import {isErrorHandlingRunning} from "../util/error-util";
 let startupModuleName: string | null = null;
 
 export class ModuleProxy<M extends Module<any, any>> {
-    constructor(private module: M, private actions: ActionCreators<M>) {
-        if (!startupModuleName) {
-            startupModuleName = module.name;
-        }
-    }
+    constructor(private module: M, private actions: ActionCreators<M>) {}
 
     getActions(): ActionCreators<M> {
         return this.actions;
@@ -32,6 +28,13 @@ export class ModuleProxy<M extends Module<any, any>> {
             private lastDidUpdateSagaTask: Task | null = null;
             private successTickCount: number = 0;
             private mountedTime: number = Date.now();
+
+            constructor(props: P) {
+                super(props);
+                if (!startupModuleName) {
+                    startupModuleName = moduleName;
+                }
+            }
 
             componentDidMount() {
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
@@ -185,7 +188,7 @@ function createStartupPerformanceLog(actionName: string): void {
 
         const createStat = (key: string, timeStamp: number) => {
             if (timeStamp >= baseTime) {
-                stats[key] = timeStamp;
+                stats[key] = timeStamp - baseTime;
             }
         };
 
