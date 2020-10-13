@@ -55,6 +55,8 @@ describe("useAction(type test)", () => {
         const expectToFail1 = changeToA();
         // @ts-expect-error
         const expectToFail2 = changeToA("");
+        // @ts-expect-error
+        const expectToFail3 = changeToA("a", "");
     });
 });
 
@@ -82,7 +84,7 @@ describe("useUnaryAction(type test)", () => {
     test("Cannot use object as dependency", () => {
         const updateAction: ActionCreator<[string, {value: number}, number]> = (id: string, data: {value: number}, number: number) => ({type: "test", payload: [id, data, number]});
 
-        //  @ts-expect-error
+        // @ts-expect-error
         const cannotUseObjectAsDeps = useUnaryAction(updateAction, "", {value: 1});
     });
 

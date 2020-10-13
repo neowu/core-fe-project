@@ -30,7 +30,7 @@ export function errorToException(error: unknown): Exception {
                 message = "[Unknown]";
             }
         }
-        return new JavaScriptException(message);
+        return new JavaScriptException(message, error);
     }
 }
 
