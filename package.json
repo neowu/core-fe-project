@@ -15,7 +15,6 @@
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
     },
     "devDependencies": {
-        "@babel/core": "7.11.6",
         "@types/jest": "26.0.15",
         "@typescript-eslint/eslint-plugin": "4.5.0",
         "@typescript-eslint/parser": "4.5.0",
