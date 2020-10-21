@@ -15,6 +15,7 @@
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
     },
     "devDependencies": {
+        "@types/node": "14.14.0",
         "@types/jest": "26.0.15",
         "@typescript-eslint/eslint-plugin": "4.5.0",
         "@typescript-eslint/parser": "4.5.0",
@@ -29,7 +30,6 @@
         "yargs": "16.1.0"
     },
     "dependencies": {
-        "@types/node": "14.14.0",
         "@types/react": "16.9.53",
         "@types/react-dom": "16.9.8",
         "@types/react-redux": "7.1.9",
@@ -49,7 +49,7 @@
         "tslib": "2.0.3"
     },
     "peerDependencies": {
-        "@types/node": "14.11.8",
+        "@types/node": "^14.14.0",
         "@types/react": "*",
         "@types/react-dom": "16.9.8",
         "@types/react-redux": "7.1.9",
