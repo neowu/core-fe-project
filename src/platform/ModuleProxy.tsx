@@ -45,17 +45,18 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const props = this.props as RouteComponentProps & P;
                 const currentLocation = props.location;
                 const currentRouteParams = props.match ? props.match.params : null;
-                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onRender.isLifecycle) {
-                    // Only trigger onRender if current component is connected to <Route>
+
+                // Only trigger onLocationMatched if current component is connected to <Route>
+                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onLocationMatched.isLifecycle) {
                     try {
                         this.lastDidUpdateSagaTask?.cancel();
                     } catch (e) {
                         // In rare case, it may throw error, just ignore
                     }
                     this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function* () {
-                        const action = `${moduleName}/@@LOCATION_CHANGE_RENDER`;
+                        const action = `${moduleName}/@@LOCATION_MATCHED`;
                         const startTime = Date.now();
-                        yield rawCall(executeAction, action, lifecycleListener.onRender.bind(lifecycleListener), currentRouteParams, currentLocation);
+                        yield rawCall(executeAction, action, lifecycleListener.onLocationMatched.bind(lifecycleListener), currentRouteParams, currentLocation);
                         app.logger.info({
                             action,
                             elapsedTime: Date.now() - startTime,
@@ -131,12 +132,12 @@ export class ModuleProxy<M extends Module<any, any>> {
                     });
                 }
 
-                if (lifecycleListener.onRender.isLifecycle) {
-                    const initialRenderActionName = `${moduleName}/@@INITIAL_RENDER`;
+                if (lifecycleListener.onLocationMatched.isLifecycle) {
                     if ("match" in props && "location" in props) {
+                        const initialRenderActionName = `${moduleName}/@@LOCATION_MATCHED`;
                         const startTime = Date.now();
                         const routeParams = props.match.params;
-                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), routeParams, props.location);
+                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onLocationMatched.bind(lifecycleListener), routeParams, props.location);
                         app.logger.info({
                             action: initialRenderActionName,
                             elapsedTime: Date.now() - startTime,
@@ -146,13 +147,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                             },
                         });
                     } else {
-                        console.warn(`[framework] Module [${moduleName}] is non-Route, use onEnter() instead of onRender()`);
-                        const startTime = Date.now();
-                        yield rawCall(executeAction, initialRenderActionName, lifecycleListener.onRender.bind(lifecycleListener), {}, app.browserHistory.location);
-                        app.logger.info({
-                            action: initialRenderActionName,
-                            elapsedTime: Date.now() - startTime,
-                        });
+                        console.error(`[framework] Module component [${moduleName}] is non-Route, use onEnter() instead of onLocationMatched()`);
                     }
                 }
 

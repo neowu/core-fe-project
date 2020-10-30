@@ -15,8 +15,8 @@ if (process.env.NODE_ENV === "development") {
 
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
     onEnter: ((entryComponentProps?: any) => SagaIterator) & LifecycleDecoratorFlag;
-    onRender: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
+    onLocationMatched: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
 }
 
@@ -29,17 +29,16 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
          */
     }
 
-    *onRender(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator {
-        /**
-         * Called when the attached component is in either case:
-         * - Initially mounted
-         * - Re-rendered due to location updates (only for route connected components)
-         */
-    }
-
     *onDestroy(): SagaIterator {
         /**
          * Called when the attached component is going to unmount
+         */
+    }
+
+    *onLocationMatched(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator {
+        /**
+         * Called when the attached component is a React-Route component and its Route location matches
+         * It is called each time the location changes, as long as it still matches
          */
     }
 
