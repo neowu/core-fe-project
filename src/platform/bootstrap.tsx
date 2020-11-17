@@ -43,6 +43,7 @@ interface BrowserConfig {
 interface BootstrapOption {
     componentType: React.ComponentType;
     errorListener: ErrorListener;
+    rootContainer?: HTMLElement;
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
@@ -53,13 +54,13 @@ export const VERSION_CHECK_ACTION = "@@framework/version-check";
 export const GLOBAL_ERROR_ACTION = "@@framework/global";
 export const GLOBAL_PROMISE_REJECTION_ACTION = "@@framework/promise-rejection";
 
-export function startApp(option: BootstrapOption): void {
+export function bootstrap(option: BootstrapOption): void {
     detectIEBrowser(option.browserConfig?.onIE);
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
-    renderRoot(option.componentType, option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
+    renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
 function detectIEBrowser(onIE?: () => void) {
@@ -130,14 +131,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     );
 }
 
-function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMessage: string) {
-    const rootElement: HTMLDivElement = document.createElement("div");
-    rootElement.style.transition = "all 150ms ease-in 100ms";
-    rootElement.style.opacity = "0";
-    rootElement.style.transform = "translateY(-10px) scale(0.96)";
-    rootElement.id = "framework-app-root";
-    document.body.appendChild(rootElement);
-
+function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement, navigationPreventionMessage: string) {
     ReactDOM.render(
         <Provider store={app.store}>
             <ConnectedRouter history={app.browserHistory}>
@@ -147,13 +141,15 @@ function renderRoot(EntryComponent: React.ComponentType, navigationPreventionMes
                 </ErrorBoundary>
             </ConnectedRouter>
         </Provider>,
-        rootElement,
-        () => {
-            const rootElement = document.getElementById("framework-app-root")!;
-            rootElement.style.transform = "none";
-            rootElement.style.opacity = "1";
-        }
+        rootContainer
     );
+}
+
+function injectRootContainer(): HTMLElement {
+    const rootContainer = document.createElement("div");
+    rootContainer.id = "framework-app-root";
+    document.body.appendChild(rootContainer);
+    return rootContainer;
 }
 
 function setupAppExitListener(eventServerURL?: string) {
