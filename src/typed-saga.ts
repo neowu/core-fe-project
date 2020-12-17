@@ -4,7 +4,7 @@ type SagaGenerator<RT> = Generator<Effect<any>, RT, any>;
 
 type UnwrapReturnType<R> = R extends SagaGenerator<infer RT> ? RT : R extends Promise<infer PromiseValue> ? PromiseValue : R;
 
-export type SagaIterator = IterableIterator<StrictEffect> | Iterator<StrictEffect, any, any>;
+export type SagaIterator = IterableIterator<StrictEffect>;
 
 export function* call<Args extends any[], R>(fn: (...args: Args) => R, ...args: Args): SagaGenerator<UnwrapReturnType<R>> {
     return yield rawCall(fn, ...args);
