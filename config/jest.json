@@ -11,7 +11,7 @@
     "moduleDirectories": ["node_modules", "src"],
     "globals": {
         "ts-jest": {
-            "tsConfig": "./config/tsconfig.json"
+            "tsconfig": "./config/tsconfig.json"
         }
     }
 }
