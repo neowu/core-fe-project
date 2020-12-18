@@ -3,7 +3,7 @@ import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
 import {Action, setStateAction} from "./reducer";
-import {SagaIterator} from "./typed-saga";
+import {SagaGenerator} from "./typed-saga";
 import {captureError} from "./util/error-util";
 import {stringifyWithMask} from "./util/json-util";
 
@@ -15,16 +15,16 @@ export interface TickIntervalDecoratorFlag {
     tickInterval?: number;
 }
 
-export type ActionHandler = (...args: any[]) => SagaIterator;
+export type ActionHandler = (...args: any[]) => SagaGenerator;
 
-export type ErrorHandler = (error: Exception) => SagaIterator;
+export type ErrorHandler = (error: Exception) => SagaGenerator;
 
 export interface ErrorListener {
     onError: ErrorHandler;
 }
 
-type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? (...args: P) => Action<P> : never;
-type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
+type ActionCreator<H> = H extends (...args: infer P) => SagaGenerator ? (...args: P) => Action<P> : never;
+type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaGenerator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
 export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
 export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> {
@@ -49,7 +49,7 @@ export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> 
     return new ModuleProxy(module, actions);
 }
 
-export function* executeAction(actionName: string, handler: ActionHandler, ...payload: any[]): SagaIterator {
+export function* executeAction(actionName: string, handler: ActionHandler, ...payload: any[]): SagaGenerator {
     try {
         yield* handler(...payload);
     } catch (error) {

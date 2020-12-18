@@ -19,7 +19,7 @@ export function useAction<P extends Array<string | number | boolean | null | und
 
 /**
  * For actions like:
- * *foo(a: number, b: string, c: boolean): SagaIterator {..}
+ * *foo(a: number, b: string, c: boolean): SagaGenerator {..}
  *
  * useUnaryAction(foo, 100, "") will return:
  * (c: boolean) => void;
@@ -31,7 +31,7 @@ export function useUnaryAction<P extends any[], U>(actionCreator: (...args: [...
 
 /**
  * For actions like:
- * *foo(a: number, b: string, c: boolean): SagaIterator {..}
+ * *foo(a: number, b: string, c: boolean): SagaGenerator {..}
  *
  * useBinaryAction(foo, 100) will return:
  * (b: string, c: boolean) => void;
@@ -43,7 +43,7 @@ export function useBinaryAction<P extends any[], U, K>(actionCreator: (...args: 
 
 /**
  * For actions like:
- * *foo(data: {key: number}): SagaIterator {..}
+ * *foo(data: {key: number}): SagaGenerator {..}
  *
  * useModuleObjectAction(foo, "key") will return:
  * (objectValue: number) => void;

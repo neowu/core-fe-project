@@ -12,7 +12,7 @@ import {ajax} from "../util/network";
 import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
-import {SagaIterator, call, delay} from "../typed-saga";
+import {SagaGenerator, call, delay} from "../typed-saga";
 
 /**
  * Configuration for frontend version check.
@@ -23,7 +23,7 @@ import {SagaIterator, call, delay} from "../typed-saga";
  * - versionCheckURL: Respond a JSON based on computed bundled index.html content, whose contained JS/CSS file name changes when version changes.
  */
 interface VersionConfig {
-    onRemind: () => SagaIterator;
+    onRemind: () => SagaGenerator;
     versionCheckURL: string; // Must be GET Method, returning whatever JSON
     thresholdHours?: number; // Default: 24
 }

@@ -1,6 +1,6 @@
 import {push} from "connected-react-router";
 import {Location} from "history";
-import {SagaIterator} from "../typed-saga";
+import {SagaGenerator} from "../typed-saga";
 import {put} from "redux-saga/effects";
 import {produce, enablePatches, enableES5} from "immer";
 import {app} from "../app";
@@ -14,35 +14,35 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
-    onEnter: ((entryComponentProps?: any) => SagaIterator) & LifecycleDecoratorFlag;
-    onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
-    onLocationMatched: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaIterator) & LifecycleDecoratorFlag;
-    onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
+    onEnter: ((entryComponentProps?: any) => SagaGenerator) & LifecycleDecoratorFlag;
+    onDestroy: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onLocationMatched: ((routeParameters: RouteParam, location: Location<HistoryState | undefined>) => SagaGenerator) & LifecycleDecoratorFlag;
+    onTick: (() => SagaGenerator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object, HistoryState extends object = object> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
-    *onEnter(entryComponentProps: any): SagaIterator {
+    *onEnter(entryComponentProps: any): SagaGenerator {
         /**
          * Called when the attached component is initially mounted.
          */
     }
 
-    *onDestroy(): SagaIterator {
+    *onDestroy(): SagaGenerator {
         /**
          * Called when the attached component is going to unmount
          */
     }
 
-    *onLocationMatched(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaIterator {
+    *onLocationMatched(routeParameters: RouteParam, location: Location<HistoryState | undefined>): SagaGenerator {
         /**
          * Called when the attached component is a React-Route component and its Route location matches
          * It is called each time the location changes, as long as it still matches
          */
     }
 
-    *onTick(): SagaIterator {
+    *onTick(): SagaGenerator {
         /**
          * Called periodically during the lifecycle of attached component
          * Usually used together with @Interval decorator, to specify the period (in second)
@@ -111,12 +111,12 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
      *
      * https://github.com/react-boilerplate/react-boilerplate/issues/1281
      */
-    pushHistory(url: string): SagaIterator;
-    pushHistory(url: string, stateMode: "keep-state"): SagaIterator;
-    pushHistory<T extends object>(url: string, state: T): SagaIterator; // Recommended explicitly pass the generic type
-    pushHistory(state: HistoryState): SagaIterator;
+    pushHistory(url: string): SagaGenerator;
+    pushHistory(url: string, stateMode: "keep-state"): SagaGenerator;
+    pushHistory<T extends object>(url: string, state: T): SagaGenerator; // Recommended explicitly pass the generic type
+    pushHistory(state: HistoryState): SagaGenerator;
 
-    *pushHistory(urlOrState: HistoryState | string, state?: object | "keep-state"): SagaIterator {
+    *pushHistory(urlOrState: HistoryState | string, state?: object | "keep-state"): SagaGenerator {
         if (typeof urlOrState === "string") {
             const url: string = urlOrState;
             if (state) {
