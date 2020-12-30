@@ -153,7 +153,7 @@ export class LoggerImpl implements Logger {
         if (entry.info) {
             Object.entries(entry.info).map(([key, value]) => {
                 if (value !== undefined) {
-                    info[key] = key === "app_state" ? value : value.substr(0, 1000);
+                    info[key] = key === "app_state" ? value.substr(0, 500000) : value.substr(0, 1000);
                 }
             });
         }
