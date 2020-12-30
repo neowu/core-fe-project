@@ -2,6 +2,8 @@ import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
+type ExtractPathParams<T extends string> = string extends T ? {[key: string]: string} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof ExtractPathParams<Rest>]: string} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string} : {};
+
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
     if (contentType && contentType.startsWith("application/json")) {
@@ -44,7 +46,7 @@ axios.interceptors.response.use(
     }
 );
 
-export async function ajax<Request, Response>(method: Method, path: string, pathParams: object, request: Request, extraConfig: Partial<AxiosRequestConfig> = {}): Promise<Response> {
+export async function ajax<Request, Response, Path extends string>(method: Method, path: Path, pathParams: ExtractPathParams<Path>, request: Request, extraConfig: Partial<AxiosRequestConfig> = {}): Promise<Response> {
     const fullURL = urlParams(path, pathParams);
     const config: AxiosRequestConfig = {...extraConfig, method, url: fullURL};
 
