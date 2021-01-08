@@ -1,5 +1,5 @@
 import {all, call, race} from "../src/typed-saga";
-import {call as rawCall, delay} from "redux-saga/effects";
+import {call as rawCall, delay, Effect} from "redux-saga/effects";
 
 describe("typed-saga (functional test)", () => {
     interface APIResponse {
@@ -41,29 +41,42 @@ describe("typed-saga (type test)", () => {
         test("should accept an object as parameter", () => {
             race({});
             race({d1: delay(1), d2: delay(2)});
-            function* unimportantGeneratorUsedForTypeTestingOnly() {
-                const {c1, c2, c3} = yield* race({
-                    c1: call(async (_: number): Promise<number> => _, 1),
-                    c2: call(async (_: string): Promise<string> => _, "s"),
-                    c3: call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
+
+            function* testTyping() {
+                const {a, b, c, d, e} = yield* race({
+                    a: call(async (_: number): Promise<number> => _, 1),
+                    b: call(async (_: string): Promise<string> => _, "s"),
+                    c: call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
                     d: delay(10),
+                    e: Promise.resolve("a"),
                 });
-                const expectC1ToBeAssignableToType: number | undefined = c1;
-                const expectC2ToBeAssignableToType: string | undefined = c2;
-                const expectC3ToBeAssignableToType: {baz: boolean} | undefined = c3;
+
+                const [_a, _b, _c, _d, _e]: [number?, string?, {baz: boolean}?, Effect?, string?] = [a, b, c, d, e];
             }
         });
 
-        test("should not accept an array as parameter", () => {
+        test("should accept an array as parameter", () => {
             // @ts-expect-error
             race([]);
             // @ts-expect-error
+            race([delay(1)]);
+
             race([delay(1), delay(2)]);
-            // @ts-expect-error
-            race([call(async (_: number): Promise<number> => _, 1), delay(10)]);
+
+            function* testTyping() {
+                const [a, b, c, d, e] = yield* race([
+                    // prettier-format-preserve
+                    call(async (_: number): Promise<number> => _, 1),
+                    call(async (_: string): Promise<string> => _, "s"),
+                    call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
+                    delay(10),
+                    Promise.resolve("a"),
+                ]);
+                const [_a, _b, _c, _d, _e]: [number?, string?, {baz: boolean}?, Effect?, string?] = [a, b, c, d, e];
+            }
         });
 
-        test("should not accept any primitive values as parameter (regression test for `{}` typing)", () => {
+        test("should not accept any primitive values as parameter", () => {
             // @ts-expect-error
             race(undefined);
             // @ts-expect-error
@@ -83,29 +96,43 @@ describe("typed-saga (type test)", () => {
         test("should accept an object as parameter", () => {
             all({});
             all({d1: delay(1), d2: delay(2)});
-            function* unimportantGeneratorUsedForTypeTestingOnly() {
-                const {c1, c2, c3} = yield* all({
-                    c1: call(async (_: number): Promise<number> => _, 1),
-                    c2: call(async (_: string): Promise<string> => _, "s"),
-                    c3: call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
+
+            function* testTyping() {
+                const {a, b, c, d, e} = yield* all({
+                    a: call(async (_: number): Promise<number> => _, 1),
+                    b: call(async (_: string): Promise<string> => _, "s"),
+                    c: call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
                     d: delay(10),
+                    e: Promise.resolve("a"),
                 });
-                const expectC1ToBeAssignableToType: number = c1;
-                const expectC2ToBeAssignableToType: string = c2;
-                const expectC3ToBeAssignableToType: {baz: boolean} = c3;
+
+                const [_a, _b, _c, _d, _e]: [number, string, {baz: boolean}, Effect, string] = [a, b, c, d, e];
             }
         });
 
-        test("should not accept an array as parameter", () => {
+        test("should accept an array as parameter", () => {
             // @ts-expect-error
             all([]);
             // @ts-expect-error
+            all([delay(1)]);
+
             all([delay(1), delay(2)]);
-            // @ts-expect-error
-            all([call(async (_: number): Promise<number> => _, 1), delay(10)]);
+
+            function* testTyping() {
+                const [a, b, c, d, e] = yield* all([
+                    // prettier-format-preserve
+                    call(async (_: number): Promise<number> => _, 1),
+                    call(async (_: string): Promise<string> => _, "s"),
+                    call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
+                    delay(10),
+                    Promise.resolve("a"),
+                ]);
+
+                const [_a, _b, _c, _d, _e]: [number, string, {baz: boolean}, Effect, string] = [a, b, c, d, e];
+            }
         });
 
-        test("should not accept any primitive values as parameter (regression test for `{}` typing)", () => {
+        test("should not accept any primitive values as parameter", () => {
             // @ts-expect-error
             all(undefined);
             // @ts-expect-error

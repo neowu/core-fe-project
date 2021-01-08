@@ -6,7 +6,6 @@ import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
-import {isErrorHandlingRunning} from "../util/error-util";
 
 let startupModuleName: string | null = null;
 
@@ -26,7 +25,7 @@ export class ModuleProxy<M extends Module<any, any>> {
             static displayName = `Module[${moduleName}]`;
             private lifecycleSagaTask: Task | null = null;
             private lastDidUpdateSagaTask: Task | null = null;
-            private successTickCount: number = 0;
+            private tickCount: number = 0;
             private mountedTime: number = Date.now();
 
             constructor(props: P) {
@@ -85,7 +84,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 app.logger.info({
                     action: `${moduleName}/@@DESTROY`,
                     info: {
-                        success_tick: this.successTickCount.toString(),
+                        tick_count: this.tickCount.toString(),
                         staying_second: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                     },
                 });
@@ -160,10 +159,8 @@ export class ModuleProxy<M extends Module<any, any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        if (!isErrorHandlingRunning()) {
-                            yield rawCall(executeAction, tickActionName, boundTicker);
-                            this.successTickCount++;
-                        }
+                        yield rawCall(executeAction, tickActionName, boundTicker);
+                        this.tickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }

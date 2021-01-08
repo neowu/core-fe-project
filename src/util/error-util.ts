@@ -64,10 +64,6 @@ export function captureError(error: unknown, action: string, extra: ErrorExtra =
     return exception;
 }
 
-export function isErrorHandlingRunning(): boolean {
-    return errorHandlerRunning;
-}
-
 export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
     // For app, report errors to event server ASAP, in case of sudden termination
     yield spawn(sendEventLogs);

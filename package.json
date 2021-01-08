@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.25.1",
+    "version": "1.25.2",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -15,7 +15,7 @@
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
     },
     "devDependencies": {
-        "@types/jest": "26.0.19",
+        "@types/jest": "26.0.20",
         "@types/node": "14.14.20",
         "@typescript-eslint/eslint-plugin": "4.12.0",
         "@typescript-eslint/parser": "4.12.0",
@@ -33,7 +33,7 @@
         "@types/react": "17.0.0",
         "@types/react-dom": "17.0.0",
         "@types/react-redux": "7.1.15",
-        "@types/react-router": "5.1.9",
+        "@types/react-router": "5.1.10",
         "@types/react-router-dom": "5.1.7",
         "axios": "0.21.1",
         "connected-react-router": "6.8.0",
@@ -52,7 +52,7 @@
         "@types/react": "17.0.0",
         "@types/react-dom": "17.0.0",
         "@types/react-redux": "7.1.15",
-        "@types/react-router": "5.1.9",
+        "@types/react-router": "5.1.10",
         "@types/react-router-dom": "5.1.7",
         "axios": "0.21.1",
         "connected-react-router": "6.8.0",
