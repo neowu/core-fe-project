@@ -15,6 +15,7 @@ export function race<T1, T2>(effects: [T1, T2]): SagaGeneratorWithReturn<[Unwrap
 export function race<T1, T2, T3>(effects: [T1, T2, T3]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>?, UnwrapReturnType<T2>?, UnwrapReturnType<T3>?]>;
 export function race<T1, T2, T3, T4>(effects: [T1, T2, T3, T4]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>?, UnwrapReturnType<T2>?, UnwrapReturnType<T3>?, UnwrapReturnType<T4>?]>;
 export function race<T1, T2, T3, T4, T5>(effects: [T1, T2, T3, T4, T5]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>?, UnwrapReturnType<T2>?, UnwrapReturnType<T3>?, UnwrapReturnType<T4>?, UnwrapReturnType<T5>?]>;
+export function race<T>(effects: T[]): SagaGeneratorWithReturn<Array<UnwrapReturnType<T> | undefined>>;
 export function* race(effects: any): any {
     return yield rawRace(effects);
 }
@@ -24,6 +25,7 @@ export function all<T1, T2>(effects: [T1, T2]): SagaGeneratorWithReturn<[UnwrapR
 export function all<T1, T2, T3>(effects: [T1, T2, T3]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>, UnwrapReturnType<T2>, UnwrapReturnType<T3>]>;
 export function all<T1, T2, T3, T4>(effects: [T1, T2, T3, T4]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>, UnwrapReturnType<T2>, UnwrapReturnType<T3>, UnwrapReturnType<T4>]>;
 export function all<T1, T2, T3, T4, T5>(effects: [T1, T2, T3, T4, T5]): SagaGeneratorWithReturn<[UnwrapReturnType<T1>, UnwrapReturnType<T2>, UnwrapReturnType<T3>, UnwrapReturnType<T4>, UnwrapReturnType<T5>]>;
+export function all<T>(effects: T[]): SagaGeneratorWithReturn<Array<UnwrapReturnType<T>>>;
 export function* all(effects: any): any {
     return yield rawAll(effects);
 }

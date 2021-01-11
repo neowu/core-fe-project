@@ -56,11 +56,7 @@ describe("typed-saga (type test)", () => {
         });
 
         test("should accept an array as parameter", () => {
-            // @ts-expect-error
             race([]);
-            // @ts-expect-error
-            race([delay(1)]);
-
             race([delay(1), delay(2)]);
 
             function* testTyping() {
@@ -111,11 +107,7 @@ describe("typed-saga (type test)", () => {
         });
 
         test("should accept an array as parameter", () => {
-            // @ts-expect-error
             all([]);
-            // @ts-expect-error
-            all([delay(1)]);
-
             all([delay(1), delay(2)]);
 
             function* testTyping() {
