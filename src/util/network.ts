@@ -2,7 +2,7 @@ import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
-type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
+export type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
 
 axios.defaults.transformResponse = (data, headers) => {
     const contentType = headers["content-type"];
