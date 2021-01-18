@@ -119,14 +119,13 @@ function isValidStacktrace(stacktrace?: string): boolean {
             return false;
         }
 
-        const validSources: string[] = [];
-        document.querySelectorAll("script").forEach((scriptNode) => {
-            if (scriptNode.src) {
-                validSources.push(scriptNode.src);
-            }
-        });
-        // If validSources is [], it return false
-        return validSources.some((_) => stacktrace.includes(_));
+        /**
+         * Use fuzzy search, instead of document.querySelectorAll("script") to get all script tag URLs.
+         *
+         * The reason is, in latest webpack, the code-split chunk script is just injected and then removed.
+         * In other words, the <script> tag only exists temporarily, not persisted in the DOM.
+         */
+        return stacktrace.includes(".js");
     }
     return false;
 }
