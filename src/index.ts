@@ -6,6 +6,7 @@ export {bootstrap} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
 export {async} from "./util/async";
+export {captureError} from "./util/error-util";
 export {ajax, uri} from "./util/network";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
