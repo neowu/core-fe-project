@@ -170,7 +170,7 @@ export class ModuleProxy<M extends Module<any, any>> {
 }
 
 function createStartupPerformanceLog(actionName: string): void {
-    if (performance && performance.timing) {
+    if (window.performance && performance.timing) {
         // For performance timing API, please refer: https://www.w3.org/blog/2012/09/performance-timing-information/
         const now = Date.now();
         const perfTiming = performance.timing;
