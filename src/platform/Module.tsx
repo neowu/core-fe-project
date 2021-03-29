@@ -35,7 +35,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
          */
     }
 
-    *onLocationMatched(routeParameters: RouteParam, location: Location<Readonly<HistoryState> | undefined>): SagaGenerator {
+    *onLocationMatched(routeParam: RouteParam, location: Location<Readonly<HistoryState> | undefined>): SagaGenerator {
         /**
          * Called when the attached component is a React-Route component and its Route location matches
          * It is called each time the location changes, as long as it still matches
