@@ -109,6 +109,10 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         // This is a known Ant Design Tabs issue
         return "IGNORED_ANTD_TAB_ISSUE";
     }
+    if (action === GLOBAL_ERROR_ACTION && errorMessage.includes("'forcepopupalign' of null")) {
+        // This is a known Ant Design Slider issue
+        return "IGNORED_ANTD_SLIDER_ISSUE";
+    }
     return null;
 }
 
