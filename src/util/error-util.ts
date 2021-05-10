@@ -92,6 +92,9 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         {pattern: "ucbrowser", errorCode: "VENDOR"},
         {pattern: "vivo", errorCode: "VENDOR"},
         {pattern: "huawei", errorCode: "VENDOR"},
+        // Browser sandbox issues
+        {pattern: "the operation is insecure", errorCode: "BROWSER_LIMIT"},
+        {pattern: "access is denied for this document", errorCode: "BROWSER_LIMIT"},
     ];
 
     if (isIEBrowser()) {

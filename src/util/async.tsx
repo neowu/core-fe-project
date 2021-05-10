@@ -4,23 +4,29 @@ import {loadingAction} from "../reducer";
 
 type ReactComponentKeyOf<T> = {[P in keyof T]: T[P] extends React.ComponentType<any> ? P : never}[keyof T];
 
-export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, loadingComponent: React.ReactElement | null = null): T[K] {
-    interface State {
-        Component: React.ComponentType<any> | null;
-    }
+interface AsyncOptions {
+    loadingComponent?: React.ReactElement;
+    loadingIdentifier?: string;
+}
 
-    return class AsyncWrapperComponent extends React.PureComponent<{}, State> {
-        state: State = {
-            Component: null,
-        };
+interface WrapperComponentState {
+    Component: React.ComponentType<any> | null;
+}
+
+export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {loadingComponent, loadingIdentifier}: AsyncOptions): T[K] {
+    return class AsyncWrapperComponent extends React.PureComponent<{}, WrapperComponentState> {
+        constructor(props: {}) {
+            super(props);
+            this.state = {Component: null};
+        }
 
         async componentDidMount() {
             try {
-                app.store.dispatch(loadingAction(true));
+                app.store.dispatch(loadingAction(true, loadingIdentifier));
                 const moduleExports = await resolve();
                 this.setState({Component: moduleExports[component]});
             } finally {
-                app.store.dispatch(loadingAction(false));
+                app.store.dispatch(loadingAction(false, loadingIdentifier));
             }
         }
 
