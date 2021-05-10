@@ -32,7 +32,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
 
         render() {
             const {Component} = this.state;
-            return Component ? <Component {...this.props} /> : loadingComponent;
+            return Component ? <Component {...this.props} /> : loadingComponent || null;
         }
     } as any;
 }
