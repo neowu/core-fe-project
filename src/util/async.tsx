@@ -13,7 +13,7 @@ interface WrapperComponentState {
     Component: React.ComponentType<any> | null;
 }
 
-export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {loadingComponent, loadingIdentifier}: AsyncOptions): T[K] {
+export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {loadingComponent, loadingIdentifier}: AsyncOptions = {}): T[K] {
     return class AsyncWrapperComponent extends React.PureComponent<{}, WrapperComponentState> {
         constructor(props: {}) {
             super(props);
