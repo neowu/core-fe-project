@@ -10,6 +10,7 @@ export {captureError} from "./util/error-util";
 export {ajax, uri} from "./util/network";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
+export {default as classNames} from "classnames";
 
 export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Lifecycle, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
