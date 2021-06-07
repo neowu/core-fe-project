@@ -20,7 +20,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             this.state = {Component: null};
         }
 
-        async componentDidMount() {
+        override async componentDidMount() {
             try {
                 app.store.dispatch(loadingAction(true, loadingIdentifier));
                 const moduleExports = await resolve();
@@ -30,7 +30,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             }
         }
 
-        render() {
+        override render() {
             const {Component} = this.state;
             return Component ? <Component {...this.props} /> : loadingComponent || null;
         }

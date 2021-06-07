@@ -22,8 +22,8 @@ export function stringifyWithMask(maskedKeywords: RegExp[], maskedOutput: string
         return value;
     };
 
-    const isDOMEvent = (e: any) => e && e.target instanceof Node;
-    const serializableArgs = args.filter((_) => typeof _ !== "function" && typeof _ !== "symbol" && !isDOMEvent(_));
+    const isEvent = (e: any) => Boolean(e && e.target && e.currentTarget);
+    const serializableArgs = args.filter((_) => typeof _ !== "function" && typeof _ !== "symbol" && !isEvent(_));
     switch (serializableArgs.length) {
         case 0:
             return undefined;

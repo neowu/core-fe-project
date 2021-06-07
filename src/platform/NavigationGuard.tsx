@@ -14,14 +14,14 @@ interface StateProps {
 interface Props extends OwnProps, StateProps, DispatchProp {}
 
 class Component extends React.PureComponent<Props, State> {
-    componentDidUpdate(prevProps: Readonly<Props>): void {
+    override componentDidUpdate(prevProps: Readonly<Props>): void {
         const {message, isPrevented} = this.props;
         if (prevProps.isPrevented !== isPrevented) {
             window.onbeforeunload = isPrevented ? () => message : null;
         }
     }
 
-    render() {
+    override render() {
         const {isPrevented, message} = this.props;
         return <Prompt message={message} when={isPrevented} />;
     }

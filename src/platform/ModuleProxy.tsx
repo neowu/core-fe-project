@@ -35,11 +35,11 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
             }
 
-            componentDidMount() {
+            override componentDidMount() {
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
             }
 
-            componentDidUpdate(prevProps: Readonly<P>) {
+            override componentDidUpdate(prevProps: Readonly<P>) {
                 const prevLocation = (prevProps as any).location;
                 const props = this.props as RouteComponentProps & P;
                 const currentLocation = props.location;
@@ -70,7 +70,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
             }
 
-            componentWillUnmount() {
+            override componentWillUnmount() {
                 if (lifecycleListener.onDestroy.isLifecycle) {
                     app.store.dispatch(actions.onDestroy());
                 }
@@ -97,7 +97,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
             }
 
-            render() {
+            override render() {
                 return <ComponentType {...this.props} />;
             }
 

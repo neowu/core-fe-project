@@ -33,7 +33,7 @@ export class Route extends React.PureComponent<Props> {
         }
     };
 
-    render() {
+    override render() {
         const {component, ...restRouteProps} = this.props;
         return <ReactRouterDOMRoute {...restRouteProps} render={this.renderRegularRouteComponent} />;
     }
@@ -41,7 +41,7 @@ export class Route extends React.PureComponent<Props> {
 
 function withNotFoundWarning<T extends {}>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> {
     return class extends React.PureComponent<T> {
-        componentDidMount() {
+        override componentDidMount() {
             app.logger.warn({
                 action: "@@framework/route-404",
                 elapsedTime: 0,
@@ -51,7 +51,7 @@ function withNotFoundWarning<T extends {}>(WrappedComponent: React.ComponentType
             });
         }
 
-        render() {
+        override render() {
             return <WrappedComponent {...this.props} />;
         }
     };

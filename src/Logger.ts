@@ -42,6 +42,7 @@ export interface LoggerConfig {
 
 export interface Logger {
     addContext(context: {[key: string]: string | (() => string)}): void;
+    removeContext(key: string): void;
     info(entry: InfoLogEntry): void;
     warn(data: ErrorLogEntry): void;
     error(data: ErrorLogEntry): void;
@@ -63,6 +64,14 @@ export class LoggerImpl implements Logger {
             console.warn(`[framework] Logger context size ${contextSize} is too large`);
         }
         this.contextMap = newContextMap;
+    }
+
+    removeContext(key: string): void {
+        if (this.contextMap[key] !== undefined) {
+            delete this.contextMap[key];
+        } else {
+            console.warn(`[framework] Logger context key ${key} does not exist`);
+        }
     }
 
     info(entry: InfoLogEntry): void {
