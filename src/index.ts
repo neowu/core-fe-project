@@ -12,7 +12,7 @@ export {ErrorBoundary} from "./util/ErrorBoundary";
 export {Route} from "./util/Route";
 export {default as classNames} from "classnames";
 
-export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Lifecycle, Log} from "./decorator";
+export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

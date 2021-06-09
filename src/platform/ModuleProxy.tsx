@@ -19,6 +19,7 @@ export class ModuleProxy<M extends Module<any, any>> {
     attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name as string;
         const lifecycleListener = this.module as ModuleLifecycleListener;
+        const modulePrototype = Object.getPrototypeOf(lifecycleListener);
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P> {
@@ -46,7 +47,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const currentRouteParams = props.match ? props.match.params : null;
 
                 // Only trigger onLocationMatched if current component is connected to <Route>
-                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && lifecycleListener.onLocationMatched.isLifecycle) {
+                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && this.hasOwnLifecycle("onLocationMatched")) {
                     try {
                         this.lastDidUpdateSagaTask?.cancel();
                     } catch (e) {
@@ -71,7 +72,7 @@ export class ModuleProxy<M extends Module<any, any>> {
             }
 
             override componentWillUnmount() {
-                if (lifecycleListener.onDestroy.isLifecycle) {
+                if (this.hasOwnLifecycle("onDestroy")) {
                     app.store.dispatch(actions.onDestroy());
                 }
 
@@ -101,6 +102,10 @@ export class ModuleProxy<M extends Module<any, any>> {
                 return <ComponentType {...this.props} />;
             }
 
+            private hasOwnLifecycle = (methodName: keyof ModuleLifecycleListener): boolean => {
+                return Object.prototype.hasOwnProperty.call(modulePrototype, methodName);
+            };
+
             private *lifecycleSaga() {
                 /**
                  * CAVEAT:
@@ -112,26 +117,17 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const props = this.props as RouteComponentProps & P;
 
                 const enterActionName = `${moduleName}/@@ENTER`;
-                if (lifecycleListener.onEnter.isLifecycle) {
-                    const startTime = Date.now();
-                    yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
-                    app.logger.info({
-                        action: enterActionName,
-                        elapsedTime: Date.now() - startTime,
-                        info: {
-                            component_props: JSON.stringify(props),
-                        },
-                    });
-                } else {
-                    app.logger.info({
-                        action: enterActionName,
-                        info: {
-                            component_props: JSON.stringify(props),
-                        },
-                    });
-                }
+                const startTime = Date.now();
+                yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props);
+                app.logger.info({
+                    action: enterActionName,
+                    elapsedTime: Date.now() - startTime,
+                    info: {
+                        component_props: JSON.stringify(props),
+                    },
+                });
 
-                if (lifecycleListener.onLocationMatched.isLifecycle) {
+                if (this.hasOwnLifecycle("onLocationMatched")) {
                     if ("match" in props && "location" in props) {
                         const initialRenderActionName = `${moduleName}/@@LOCATION_MATCHED`;
                         const startTime = Date.now();
@@ -154,7 +150,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                     createStartupPerformanceLog(`${moduleName}/@@STARTUP_PERF`);
                 }
 
-                if (lifecycleListener.onTick.isLifecycle) {
+                if (this.hasOwnLifecycle("onTick")) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;

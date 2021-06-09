@@ -7,10 +7,6 @@ import {SagaGenerator} from "./typed-saga";
 import {captureError} from "./util/error-util";
 import {stringifyWithMask} from "./util/json-util";
 
-export interface LifecycleDecoratorFlag {
-    isLifecycle?: boolean;
-}
-
 export interface TickIntervalDecoratorFlag {
     tickInterval?: number;
 }

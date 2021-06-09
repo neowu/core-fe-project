@@ -5,7 +5,7 @@ import {put} from "redux-saga/effects";
 import {produce, enablePatches, enableES5} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
-import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
+import {TickIntervalDecoratorFlag} from "../module";
 import {navigationPreventionAction, setStateAction, State} from "../reducer";
 
 enableES5();
@@ -14,10 +14,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
-    onEnter: ((entryComponentProps?: any) => SagaGenerator) & LifecycleDecoratorFlag;
-    onDestroy: (() => SagaGenerator) & LifecycleDecoratorFlag;
-    onLocationMatched: ((routeParameters: RouteParam, location: Location<Readonly<HistoryState> | undefined>) => SagaGenerator) & LifecycleDecoratorFlag;
-    onTick: (() => SagaGenerator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
+    onEnter: (entryComponentProps?: any) => SagaGenerator;
+    onDestroy: () => SagaGenerator;
+    onLocationMatched: (routeParameters: RouteParam, location: Location<Readonly<HistoryState> | undefined>) => SagaGenerator;
+    onTick: (() => SagaGenerator) & TickIntervalDecoratorFlag;
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object, HistoryState extends object = object> implements ModuleLifecycleListener<RouteParam, HistoryState> {

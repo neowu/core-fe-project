@@ -6,7 +6,6 @@ import {app} from "../app";
 import {stringifyWithMask} from "../util/json-util";
 
 export {Interval} from "./Interval";
-export {Lifecycle} from "./Lifecycle";
 export {Loading} from "./Loading";
 export {Log} from "./Log";
 export {Mutex} from "./Mutex";
