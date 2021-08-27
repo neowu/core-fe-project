@@ -8,6 +8,7 @@
         "inlineSources": true,
         "declaration": true,
         "strict": true,
+        "exactOptionalPropertyTypes": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "importHelpers": true,

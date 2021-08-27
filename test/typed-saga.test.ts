@@ -51,7 +51,14 @@ describe("typed-saga (type test)", () => {
                     e: Promise.resolve("a"),
                 });
 
-                const [_a, _b, _c, _d, _e]: [number?, string?, {baz: boolean}?, Effect?, string?] = [a, b, c, d, e];
+                const [_a, _b, _c, _d, _e]: [
+                    // prettier-reserve
+                    number | undefined,
+                    string | undefined,
+                    {baz: boolean} | undefined,
+                    Effect | undefined,
+                    string | undefined
+                ] = [a, b, c, d, e];
             }
         });
 
@@ -61,14 +68,21 @@ describe("typed-saga (type test)", () => {
 
             function* testTyping() {
                 const [a, b, c, d, e] = yield* race([
-                    // prettier-format-preserve
+                    // prettier-reserve
                     call(async (_: number): Promise<number> => _, 1),
                     call(async (_: string): Promise<string> => _, "s"),
                     call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),
                     delay(10),
                     Promise.resolve("a"),
                 ]);
-                const [_a, _b, _c, _d, _e]: [number?, string?, {baz: boolean}?, Effect?, string?] = [a, b, c, d, e];
+                const [_a, _b, _c, _d, _e]: [
+                    // prettier-reserve
+                    number | undefined,
+                    string | undefined,
+                    {baz: boolean} | undefined,
+                    Effect | undefined,
+                    string | undefined
+                ] = [a, b, c, d, e];
             }
         });
 
@@ -112,7 +126,7 @@ describe("typed-saga (type test)", () => {
 
             function* testTyping() {
                 const [a, b, c, d, e] = yield* all([
-                    // prettier-format-preserve
+                    // prettier-reserve
                     call(async (_: number): Promise<number> => _, 1),
                     call(async (_: string): Promise<string> => _, "s"),
                     call(async (_: {foo: number; bar: string}): Promise<{baz: boolean}> => ({baz: true}), {foo: 0, bar: ""}),

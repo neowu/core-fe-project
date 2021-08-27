@@ -11,8 +11,8 @@ interface Log {
     context: {[key: string]: string}; // Indexed data for Elastic Search, key in lowercase with underscore, e.g: some_field
     info: {[key: string]: string}; // Text data for view only, key in lowercase with underscore, e.g: some_field
     stats: {[key: string]: number}; // Numerical data for Elastic Search and statistics, key in lowercase with underscore, e.g: some_field
-    errorCode?: string; // Naming in uppercase with underscore, e.g: SOME_ERROR
-    errorMessage?: string;
+    errorCode?: string | undefined; // Naming in uppercase with underscore, e.g: SOME_ERROR
+    errorMessage?: string | undefined;
 }
 
 interface InfoLogEntry {
@@ -162,7 +162,8 @@ export class LoggerImpl implements Logger {
         if (entry.info) {
             Object.entries(entry.info).map(([key, value]) => {
                 if (value !== undefined) {
-                    info[key] = key === "app_state" ? value.substr(0, 500000) : value.substr(0, 1000);
+                    const isBuiltinInfo = ["app_state", "stacktrace", "extra_stacktrace"].includes(key);
+                    info[key] = isBuiltinInfo ? value.substr(0, 500000) : value.substr(0, 500);
                 }
             });
         }
