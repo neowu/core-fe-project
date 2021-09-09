@@ -1,23 +1,24 @@
 import React from "react";
 import {app} from "../app";
 import {loadingAction} from "../reducer";
+import {captureError} from "./error-util";
 
 type ReactComponentKeyOf<T> = {[P in keyof T]: T[P] extends React.ComponentType<any> ? P : never}[keyof T];
 
-interface AsyncOptions {
+export interface AsyncOptions {
     loadingIdentifier?: string;
     LoadingComponent?: React.ComponentType;
-    ErrorComponent?: React.ComponentType<ErrorComponentProps>;
+    ErrorComponent?: React.ComponentType<AsyncErrorComponentProps>;
+}
+
+export interface AsyncErrorComponentProps {
+    error: unknown;
+    reload: () => Promise<void>;
 }
 
 interface WrapperComponentState {
     Component: React.ComponentType<any> | null;
     error: unknown | null;
-}
-
-export interface ErrorComponentProps {
-    error: unknown;
-    reload: () => Promise<void>;
 }
 
 export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {LoadingComponent, loadingIdentifier, ErrorComponent}: AsyncOptions = {}): T[K] {
@@ -38,6 +39,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                 const moduleExports = await resolve();
                 this.setState({Component: moduleExports[component]});
             } catch (e) {
+                captureError(e, "@@framework/async-import");
                 this.setState({error: e});
             } finally {
                 app.store.dispatch(loadingAction(false, loadingIdentifier));
