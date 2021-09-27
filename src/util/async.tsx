@@ -32,7 +32,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             this.loadComponent();
         }
 
-        async loadComponent() {
+        loadComponent = async () => {
             try {
                 this.setState({error: null});
                 app.store.dispatch(loadingAction(true, loadingIdentifier));
@@ -44,7 +44,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             } finally {
                 app.store.dispatch(loadingAction(false, loadingIdentifier));
             }
-        }
+        };
 
         override render() {
             const {Component, error} = this.state;
