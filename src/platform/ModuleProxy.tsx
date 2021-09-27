@@ -6,6 +6,11 @@ import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {navigationPreventionAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
+import {Location} from "history";
+
+function locationsAreEqual(a: Location, b: Location) {
+    return a.pathname === b.pathname && a.search === b.search && a.hash === b.hash && a.key === b.key && a.state === b.state;
+}
 
 let startupModuleName: string | null = null;
 
@@ -46,8 +51,14 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const currentLocation = props.location;
                 const currentRouteParams = props.match ? props.match.params : null;
 
-                // Only trigger onLocationMatched if current component is connected to <Route>
-                if (currentLocation && currentRouteParams && prevLocation !== currentLocation && this.hasOwnLifecycle("onLocationMatched")) {
+                /**
+                 * Only trigger onLocationMatched if current component is connected to <Route>, and location literally changed.
+                 *
+                 * CAVEAT:
+                 *  Do not use !== to compare locations.
+                 *  Because in "connected-react-router", location from rootState.router.location is not equal to current history.location in reference.
+                 */
+                if (currentLocation && currentRouteParams && !locationsAreEqual(currentLocation, prevLocation) && this.hasOwnLifecycle("onLocationMatched")) {
                     try {
                         this.lastDidUpdateSagaTask?.cancel();
                     } catch (e) {
@@ -142,7 +153,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                             },
                         });
                     } else {
-                        console.error(`[framework] Module component [${moduleName}] is non-Route, use onEnter() instead of onLocationMatched()`);
+                        console.error(`[framework] Module component [${moduleName}] is non-route, use onEnter() instead of onLocationMatched()`);
                     }
                 }
 
