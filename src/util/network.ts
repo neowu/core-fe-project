@@ -4,9 +4,15 @@ import {parseWithDate} from "./json-util";
 
 export type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
 
+export interface APIErrorResponse {
+    id?: string | null;
+    errorCode?: string | null;
+    message?: string | null;
+}
+
 axios.defaults.transformResponse = (data, headers) => {
-    const contentType = headers["content-type"];
-    if (contentType && contentType.startsWith("application/json")) {
+    const contentType = headers?.["content-type"];
+    if (contentType?.startsWith("application/json")) {
         return parseWithDate(data);
     }
     return data;
@@ -15,15 +21,14 @@ axios.defaults.transformResponse = (data, headers) => {
 axios.interceptors.response.use(
     (response) => response,
     (e) => {
-        // eslint-disable-next-line no-prototype-builtins
-        if (e && typeof e === "object" && e.hasOwnProperty("isAxiosError")) {
-            const error = e as AxiosError;
+        if (axios.isAxiosError(e)) {
+            const error = e as AxiosError<APIErrorResponse | undefined>;
             const requestURL = error.config.url || "-";
             if (error.response) {
                 // Try to get server error message/ID/code from response
                 const responseData = error.response.data;
-                const errorId: string | null = responseData && responseData.id ? responseData.id : null;
-                const errorCode: string | null = responseData && responseData.errorCode ? responseData.errorCode : null;
+                const errorId: string | null = responseData?.id || null;
+                const errorCode: string | null = responseData?.errorCode || null;
 
                 if (!errorId && (error.response.status === 502 || error.response.status === 504)) {
                     // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
@@ -61,7 +66,7 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
         Accept: "application/json",
     };
 
-    const response = await axios.request(config);
+    const response = await axios.request<Response>(config);
     return response.data;
 }
 
