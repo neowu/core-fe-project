@@ -12,6 +12,7 @@ export interface State {
     router: RouterState;
     navigationPrevented: boolean;
     app: object;
+    idleStartingTime: number | null;
 }
 
 // Redux Action
@@ -95,6 +96,28 @@ function navigationPreventionReducer(state: boolean = false, action: Action<Navi
     return state;
 }
 
+// Redux Action: Idle Starting Time (to update state.idleStartingTime)
+interface IdleStartingTimeActionPayload {
+    time: number | null;
+}
+
+const IDLE_STARTING_TIME_ACTION = "@@framework/idle-starting-time";
+
+export function idleStartingTimeAction(time: number | null): Action<IdleStartingTimeActionPayload> {
+    return {
+        type: IDLE_STARTING_TIME_ACTION,
+        payload: {time},
+    };
+}
+
+function idleStartingTimeReducer(state: number | null = null, action: Action<IdleStartingTimeActionPayload>): number | null {
+    if (action.type === IDLE_STARTING_TIME_ACTION) {
+        const payload = action.payload as IdleStartingTimeActionPayload;
+        return payload.time;
+    }
+    return state;
+}
+
 // Root Reducer
 export function rootReducer(history: History): Reducer<State> {
     return combineReducers<State>({
@@ -102,6 +125,7 @@ export function rootReducer(history: History): Reducer<State> {
         loading: loadingReducer,
         app: setStateReducer,
         navigationPrevented: navigationPreventionReducer,
+        idleStartingTime: idleStartingTimeReducer,
     });
 }
 
