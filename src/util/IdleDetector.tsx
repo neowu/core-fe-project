@@ -40,7 +40,10 @@ export class IdleDetector extends React.PureComponent<Props, State> {
         this.state = {
             idleStartingTime: null,
         };
-        this.idleTimer = IdleDetector.createTimer(props.idleTime, (_) => app.store.dispatch(idleStartingTimeAction(_)));
+        this.idleTimer = IdleDetector.createTimer(props.idleTime, (_) => {
+            this.setState({idleStartingTime: _});
+            app.store.dispatch(idleStartingTimeAction(_));
+        });
         this.idleTimer.start();
     }
 
