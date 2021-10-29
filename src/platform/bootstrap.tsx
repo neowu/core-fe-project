@@ -13,6 +13,7 @@ import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
+import {IdleDetector} from "..";
 
 /**
  * Configuration for frontend version check.
@@ -134,12 +135,14 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement, navigationPreventionMessage: string) {
     ReactDOM.render(
         <Provider store={app.store}>
-            <ConnectedRouter history={app.browserHistory}>
-                <NavigationGuard message={navigationPreventionMessage} />
-                <ErrorBoundary>
-                    <EntryComponent />
-                </ErrorBoundary>
-            </ConnectedRouter>
+            <IdleDetector>
+                <ConnectedRouter history={app.browserHistory}>
+                    <NavigationGuard message={navigationPreventionMessage} />
+                    <ErrorBoundary>
+                        <EntryComponent />
+                    </ErrorBoundary>
+                </ConnectedRouter>
+            </IdleDetector>
         </Provider>,
         rootContainer
     );

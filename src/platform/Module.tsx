@@ -6,7 +6,7 @@ import {produce, enablePatches, enableES5} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {TickIntervalDecoratorFlag} from "../module";
-import {navigationPreventionAction, setStateAction, State} from "../reducer";
+import {idleTimeoutActions, navigationPreventionAction, setStateAction, State} from "../reducer";
 
 enableES5();
 if (process.env.NODE_ENV === "development") {
@@ -64,6 +64,10 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
 
     setNavigationPrevented(isPrevented: boolean) {
         app.store.dispatch(navigationPreventionAction(isPrevented));
+    }
+
+    setIdleTimeout(timeout: number) {
+        app.store.dispatch(idleTimeoutActions(timeout));
     }
 
     setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]): void {

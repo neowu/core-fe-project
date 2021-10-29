@@ -7,12 +7,17 @@ interface LoadingState {
     [loading: string]: number;
 }
 
+export interface IdleState {
+    timeout: number | null;
+    state: "active" | "idle";
+}
+
 export interface State {
     loading: LoadingState;
     router: RouterState;
     navigationPrevented: boolean;
     app: object;
-    idleStartingTime: number | null;
+    idle: IdleState;
 }
 
 // Redux Action
@@ -96,26 +101,44 @@ function navigationPreventionReducer(state: boolean = false, action: Action<Navi
     return state;
 }
 
-// Redux Action: Idle Starting Time (to update state.idleStartingTime)
-interface IdleStartingTimeActionPayload {
-    time: number | null;
+// Redux Action: Idle state  (to update state.idle)
+interface IdleStateActionPayload {
+    state: "active" | "idle";
 }
 
-const IDLE_STARTING_TIME_ACTION = "@@framework/idle-starting-time";
+const IDLE_STATE_ACTION = "@@framework/idle-state";
 
-export function idleStartingTimeAction(time: number | null): Action<IdleStartingTimeActionPayload> {
+export function idleStateActions(state: "active" | "idle"): Action<IdleStateActionPayload> {
     return {
-        type: IDLE_STARTING_TIME_ACTION,
-        payload: {time},
+        type: IDLE_STATE_ACTION,
+        payload: {state},
     };
 }
 
-function idleStartingTimeReducer(state: number | null = null, action: Action<IdleStartingTimeActionPayload>): number | null {
-    if (action.type === IDLE_STARTING_TIME_ACTION) {
-        const payload = action.payload as IdleStartingTimeActionPayload;
-        return payload.time;
+// Redux Action: Idle timeout (to update state.timeout)
+interface IdleTimeoutActionPayload {
+    timeout: IdleState["timeout"];
+}
+
+const IDLE_TIMEOUT_ACTION = "@@framework/idle-timeout";
+
+export function idleTimeoutActions(timeout: number | null): Action<IdleTimeoutActionPayload> {
+    return {
+        type: IDLE_TIMEOUT_ACTION,
+        payload: {timeout},
+    };
+}
+
+export function idleReducer(state: IdleState = {timeout: null, state: "active"}, action: Action<IdleStateActionPayload | IdleTimeoutActionPayload>): IdleState {
+    if (action.type === IDLE_STATE_ACTION) {
+        const payload = action.payload as IdleStateActionPayload;
+        return {...state, state: payload.state};
+    } else if (action.type === IDLE_TIMEOUT_ACTION) {
+        const payload = action.payload as IdleTimeoutActionPayload;
+        return {...state, timeout: payload.timeout};
+    } else {
+        return state;
     }
-    return state;
 }
 
 // Root Reducer
@@ -125,7 +148,7 @@ export function rootReducer(history: History): Reducer<State> {
         loading: loadingReducer,
         app: setStateReducer,
         navigationPrevented: navigationPreventionReducer,
-        idleStartingTime: idleStartingTimeReducer,
+        idle: idleReducer,
     });
 }
 

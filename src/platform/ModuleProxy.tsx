@@ -163,12 +163,14 @@ export class ModuleProxy<M extends Module<any, any>> {
 
                 if (this.hasOwnLifecycle("onTick")) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
+                    const idleTickIntervalInMillisecond = lifecycleListener.onTick.idleTickInterval ? lifecycleListener.onTick.idleTickInterval * 1000 : null;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
                         yield rawCall(executeAction, tickActionName, boundTicker);
                         this.tickCount++;
-                        yield delay(tickIntervalInMillisecond);
+                        const isIdle = app.store.getState().idle.state === "idle";
+                        yield delay(isIdle && idleTickIntervalInMillisecond ? idleTickIntervalInMillisecond : tickIntervalInMillisecond);
                     }
                 }
             }

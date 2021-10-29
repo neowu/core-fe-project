@@ -2,63 +2,89 @@ import React from "react";
 import {IdleDetectorContext, IdleDetector} from "../../src/util/IdleDetector";
 import {render} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {Provider, useSelector} from "react-redux";
+import {idleReducer, idleTimeoutActions, State} from "../../src/reducer";
+import {combineReducers, createStore, Store} from "redux";
 import "@testing-library/jest-dom";
 
-describe("IdleDetector testing", () => {
+describe("IdleDetector Provider Integration Test", () => {
+    let store: Store;
     beforeEach(() => {
         jest.useFakeTimers();
+        store = createStore(
+            combineReducers({
+                idle: idleReducer,
+            })
+        );
+        store.dispatch(idleTimeoutActions(3000));
     });
     afterEach(() => {
         jest.useRealTimers();
     });
 
-    function TestComponent() {
-        const idleStartingTime = React.useContext(IdleDetectorContext);
+    const Wrapper = (component: React.ReactNode) => {
         return (
-            <React.Fragment>
-                <input data-testid="file" type="file" />
-                <div data-testid="time">{idleStartingTime ? "idle" : "active"}</div>;
-            </React.Fragment>
+            <Provider store={store}>
+                <IdleDetector>{component}</IdleDetector>,
+            </Provider>
         );
-    }
+    };
 
-    test("idleDetector context", () => {
-        const {getByTestId} = render(
-            <IdleDetector idleTime={3000}>
-                <TestComponent />
-            </IdleDetector>
-        );
+    test("testing context", () => {
+        function TestComponent() {
+            const idle = React.useContext(IdleDetectorContext);
+            return (
+                <React.Fragment>
+                    <input data-testid="file" type="file" />
+                    <div data-testid="context-value">{idle.state}</div>
+                </React.Fragment>
+            );
+        }
+        testComponentWithUserEvent(Wrapper(<TestComponent />), "context-value");
+    });
 
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
+    test("testing redux store", () => {
+        const TestComponent = () => {
+            const state = useSelector((state: State) => state.idle.state);
+            return <div data-testid="store-value">{state}</div>;
+        };
 
-        userEvent.click(document.body);
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
-
-        userEvent["keyboard"]("a");
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
-
-        userEvent["dblClick"](document.body);
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
-
-        userEvent.hover(document.body);
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
-
-        userEvent.hover(document.body);
-        expect(getByTestId("time")).toHaveTextContent("active");
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
-
-        jest.runOnlyPendingTimers();
-        expect(getByTestId("time")).toHaveTextContent("idle");
+        testComponentWithUserEvent(Wrapper(<TestComponent />), "store-value");
     });
 });
+
+function testComponentWithUserEvent(component: React.ReactElement, testId: string) {
+    const {getByTestId} = render(component);
+
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    userEvent.click(document.body);
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    userEvent["keyboard"]("a");
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    userEvent["dblClick"](document.body);
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    userEvent.hover(document.body);
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    userEvent.hover(document.body);
+    expect(getByTestId(testId)).toHaveTextContent("active");
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+
+    jest.runOnlyPendingTimers();
+    expect(getByTestId(testId)).toHaveTextContent("idle");
+}

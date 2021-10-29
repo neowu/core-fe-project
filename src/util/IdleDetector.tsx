@@ -1,69 +1,66 @@
 import React from "react";
-import {idleStartingTimeAction} from "../reducer";
-import {app} from "../app";
+import {State, idleStateActions, IdleState} from "../reducer";
+import {useDispatch, useSelector} from "react-redux";
 
 interface Props {
-    idleTime: number;
+    children: React.ReactNode;
 }
 
-interface State {
-    idleStartingTime: number | null;
+export const IdleDetectorContext = React.createContext<IdleState>({
+    timeout: null,
+    state: "active",
+});
+
+function createTimer(time: number, callback: (idleState: IdleState["state"]) => void) {
+    let timer: number;
+
+    function start() {
+        timer = window.setTimeout(() => callback("idle"), time);
+    }
+
+    function reset() {
+        clearTimeout(timer);
+        callback("active");
+        start();
+    }
+
+    function clear() {
+        clearTimeout(timer);
+    }
+
+    return {start, reset, clear};
 }
 
-export const IdleDetectorContext = React.createContext<number | null>(null);
+export function IdleDetector(props: Props) {
+    const {children} = props;
+    const {timeout, state} = useSelector((state: State) => state.idle);
+    const stateRef = React.useRef(state);
+    stateRef.current = state;
 
-export class IdleDetector extends React.PureComponent<Props, State> {
-    private static createTimer(time: number, callback: (idleAt: number | null) => void) {
-        let timer: number;
+    const dispatch = useDispatch();
 
-        function start() {
-            timer = window.setTimeout(() => callback(Date.now()), time);
+    React.useEffect(() => {
+        if (timeout) {
+            const idleTimer = createTimer(timeout, (newIdleState) => {
+                if (newIdleState !== stateRef.current) {
+                    dispatch(idleStateActions(newIdleState));
+                }
+            });
+            idleTimer.start();
+            window.addEventListener("click", idleTimer.reset);
+            window.addEventListener("touchmove", idleTimer.reset);
+            window.addEventListener("keydown", idleTimer.reset);
+            window.addEventListener("mousemove", idleTimer.reset);
+
+            return () => {
+                window.removeEventListener("click", idleTimer.reset);
+                window.removeEventListener("touchmove", idleTimer.reset);
+                window.removeEventListener("keydown", idleTimer.reset);
+                window.removeEventListener("mousemove", idleTimer.reset);
+                idleTimer.clear();
+            };
         }
+    }, [timeout]);
 
-        function reset() {
-            clearTimeout(timer);
-            callback(null);
-            start();
-        }
-
-        function clear() {
-            clearTimeout(timer);
-        }
-
-        return {start, reset, clear};
-    }
-
-    private idleTimer;
-
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            idleStartingTime: null,
-        };
-        this.idleTimer = IdleDetector.createTimer(props.idleTime, (_) => {
-            this.setState({idleStartingTime: _});
-            app.store.dispatch(idleStartingTimeAction(_));
-        });
-        this.idleTimer.start();
-    }
-
-    override componentDidMount() {
-        window.addEventListener("click", this.idleTimer.reset);
-        window.addEventListener("touchmove", this.idleTimer.reset);
-        window.addEventListener("keydown", this.idleTimer.reset);
-        window.addEventListener("mousemove", this.idleTimer.reset);
-    }
-
-    override componentWillUnmount() {
-        window.removeEventListener("click", this.idleTimer.reset);
-        window.removeEventListener("touchmove", this.idleTimer.reset);
-        window.removeEventListener("keydown", this.idleTimer.reset);
-        window.removeEventListener("mousemove", this.idleTimer.reset);
-        this.idleTimer.clear();
-    }
-
-    override render() {
-        const {idleStartingTime} = this.state;
-        return <IdleDetectorContext.Provider value={idleStartingTime}>{this.props.children}</IdleDetectorContext.Provider>;
-    }
+    return <IdleDetectorContext.Provider value={{state, timeout}}>{children}</IdleDetectorContext.Provider>;
 }
