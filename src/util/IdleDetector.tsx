@@ -42,27 +42,25 @@ export function IdleDetector(props: Props) {
     const dispatch = useDispatch();
 
     React.useEffect(() => {
-        if (timeout) {
-            const idleTimer = createTimer(timeout, (newIdleState) => {
-                if (newIdleState !== stateRef.current) {
-                    dispatch(idleStateActions(newIdleState));
-                }
-            });
-            idleTimer.start();
-            window.addEventListener("click", idleTimer.reset);
-            window.addEventListener("touchmove", idleTimer.reset);
-            window.addEventListener("keydown", idleTimer.reset);
-            window.addEventListener("mousemove", idleTimer.reset);
+        const idleTimer = createTimer(timeout, (newIdleState) => {
+            if (newIdleState !== stateRef.current) {
+                dispatch(idleStateActions(newIdleState));
+            }
+        });
+        idleTimer.start();
+        window.addEventListener("click", idleTimer.reset);
+        window.addEventListener("touchmove", idleTimer.reset);
+        window.addEventListener("keydown", idleTimer.reset);
+        window.addEventListener("mousemove", idleTimer.reset);
 
-            return () => {
-                window.removeEventListener("click", idleTimer.reset);
-                window.removeEventListener("touchmove", idleTimer.reset);
-                window.removeEventListener("keydown", idleTimer.reset);
-                window.removeEventListener("mousemove", idleTimer.reset);
-                idleTimer.clear();
-            };
-        }
-    }, [timeout]);
+        return () => {
+            window.removeEventListener("click", idleTimer.reset);
+            window.removeEventListener("touchmove", idleTimer.reset);
+            window.removeEventListener("keydown", idleTimer.reset);
+            window.removeEventListener("mousemove", idleTimer.reset);
+            idleTimer.clear();
+        };
+    }, []);
 
     return <IdleDetectorContext.Provider value={{state, timeout}}>{children}</IdleDetectorContext.Provider>;
 }
