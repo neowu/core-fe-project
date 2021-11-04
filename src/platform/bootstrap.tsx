@@ -27,7 +27,7 @@ import {INITIAL_IDLE_TIMEOUT} from "../util/IdleDetector";
 interface VersionConfig {
     onRemind: () => SagaGenerator;
     versionCheckURL: string; // Must be GET Method, returning whatever JSON
-    thresholdHours?: number; // Default: 24
+    thresholdInHour?: number; // Default: 24 hour
 }
 
 /**
@@ -49,8 +49,7 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
-    // default timeout is 5 mins
-    idleTimeoutInSecond?: number;
+    idleTimeoutInSecond?: number; // Default: 5 min
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
@@ -211,7 +210,7 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: V
             // Check if staying too long, then check if need refresh by comparing server-side checksum
             if (updateReminderConfig) {
                 const stayingHours = (Date.now() - lastChecksumTimestamp) / 3600 / 1000;
-                if (stayingHours > (updateReminderConfig.thresholdHours || 24)) {
+                if (stayingHours > (updateReminderConfig.thresholdInHour || 24)) {
                     const newChecksum = yield* call(fetchVersionChecksum, updateReminderConfig.versionCheckURL);
                     if (newChecksum) {
                         if (lastChecksum !== null && newChecksum !== lastChecksum) {
