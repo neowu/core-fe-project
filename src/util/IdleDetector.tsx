@@ -15,7 +15,7 @@ function createTimer(time: number, callback: (idleState: IdleState["state"]) => 
     let timer: number;
 
     function start() {
-        timer = window.setTimeout(() => callback("idle"), time);
+        timer = window.setTimeout(() => callback("idle"), time * 1000);
     }
 
     function reset() {

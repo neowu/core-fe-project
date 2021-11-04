@@ -48,7 +48,8 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
-    idleTimeout?: number;
+    // default timeout is 5 mins
+    idleTimeoutInSecond?: number;
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
@@ -61,7 +62,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
-    setupIdleTimeout(option.idleTimeout);
+    setupIdleTimeout(option.idleTimeoutInSecond || 300);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
@@ -188,10 +189,8 @@ function setupLocationChangeListener(listener?: (location: Location) => void) {
     }
 }
 
-function setupIdleTimeout(timeout: number | undefined) {
-    if (timeout) {
-        app.store.dispatch(idleTimeoutActions(timeout));
-    }
+function setupIdleTimeout(timeout: number) {
+    app.store.dispatch(idleTimeoutActions(timeout));
 }
 
 function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
