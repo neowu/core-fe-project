@@ -60,7 +60,7 @@ export function IdleDetector(props: Props) {
             window.removeEventListener("mousemove", idleTimer.reset);
             idleTimer.clear();
         };
-    }, []);
+    }, [timeout]);
 
     return <IdleDetectorContext.Provider value={{state, timeout}}>{children}</IdleDetectorContext.Provider>;
 }
