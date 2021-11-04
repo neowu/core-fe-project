@@ -1,10 +1,16 @@
 import {connectRouter, RouterState} from "connected-react-router";
 import {History} from "history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
+import {INITIAL_IDLE_TIMEOUT} from "./util/IdleDetector";
 
 // Redux State
 interface LoadingState {
     [loading: string]: number;
+}
+
+export interface IdleState {
+    timeout: number;
+    state: "active" | "idle";
 }
 
 export interface State {
@@ -12,6 +18,7 @@ export interface State {
     router: RouterState;
     navigationPrevented: boolean;
     app: object;
+    idle: IdleState;
 }
 
 // Redux Action
@@ -95,6 +102,46 @@ function navigationPreventionReducer(state: boolean = false, action: Action<Navi
     return state;
 }
 
+// Redux Action: Idle state  (to update state.idle)
+interface IdleStateActionPayload {
+    state: "active" | "idle";
+}
+
+const IDLE_STATE_ACTION = "@@framework/idle-state";
+
+export function idleStateActions(state: "active" | "idle"): Action<IdleStateActionPayload> {
+    return {
+        type: IDLE_STATE_ACTION,
+        payload: {state},
+    };
+}
+
+// Redux Action: Idle timeout (to update state.timeout)
+interface IdleTimeoutActionPayload {
+    timeout: IdleState["timeout"];
+}
+
+const IDLE_TIMEOUT_ACTION = "@@framework/idle-timeout";
+
+export function idleTimeoutActions(timeout: number): Action<IdleTimeoutActionPayload> {
+    return {
+        type: IDLE_TIMEOUT_ACTION,
+        payload: {timeout},
+    };
+}
+
+export function idleReducer(state: IdleState = {timeout: INITIAL_IDLE_TIMEOUT, state: "active"}, action: Action<IdleStateActionPayload | IdleTimeoutActionPayload>): IdleState {
+    if (action.type === IDLE_STATE_ACTION) {
+        const payload = action.payload as IdleStateActionPayload;
+        return {...state, state: payload.state};
+    } else if (action.type === IDLE_TIMEOUT_ACTION) {
+        const payload = action.payload as IdleTimeoutActionPayload;
+        return {...state, timeout: payload.timeout};
+    } else {
+        return state;
+    }
+}
+
 // Root Reducer
 export function rootReducer(history: History): Reducer<State> {
     return combineReducers<State>({
@@ -102,6 +149,7 @@ export function rootReducer(history: History): Reducer<State> {
         loading: loadingReducer,
         app: setStateReducer,
         navigationPrevented: navigationPreventionReducer,
+        idle: idleReducer,
     });
 }
 

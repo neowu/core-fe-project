@@ -9,6 +9,7 @@ import {stringifyWithMask} from "./util/json-util";
 
 export interface TickIntervalDecoratorFlag {
     tickInterval?: number;
+    idleTickInterval?: number;
 }
 
 export type ActionHandler = (...args: any[]) => SagaGenerator;

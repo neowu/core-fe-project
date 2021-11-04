@@ -9,6 +9,7 @@
     "testURL": "http://127.0.0.1",
     "moduleFileExtensions": ["ts", "tsx", "js"],
     "moduleDirectories": ["node_modules", "src"],
+    "testEnvironment": "jsdom",
     "globals": {
         "ts-jest": {
             "tsconfig": "./config/tsconfig.json"

@@ -13,6 +13,8 @@ import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
+import {IdleDetector, idleTimeoutActions} from "..";
+import {INITIAL_IDLE_TIMEOUT} from "../util/IdleDetector";
 
 /**
  * Configuration for frontend version check.
@@ -47,6 +49,8 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
+    // default timeout is 5 mins
+    idleTimeoutInSecond?: number;
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
@@ -59,6 +63,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
+    setupIdleTimeout(option.idleTimeoutInSecond || INITIAL_IDLE_TIMEOUT);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
@@ -134,12 +139,14 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement, navigationPreventionMessage: string) {
     ReactDOM.render(
         <Provider store={app.store}>
-            <ConnectedRouter history={app.browserHistory}>
-                <NavigationGuard message={navigationPreventionMessage} />
-                <ErrorBoundary>
-                    <EntryComponent />
-                </ErrorBoundary>
-            </ConnectedRouter>
+            <IdleDetector>
+                <ConnectedRouter history={app.browserHistory}>
+                    <NavigationGuard message={navigationPreventionMessage} />
+                    <ErrorBoundary>
+                        <EntryComponent />
+                    </ErrorBoundary>
+                </ConnectedRouter>
+            </IdleDetector>
         </Provider>,
         rootContainer
     );
@@ -181,6 +188,10 @@ function setupLocationChangeListener(listener?: (location: Location) => void) {
     if (listener) {
         app.browserHistory.listen(listener);
     }
+}
+
+function setupIdleTimeout(timeout: number) {
+    app.store.dispatch(idleTimeoutActions(timeout));
 }
 
 function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
