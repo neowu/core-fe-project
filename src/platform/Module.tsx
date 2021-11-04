@@ -6,7 +6,7 @@ import {produce, enablePatches, enableES5} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {TickIntervalDecoratorFlag} from "../module";
-import {idleTimeoutActions, navigationPreventionAction, setStateAction, State} from "../reducer";
+import {navigationPreventionAction, setStateAction, State} from "../reducer";
 
 enableES5();
 if (process.env.NODE_ENV === "development") {
