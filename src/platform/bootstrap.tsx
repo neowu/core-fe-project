@@ -13,7 +13,7 @@ import {APIException} from "../Exception";
 import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
-import {IdleDetector} from "..";
+import {IdleDetector, idleTimeoutActions} from "..";
 
 /**
  * Configuration for frontend version check.
@@ -48,6 +48,7 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
+    idleTimeout?: number;
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
@@ -60,6 +61,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
+    setupIdleTimeout(option.idleTimeout);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
@@ -183,6 +185,12 @@ function setupAppExitListener(eventServerURL?: string) {
 function setupLocationChangeListener(listener?: (location: Location) => void) {
     if (listener) {
         app.browserHistory.listen(listener);
+    }
+}
+
+function setupIdleTimeout(timeout: number | undefined) {
+    if (timeout) {
+        app.store.dispatch(idleTimeoutActions(timeout));
     }
 }
 
