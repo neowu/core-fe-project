@@ -1,7 +1,7 @@
 import {connectRouter, RouterState} from "connected-react-router";
 import {History} from "history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
-import {INITIAL_IDLE_TIMEOUT} from "./util/IdleDetector";
+import {DEFAULT_IDLE_TIMEOUT} from "./util/IdleDetector";
 
 // Redux State
 interface LoadingState {
@@ -130,7 +130,7 @@ export function idleTimeoutActions(timeout: number): Action<IdleTimeoutActionPay
     };
 }
 
-export function idleReducer(state: IdleState = {timeout: INITIAL_IDLE_TIMEOUT, state: "active"}, action: Action<IdleStateActionPayload | IdleTimeoutActionPayload>): IdleState {
+export function idleReducer(state: IdleState = {timeout: DEFAULT_IDLE_TIMEOUT, state: "active"}, action: Action<IdleStateActionPayload | IdleTimeoutActionPayload>): IdleState {
     if (action.type === IDLE_STATE_ACTION) {
         const payload = action.payload as IdleStateActionPayload;
         return {...state, state: payload.state};

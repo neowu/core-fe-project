@@ -4,13 +4,10 @@ import {Task} from "redux-saga";
 import {delay, call as rawCall, take, select, cancel, fork, ForkEffect, TakeEffect, CancelEffect, SelectEffect} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
+import {Action, IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 import {Location} from "history";
-
-function locationsAreEqual(a: Location, b: Location) {
-    return a.pathname === b.pathname && a.search === b.search && a.hash === b.hash && a.key === b.key && a.state === b.state;
-}
+import {SagaGenerator} from "../typed-saga";
 
 let startupModuleName: string | null = null;
 
@@ -58,7 +55,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                  *  Do not use !== to compare locations.
                  *  Because in "connected-react-router", location from rootState.router.location is not equal to current history.location in reference.
                  */
-                if (currentLocation && currentRouteParams && !locationsAreEqual(currentLocation, prevLocation) && this.hasOwnLifecycle("onLocationMatched")) {
+                if (currentLocation && currentRouteParams && !this.areLocationsEqual(currentLocation, prevLocation) && this.hasOwnLifecycle("onLocationMatched")) {
                     try {
                         this.lastDidUpdateSagaTask?.cancel();
                     } catch (e) {
@@ -113,37 +110,13 @@ export class ModuleProxy<M extends Module<any, any>> {
                 return <ComponentType {...this.props} />;
             }
 
+            private areLocationsEqual = (a: Location, b: Location): boolean => {
+                return a.pathname === b.pathname && a.search === b.search && a.hash === b.hash && a.key === b.key && a.state === b.state;
+            };
+
             private hasOwnLifecycle = (methodName: keyof ModuleLifecycleListener): boolean => {
                 return Object.prototype.hasOwnProperty.call(modulePrototype, methodName);
             };
-
-            private *intervalSaga() {
-                const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
-                const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
-                const tickActionName = `${moduleName}/@@TICK`;
-                while (true) {
-                    yield rawCall(executeAction, tickActionName, boundTicker);
-                    this.tickCount++;
-                    yield delay(tickIntervalInMillisecond);
-                }
-            }
-
-            private *onTickSaga(): Generator<ForkEffect<void> | TakeEffect | CancelEffect | SelectEffect, void, Task> {
-                let runningIntervalTask: Task | null = null;
-
-                runningIntervalTask = yield fork(this.intervalSaga.bind(this));
-                while (true) {
-                    yield take(IDLE_STATE_ACTION);
-                    if (runningIntervalTask) {
-                        yield cancel(runningIntervalTask);
-                        runningIntervalTask = null;
-                    }
-                    const isActive = yield select((state: State) => state.idle.state === "active");
-                    if (isActive) {
-                        runningIntervalTask = yield fork(this.intervalSaga.bind(this));
-                    }
-                }
-            }
 
             private *lifecycleSaga() {
                 /**
@@ -190,7 +163,30 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
 
                 if (this.hasOwnLifecycle("onTick")) {
-                    yield rawCall(this.onTickSaga.bind(this));
+                    yield rawCall(this.onTickWatcherSaga.bind(this));
+                }
+            }
+
+            private *onTickWatcherSaga() {
+                let runningIntervalTask: Task = yield fork(this.onTickSaga.bind(this));
+                while (true) {
+                    yield take(IDLE_STATE_ACTION);
+                    yield cancel(runningIntervalTask); // no-op if already cancelled
+                    const isActive: boolean = yield select((state: State) => state.idle.state === "active");
+                    if (isActive) {
+                        runningIntervalTask = yield fork(this.onTickSaga.bind(this));
+                    }
+                }
+            }
+
+            private *onTickSaga() {
+                const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
+                const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
+                const tickActionName = `${moduleName}/@@TICK`;
+                while (true) {
+                    yield rawCall(executeAction, tickActionName, boundTicker);
+                    this.tickCount++;
+                    yield delay(tickIntervalInMillisecond);
                 }
             }
         };

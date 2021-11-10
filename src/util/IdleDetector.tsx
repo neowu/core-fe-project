@@ -2,14 +2,14 @@ import React from "react";
 import {State, idleStateActions, IdleState} from "../reducer";
 import {useDispatch, useSelector} from "react-redux";
 
-export const INITIAL_IDLE_TIMEOUT = 300;
+export const DEFAULT_IDLE_TIMEOUT = 300;
 
 interface Props {
     children: React.ReactNode;
 }
 
 export const IdleDetectorContext = React.createContext<IdleState>({
-    timeout: INITIAL_IDLE_TIMEOUT,
+    timeout: DEFAULT_IDLE_TIMEOUT,
     state: "active",
 });
 

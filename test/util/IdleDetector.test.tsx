@@ -1,5 +1,5 @@
 import React from "react";
-import {IdleDetectorContext, IdleDetector, INITIAL_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
+import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
 import {render} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {Provider, useSelector} from "react-redux";
@@ -16,7 +16,7 @@ describe("IdleDetector Provider Integration Test", () => {
                 idle: idleReducer,
             })
         );
-        store.dispatch(idleTimeoutActions(INITIAL_IDLE_TIMEOUT));
+        store.dispatch(idleTimeoutActions(DEFAULT_IDLE_TIMEOUT));
     });
     afterEach(() => {
         jest.useRealTimers();

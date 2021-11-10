@@ -14,7 +14,7 @@ import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
 import {IdleDetector, idleTimeoutActions} from "..";
-import {INITIAL_IDLE_TIMEOUT} from "../util/IdleDetector";
+import {DEFAULT_IDLE_TIMEOUT} from "../util/IdleDetector";
 
 /**
  * Configuration for frontend version check.
@@ -49,7 +49,7 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
-    idleTimeoutInSecond?: number; // Default: 5 min. Never Idle if timeout value 0 is given
+    idleTimeoutInSecond?: number; // Default: 5 min, never Idle if non-positive value given
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
@@ -62,7 +62,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
-    setupIdleTimeout(option.idleTimeoutInSecond || INITIAL_IDLE_TIMEOUT);
+    setupIdleTimeout(option.idleTimeoutInSecond || DEFAULT_IDLE_TIMEOUT);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }

@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.32.0",
+    "version": "1.32.1",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -15,15 +15,15 @@
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
     },
     "devDependencies": {
-        "@testing-library/jest-dom": "5.14.1",
+        "@testing-library/jest-dom": "5.15.0",
         "@testing-library/react": "12.1.2",
         "@testing-library/user-event": "13.5.0",
         "@types/jest": "27.0.2",
-        "@types/node": "16.11.1",
-        "@typescript-eslint/eslint-plugin": "5.1.0",
-        "@typescript-eslint/parser": "5.1.0",
+        "@types/node": "16.11.7",
+        "@typescript-eslint/eslint-plugin": "5.3.1",
+        "@typescript-eslint/parser": "5.3.1",
         "chalk": "4.1.2",
-        "eslint": "8.0.1",
+        "eslint": "8.2.0",
         "eslint-config-prettier": "8.3.0",
         "fs-extra": "10.0.0",
         "jest": "27.3.1",
