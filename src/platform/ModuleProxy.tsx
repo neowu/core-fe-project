@@ -1,10 +1,10 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay, call as rawCall} from "redux-saga/effects";
+import {delay, call as rawCall, take, select, cancel, fork, ForkEffect, TakeEffect, CancelEffect, SelectEffect} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {navigationPreventionAction} from "../reducer";
+import {IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 import {Location} from "history";
 
@@ -117,6 +117,34 @@ export class ModuleProxy<M extends Module<any, any>> {
                 return Object.prototype.hasOwnProperty.call(modulePrototype, methodName);
             };
 
+            private *intervalSaga() {
+                const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
+                const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
+                const tickActionName = `${moduleName}/@@TICK`;
+                while (true) {
+                    yield rawCall(executeAction, tickActionName, boundTicker);
+                    this.tickCount++;
+                    yield delay(tickIntervalInMillisecond);
+                }
+            }
+
+            private *onTickSaga(): Generator<ForkEffect<void> | TakeEffect | CancelEffect | SelectEffect, void, Task> {
+                let runningIntervalTask: Task | null = null;
+
+                runningIntervalTask = yield fork(this.intervalSaga.bind(this));
+                while (true) {
+                    yield take(IDLE_STATE_ACTION);
+                    if (runningIntervalTask) {
+                        yield cancel(runningIntervalTask);
+                        runningIntervalTask = null;
+                    }
+                    const isActive = yield select((state: State) => state.idle.state === "active");
+                    if (isActive) {
+                        runningIntervalTask = yield fork(this.intervalSaga.bind(this));
+                    }
+                }
+            }
+
             private *lifecycleSaga() {
                 /**
                  * CAVEAT:
@@ -162,16 +190,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
 
                 if (this.hasOwnLifecycle("onTick")) {
-                    const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
-                    const idleTickIntervalInMillisecond = lifecycleListener.onTick.idleTickInterval ? lifecycleListener.onTick.idleTickInterval * 1000 : null;
-                    const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
-                    const tickActionName = `${moduleName}/@@TICK`;
-                    while (true) {
-                        yield rawCall(executeAction, tickActionName, boundTicker);
-                        this.tickCount++;
-                        const isIdle = app.store.getState().idle.state === "idle";
-                        yield delay(isIdle && idleTickIntervalInMillisecond ? idleTickIntervalInMillisecond : tickIntervalInMillisecond);
-                    }
+                    yield rawCall(this.onTickSaga.bind(this));
                 }
             }
         };

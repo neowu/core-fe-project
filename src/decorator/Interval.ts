@@ -5,12 +5,9 @@ type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor
 /**
  * For *onTick() action only, to specify to tick interval in second.
  */
-export function Interval(defaultInterval: number, idleInterval?: number): OnTickHandlerDecorator {
+export function Interval(second: number): OnTickHandlerDecorator {
     return (target, propertyKey, descriptor) => {
-        descriptor.value!.tickInterval = defaultInterval;
-        if (idleInterval) {
-            descriptor.value!.idleTickInterval = idleInterval;
-        }
+        descriptor.value!.tickInterval = second;
         return descriptor;
     };
 }
