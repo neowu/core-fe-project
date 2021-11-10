@@ -107,7 +107,7 @@ interface IdleStateActionPayload {
     state: "active" | "idle";
 }
 
-const IDLE_STATE_ACTION = "@@framework/idle-state";
+export const IDLE_STATE_ACTION = "@@framework/idle-state";
 
 export function idleStateActions(state: "active" | "idle"): Action<IdleStateActionPayload> {
     return {

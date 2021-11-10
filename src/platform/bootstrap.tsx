@@ -49,7 +49,7 @@ interface BootstrapOption {
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
     versionConfig?: VersionConfig;
-    idleTimeoutInSecond?: number; // Default: 5 min
+    idleTimeoutInSecond?: number; // Default: 5 min. Never Idle if timeout value 0 is given
 }
 
 export const LOGGER_ACTION = "@@framework/logger";
