@@ -1,4 +1,4 @@
-import {push} from "connected-react-router";
+import {push} from "redux-first-history";
 import {Location} from "history";
 import {SagaGenerator} from "../typed-saga";
 import {put} from "redux-saga/effects";
@@ -6,17 +6,22 @@ import {produce, enablePatches, enableES5} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {TickIntervalDecoratorFlag} from "../module";
-import {navigationPreventionAction, setStateAction, State} from "../reducer";
+import {setStateAction, State} from "../reducer";
+import {allowNavigation, blockNavigation} from "../util/browser-util";
 
 enableES5();
 if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
+export interface ModuleHistoryLocation<State extends object> extends Omit<Location, "state"> {
+    state: Readonly<State> | undefined;
+}
+
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
     onEnter: (entryComponentProps?: any) => SagaGenerator;
     onDestroy: () => SagaGenerator;
-    onLocationMatched: (routeParameters: RouteParam, location: Location<Readonly<HistoryState> | undefined>) => SagaGenerator;
+    onLocationMatched: (routeParameters: RouteParam, location: ModuleHistoryLocation<HistoryState>) => SagaGenerator;
     onTick: (() => SagaGenerator) & TickIntervalDecoratorFlag;
 }
 
@@ -31,21 +36,22 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
 
     *onDestroy(): SagaGenerator {
         /**
-         * Called when the attached component is going to unmount
+         * Called when the attached component is going to unmount.
          */
     }
 
-    *onLocationMatched(routeParam: RouteParam, location: Location<Readonly<HistoryState> | undefined>): SagaGenerator {
+    *onLocationMatched(routeParam: RouteParam, location: ModuleHistoryLocation<HistoryState>): SagaGenerator {
         /**
-         * Called when the attached component is a React-Route component and its Route location matches
-         * It is called each time the location changes, as long as it still matches
+         * Called when the attached component is a <ModuleRoute> based component and location matched <ModuleRoute>'s path.
+         * It will be re-called only if location's path or history state changed.
          */
     }
 
     *onTick(): SagaGenerator {
         /**
-         * Called periodically during the lifecycle of attached component
-         * Usually used together with @Interval decorator, to specify the period (in second)
+         * Called periodically during the lifecycle of attached component.
+         * Usually used together with @Interval decorator, to specify the period (in second).
+         *
          * Attention: The next tick will not be triggered, until the current tick has finished
          */
     }
@@ -63,7 +69,11 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
     }
 
     setNavigationPrevented(isPrevented: boolean) {
-        app.store.dispatch(navigationPreventionAction(isPrevented));
+        if (isPrevented) {
+            blockNavigation();
+        } else {
+            allowNavigation();
+        }
     }
 
     setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]): void {

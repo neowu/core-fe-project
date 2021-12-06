@@ -1,5 +1,4 @@
-import {connectRouter, RouterState} from "connected-react-router";
-import {History} from "history";
+import {RouterState} from "redux-first-history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
 import {DEFAULT_IDLE_TIMEOUT} from "./util/IdleDetector";
 
@@ -16,7 +15,6 @@ export interface IdleState {
 export interface State {
     loading: LoadingState;
     router: RouterState;
-    navigationPrevented: boolean;
     app: object;
     idle: IdleState;
 }
@@ -80,28 +78,6 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
     return state;
 }
 
-// Redux Action: Navigation Prevent (to update state.navigationPrevented)
-interface NavigationPreventionActionPayload {
-    isPrevented: boolean;
-}
-
-const NAVIGATION_PREVENTION_ACTION = "@@framework/navigation-prevention";
-
-export function navigationPreventionAction(isPrevented: boolean): Action<NavigationPreventionActionPayload> {
-    return {
-        type: NAVIGATION_PREVENTION_ACTION,
-        payload: {isPrevented},
-    };
-}
-
-function navigationPreventionReducer(state: boolean = false, action: Action<NavigationPreventionActionPayload>): boolean {
-    if (action.type === NAVIGATION_PREVENTION_ACTION) {
-        const payload = action.payload as NavigationPreventionActionPayload;
-        return payload.isPrevented;
-    }
-    return state;
-}
-
 // Redux Action: Idle state  (to update state.idle)
 interface IdleStateActionPayload {
     state: "active" | "idle";
@@ -143,12 +119,11 @@ export function idleReducer(state: IdleState = {timeout: DEFAULT_IDLE_TIMEOUT, s
 }
 
 // Root Reducer
-export function rootReducer(history: History): Reducer<State> {
+export function rootReducer(routerReducer: Reducer<RouterState>): Reducer<State> {
     return combineReducers<State>({
-        router: connectRouter(history),
+        router: routerReducer,
         loading: loadingReducer,
         app: setStateReducer,
-        navigationPrevented: navigationPreventionReducer,
         idle: idleReducer,
     });
 }

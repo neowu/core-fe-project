@@ -21,7 +21,7 @@ interface WrapperComponentState {
     error: unknown | null;
 }
 
-export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {LoadingComponent, loadingIdentifier, ErrorComponent}: AsyncOptions = {}): T[K] {
+export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, componentKey: K, {LoadingComponent, loadingIdentifier, ErrorComponent}: AsyncOptions = {}): T[K] {
     return class AsyncWrapperComponent extends React.PureComponent<{}, WrapperComponentState> {
         constructor(props: {}) {
             super(props);
@@ -36,8 +36,8 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
             try {
                 this.setState({error: null});
                 app.store.dispatch(loadingAction(true, loadingIdentifier));
-                const moduleExports = await resolve();
-                this.setState({Component: moduleExports[component]});
+                const moduleExports: T = await resolve();
+                this.setState({Component: moduleExports[componentKey] as any});
             } catch (e) {
                 captureError(e, "@@framework/async-import");
                 this.setState({error: e});
