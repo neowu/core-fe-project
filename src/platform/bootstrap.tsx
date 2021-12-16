@@ -62,7 +62,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
-    setupIdleTimeout(option.idleTimeoutInSecond || DEFAULT_IDLE_TIMEOUT);
+    setupIdleTimeout(option.idleTimeoutInSecond ?? DEFAULT_IDLE_TIMEOUT);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
