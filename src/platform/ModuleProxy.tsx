@@ -1,13 +1,12 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay, call as rawCall, take, select, cancel, fork, ForkEffect, TakeEffect, CancelEffect, SelectEffect} from "redux-saga/effects";
+import {delay, call as rawCall, take, select, cancel, fork} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {Action, IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
+import {IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 import {Location} from "history";
-import {SagaGenerator} from "../typed-saga";
 
 let startupModuleName: string | null = null;
 

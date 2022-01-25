@@ -37,7 +37,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                 this.setState({error: null});
                 app.store.dispatch(loadingAction(true, loadingIdentifier));
                 const moduleExports = await resolve();
-                this.setState({Component: moduleExports[component]});
+                this.setState({Component: moduleExports[component] as any});
             } catch (e) {
                 captureError(e, "@@framework/async-import");
                 this.setState({error: e});

@@ -13,6 +13,8 @@ if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
+export type ModuleLocation<State> = Location<Readonly<State> | undefined>;
+
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
     onEnter: (entryComponentProps?: any) => SagaGenerator;
     onDestroy: () => SagaGenerator;
@@ -35,7 +37,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
          */
     }
 
-    *onLocationMatched(routeParam: RouteParam, location: Location<Readonly<HistoryState> | undefined>): SagaGenerator {
+    *onLocationMatched(routeParam: RouteParam, location: ModuleLocation<HistoryState>): SagaGenerator {
         /**
          * Called when the attached component is a React-Route component and its Route location matches
          * It is called each time the location changes, as long as it still matches
