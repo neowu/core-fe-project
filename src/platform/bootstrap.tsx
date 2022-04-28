@@ -1,7 +1,7 @@
 import {ConnectedRouter} from "connected-react-router";
 import {Location} from "history";
 import React from "react";
-import ReactDOM from "react-dom";
+import {createRoot} from "react-dom/client";
 import {Provider} from "react-redux";
 import {app} from "../app";
 import {NavigationGuard} from "./NavigationGuard";
@@ -136,9 +136,11 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 }
 
 function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement, navigationPreventionMessage: string) {
-    ReactDOM.render(
+    const root = createRoot(rootContainer);
+    root.render(
         <Provider store={app.store}>
             <IdleDetector>
+                {/* @ts-ignore - @types/react removed default props.children in class component, and no children prop in ConnectedRouter */}
                 <ConnectedRouter history={app.browserHistory}>
                     <NavigationGuard message={navigationPreventionMessage} />
                     <ErrorBoundary>
@@ -146,8 +148,7 @@ function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElem
                     </ErrorBoundary>
                 </ConnectedRouter>
             </IdleDetector>
-        </Provider>,
-        rootContainer
+        </Provider>
     );
 }
 
