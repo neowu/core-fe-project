@@ -36,7 +36,7 @@ axios.interceptors.response.use(
                 const errorId: string | null = responseData?.id || null;
                 const errorCode: string | null = responseData?.errorCode || null;
 
-                if (!errorId && (typedError.response.status === 502 || typedError.response.status === 504)) {
+                if (!errorId && (typedError.response.status === 502 || typedError.response.status === 504 || typedError.response.status === 0)) {
                     // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
                     // Note: Status 503 is maintenance
                     throw new NetworkConnectionException(`Gateway error (${typedError.response.status})`, requestURL, typedError.message);
