@@ -6,10 +6,12 @@
         "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "\\.test\\.tsx?$",
-    "testURL": "http://127.0.0.1",
     "moduleFileExtensions": ["ts", "tsx", "js"],
     "moduleDirectories": ["node_modules", "src"],
     "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+        "url": "http://127.0.0.1"
+    },
     "globals": {
         "ts-jest": {
             "tsconfig": "./config/tsconfig.json"

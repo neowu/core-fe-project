@@ -30,27 +30,21 @@ axios.interceptors.response.use(
         if (axios.isAxiosError(error)) {
             const typedError = error as AxiosError<APIErrorResponse | undefined>;
             const requestURL = typedError.config.url || "-";
-            if (typedError.response) {
-                // Try to get server error message/ID/code from response
-                const responseData = typedError.response.data;
-                const errorId: string | null = responseData?.id || null;
-                const errorCode: string | null = responseData?.errorCode || null;
 
-                if (!errorId && (typedError.response.status === 502 || typedError.response.status === 504 || typedError.response.status === 0)) {
-                    // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
-                    // Note: Status 503 is maintenance
-                    throw new NetworkConnectionException(`Gateway error (${typedError.response.status})`, requestURL, typedError.message);
-                } else {
-                    const errorMessage: string = responseData && responseData.message ? responseData.message : `[No Response]`;
+            if (typedError.response) {
+                const responseData = typedError.response.data;
+                // Treat "cloud" error as Network Exception, e.g: gateway/load balancer issue,
+                const networkErrorStatusCodes: number[] = [0, 502, 504];
+                if (responseData && !networkErrorStatusCodes.includes(typedError.response.status)) {
+                    // Try to get server error message/ID/code from response
+                    const errorId: string | null = responseData?.id || null;
+                    const errorCode: string | null = responseData?.errorCode || null;
+                    const errorMessage: string = responseData.message || `[No Response]`;
                     throw new APIException(errorMessage, typedError.response.status, requestURL, responseData, errorId, errorCode);
                 }
-            } else {
-                /**
-                 * It could be network failure, or CORS pre-flight failure. We cannot distinguish here.
-                 * Ref: https://github.com/axios/axios/issues/838
-                 */
-                throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, typedError.message);
             }
+
+            throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, `${typedError.code || "UNKNOWN"}: ${typedError.message}`);
         } else if (error instanceof NetworkConnectionException) {
             throw error;
         } else {

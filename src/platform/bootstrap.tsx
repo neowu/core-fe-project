@@ -15,19 +15,16 @@ import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
 import {IdleDetector, idleTimeoutActions} from "..";
 import {DEFAULT_IDLE_TIMEOUT} from "../util/IdleDetector";
+import {SagaIterator} from "redux-saga";
 
 /**
  * Configuration for frontend version check.
- * If the version changes (by sending GET request to `versionCheckURL`) over `thresholdHours` (default: 24), `onRemind` will be executed.
- *
- * Suggested Approach:
- * - onRemind: Alert to end-user for page refresh
- * - versionCheckURL: Respond a JSON based on computed bundled index.html content, whose contained JS/CSS file name changes when version changes.
+ * If the `versionCheckURL` API response changes, `onRemind` will be executed.
  */
-interface VersionConfig {
+interface VersionCheckConfig {
     onRemind: () => SagaGenerator;
     versionCheckURL: string; // Must be GET Method, returning whatever JSON
-    thresholdInHour?: number; // Default: 24 hour
+    frequencyInSecond?: number; // Default: 600 (10 min)
 }
 
 /**
@@ -48,7 +45,7 @@ interface BootstrapOption {
     rootContainer?: HTMLElement;
     browserConfig?: BrowserConfig;
     loggerConfig?: LoggerConfig;
-    versionConfig?: VersionConfig;
+    versionConfig?: VersionCheckConfig;
     idleTimeoutInSecond?: number; // Default: 5 min, never Idle if non-positive value given
 }
 
@@ -194,43 +191,40 @@ function setupIdleTimeout(timeout: number) {
     app.store.dispatch(idleTimeoutActions(timeout));
 }
 
-function runBackgroundLoop(loggerConfig?: LoggerConfig, updateReminderConfig?: VersionConfig) {
+function runBackgroundLoop(loggerConfig?: LoggerConfig, versionCheckConfig?: VersionCheckConfig) {
     app.logger.info({action: "@@ENTER"});
     app.loggerConfig = loggerConfig || null;
 
-    app.sagaMiddleware.run(function* () {
-        let lastChecksumTimestamp = 0;
-        let lastChecksum: string | null = null;
-        while (true) {
-            // Loop on every 15 second
-            yield delay(15000);
+    if (loggerConfig) {
+        app.sagaMiddleware.run(function* () {
+            while (true) {
+                yield delay((loggerConfig.frequencyInSecond || 20) * 1000);
+                yield* call(sendEventLogs);
+            }
+        });
+    }
 
-            // Send collected log to event server
-            yield* call(sendEventLogs);
+    if (versionCheckConfig) {
+        app.sagaMiddleware.run(function* () {
+            let lastChecksum: string | null = null;
 
-            // Check if staying too long, then check if need refresh by comparing server-side checksum
-            if (updateReminderConfig) {
-                const stayingHours = (Date.now() - lastChecksumTimestamp) / 3600 / 1000;
-                if (stayingHours > (updateReminderConfig.thresholdInHour || 24)) {
-                    const newChecksum = yield* call(fetchVersionChecksum, updateReminderConfig.versionCheckURL);
-                    if (newChecksum) {
-                        if (lastChecksum !== null && newChecksum !== lastChecksum) {
-                            app.logger.warn({
-                                action: VERSION_CHECK_ACTION,
-                                errorMessage: `Frontend version changed, page no refresh for ${stayingHours.toFixed(2)} hrs`,
-                                errorCode: "VERSION_CHANGED",
-                                elapsedTime: 0,
-                                info: {newChecksum, lastChecksum},
-                            });
-                            yield* executeAction(VERSION_CHECK_ACTION, updateReminderConfig.onRemind);
-                        }
-                        lastChecksum = newChecksum;
-                        lastChecksumTimestamp = Date.now();
+            while (true) {
+                yield delay((versionCheckConfig.frequencyInSecond || 600) * 1000);
+                const newChecksum = yield* call(fetchVersionChecksum, versionCheckConfig.versionCheckURL);
+                if (newChecksum) {
+                    if (lastChecksum !== null && newChecksum !== lastChecksum) {
+                        app.logger.info({
+                            action: VERSION_CHECK_ACTION,
+                            elapsedTime: 0,
+                            info: {newChecksum, lastChecksum},
+                        });
+                        yield* executeAction(VERSION_CHECK_ACTION, versionCheckConfig.onRemind);
                     }
+                    lastChecksum = newChecksum;
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 export async function sendEventLogs(): Promise<void> {

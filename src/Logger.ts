@@ -36,7 +36,8 @@ interface ErrorLogEntry extends InfoLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
-    slowStartupThreshold?: number; // In second, default: 5
+    slowStartupThresholdInSecond?: number; // Default: 5
+    frequencyInSecond?: number; // Default: 20
     maskedKeywords?: RegExp[];
 }
 
