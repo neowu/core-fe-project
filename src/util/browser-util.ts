@@ -15,10 +15,10 @@ export function setNavigationBlockedMessage(message: string | null | undefined):
 
 export function blockNavigation(): void {
     window.onbeforeunload = () => navigationBlockedMessage;
-    navigationBlockRemover = app.browserHistory.block((transition) => {
+    navigationBlockRemover = app.browserHistory.block((transaction) => {
         if (window.confirm(navigationBlockedMessage)) {
             setTimeout(allowNavigation, 0);
-            transition.retry();
+            transaction.retry();
         }
     });
 }
