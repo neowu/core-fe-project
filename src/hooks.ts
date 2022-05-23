@@ -8,6 +8,11 @@ export function useLoadingStatus(identifier: string = "global"): boolean {
     return useSelector((state: State) => state.loading[identifier] > 0);
 }
 
+interface IdleStatus {
+    idle: boolean;
+    startAt: number | null;
+}
+
 /**
  * Action parameters must be of primitive types, so that the dependency check can work well.
  * No need add dispatch to dep list, because it is always fixed.
