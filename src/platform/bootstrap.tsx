@@ -61,7 +61,7 @@ export function bootstrap(option: BootstrapOption): void {
     setupGlobalErrorHandler(option.errorListener);
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
-    setupIdleTimeout(option.idleTimeoutInSecond ?? DEFAULT_IDLE_TIMEOUT);
+    setupIdleTimeout(option.idleTimeoutInSecond || DEFAULT_IDLE_TIMEOUT);
     setNavigationBlockedMessage(option.browserConfig?.navigationPreventionMessage);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
     renderRoot(option.componentType, option.rootContainer || injectRootContainer());
