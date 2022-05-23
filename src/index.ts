@@ -11,7 +11,6 @@ export {ajax, uri} from "./util/network";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {IdleDetector, IdleDetectorContext} from "./util/IdleDetector";
 export {Route} from "./util/Route";
-export {default as classNames} from "classnames";
 
 export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
