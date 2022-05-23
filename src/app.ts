@@ -1,4 +1,4 @@
-import {createReduxHistoryContext} from "redux-first-history";
+import {routerMiddleware} from "connected-react-router";
 import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
@@ -38,19 +38,12 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 }
 
 function createApp(): App {
+    const browserHistory = createBrowserHistory();
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware({
         onError: (error, info) => captureError(error, "@@framework/detached-saga", {extraStacktrace: info.sagaStack}),
     });
-    const {createReduxHistory, routerMiddleware, routerReducer} = createReduxHistoryContext({
-        history: createBrowserHistory(),
-    });
-    const store: Store<State> = createStore(
-        // prettier-reserve
-        rootReducer(routerReducer),
-        composeWithDevTools(applyMiddleware(routerMiddleware, sagaMiddleware))
-    );
-
+    const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function* () {
         yield takeEvery("*", function* (action: Action<any>) {
             const handler = app.actionHandlers[action.type];
@@ -61,7 +54,7 @@ function createApp(): App {
     });
 
     return {
-        browserHistory: createReduxHistory(store),
+        browserHistory,
         store,
         sagaMiddleware,
         actionHandlers: {},

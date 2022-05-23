@@ -1,7 +1,7 @@
 import {Exception, JavaScriptException} from "../Exception";
 import {ErrorHandler} from "../module";
 import {app} from "../app";
-import {isIEBrowser} from "./browser-util";
+import {isIEBrowser} from "./navigator-util";
 import {spawn} from "../typed-saga";
 import {GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION, sendEventLogs} from "../platform/bootstrap";
 

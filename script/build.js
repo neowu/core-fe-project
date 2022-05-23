@@ -1,6 +1,7 @@
 /* eslint-env node */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+const chalk = require("chalk");
 const childProcess = require("child_process");
 const fs = require("fs-extra");
 const yargs = require("yargs");
@@ -13,39 +14,39 @@ function spawn(command, args, errorMessage) {
         process.exit(1);
     }
     if (result.status !== 0) {
-        console.error(errorMessage);
+        console.error(chalk`{red.bold ${errorMessage}}`);
         console.error(`non-zero exit code returned, code=${result.status}, command=${command} ${args.join(" ")}`);
         process.exit(1);
     }
 }
 
 function checkCodeStyle() {
-    console.info("[task] check code style");
+    console.info(chalk`{green.bold [task]} {white.bold check code style}`);
     return spawn("prettier", ["--config", "config/prettier.json", "--list-different", "{src,test}/**/*.{ts,tsx}"], "check code style failed, please format above files");
 }
 
 function test() {
-    console.info("[task] test");
+    console.info(chalk`{green.bold [task]} {white.bold test}`);
     return spawn("jest", ["--config", "config/jest.json"], "test failed, please fix");
 }
 
 function lint() {
-    console.info("[task] eslint");
+    console.info(chalk`{green.bold [task]} {white.bold lint}`);
     return spawn("eslint", ["{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
 }
 
 function cleanup() {
-    console.info("[task] cleanup");
+    console.info(chalk`{green.bold [task]} {white.bold cleanup}`);
     fs.emptyDirSync("build");
 }
 
 function compile() {
-    console.info("[task] tsc compile");
+    console.info(chalk`{green.bold [task]} {white.bold compile}`);
     return spawn("tsc", ["-p", "config/tsconfig.json"], "compile failed, please fix");
 }
 
 function distribute() {
-    console.info("[task] distribute");
+    console.info(chalk`{green.bold [task]} {white.bold distribute}`);
     fs.mkdirsSync("build/dist/lib");
     fs.copySync("build/out/src", "build/dist/lib/", {dereference: true});
     fs.copySync("package.json", "build/dist/package.json", {dereference: true});

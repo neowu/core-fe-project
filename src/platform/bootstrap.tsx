@@ -1,15 +1,16 @@
-import {Update} from "history";
+import {ConnectedRouter} from "connected-react-router";
+import {Location} from "history";
 import React from "react";
 import ReactDOM from "react-dom";
-import {HistoryRouter} from "redux-first-history/rr6";
 import {Provider} from "react-redux";
 import {app} from "../app";
+import {NavigationGuard} from "./NavigationGuard";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener, executeAction} from "../module";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {APIException} from "../Exception";
-import {isIEBrowser, setNavigationBlockedMessage} from "../util/browser-util";
+import {isIEBrowser} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {SagaGenerator, call, delay} from "../typed-saga";
 import {IdleDetector, idleTimeoutActions} from "..";
@@ -37,7 +38,7 @@ interface VersionConfig {
  */
 interface BrowserConfig {
     onIE?: () => void;
-    onLocationChange?: (locationUpdate: Update) => void;
+    onLocationChange?: (location: Location) => void;
     navigationPreventionMessage?: string;
 }
 
@@ -62,9 +63,8 @@ export function bootstrap(option: BootstrapOption): void {
     setupAppExitListener(option.loggerConfig?.serverURL);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
     setupIdleTimeout(option.idleTimeoutInSecond || DEFAULT_IDLE_TIMEOUT);
-    setNavigationBlockedMessage(option.browserConfig?.navigationPreventionMessage);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
-    renderRoot(option.componentType, option.rootContainer || injectRootContainer());
+    renderRoot(option.componentType, option.rootContainer || injectRootContainer(), option.browserConfig?.navigationPreventionMessage || "Are you sure to leave current page?");
 }
 
 function detectIEBrowser(onIE?: () => void) {
@@ -135,15 +135,16 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     );
 }
 
-function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement) {
+function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElement, navigationPreventionMessage: string) {
     ReactDOM.render(
         <Provider store={app.store}>
             <IdleDetector>
-                <HistoryRouter history={app.browserHistory}>
+                <ConnectedRouter history={app.browserHistory}>
+                    <NavigationGuard message={navigationPreventionMessage} />
                     <ErrorBoundary>
                         <EntryComponent />
                     </ErrorBoundary>
-                </HistoryRouter>
+                </ConnectedRouter>
             </IdleDetector>
         </Provider>,
         rootContainer
@@ -182,7 +183,7 @@ function setupAppExitListener(eventServerURL?: string) {
     }
 }
 
-function setupLocationChangeListener(listener?: (location: Update) => void) {
+function setupLocationChangeListener(listener?: (location: Location) => void) {
     if (listener) {
         app.browserHistory.listen(listener);
     }
