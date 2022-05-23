@@ -36,7 +36,8 @@ interface ErrorLogEntry extends InfoLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
-    slowStartupThreshold?: number; // In second, default: 5
+    slowStartupThresholdInSecond?: number; // Default: 5
+    frequencyInSecond?: number; // Default: 20
     maskedKeywords?: RegExp[];
 }
 
@@ -187,7 +188,7 @@ export class LoggerImpl implements Logger {
             info,
             stats,
             errorCode: "errorCode" in entry ? entry.errorCode : undefined,
-            errorMessage: "errorMessage" in entry ? entry.errorMessage.substr(0, 1000) : undefined,
+            errorMessage: "errorMessage" in entry ? entry.errorMessage.substring(0, 1000) : undefined,
         };
         this.logQueue.push(event);
     }

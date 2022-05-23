@@ -1,13 +1,12 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay, call as rawCall, take, select, cancel, fork, ForkEffect, TakeEffect, CancelEffect, SelectEffect} from "redux-saga/effects";
+import {delay, call as rawCall, take, select, cancel, fork} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {Action, IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
+import {IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 import {Location} from "history";
-import {SagaGenerator} from "../typed-saga";
 
 let startupModuleName: string | null = null;
 
@@ -214,7 +213,7 @@ function createStartupPerformanceLog(actionName: string): void {
         createStat("dom_content", perfTiming.domContentLoadedEventEnd); // Mostly same time with domContentLoadedEventStart
         createStat("dom_end", perfTiming.loadEventEnd); // Mostly same with domComplete/loadEventStart
 
-        const slowStartupThreshold = app.loggerConfig?.slowStartupThreshold || 5;
+        const slowStartupThreshold = app.loggerConfig?.slowStartupThresholdInSecond || 5;
         if (duration / 1000 >= slowStartupThreshold) {
             app.logger.warn({
                 action: actionName,

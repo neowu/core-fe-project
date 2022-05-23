@@ -3,7 +3,7 @@ import "regenerator-runtime/runtime";
 import "./debug";
 
 export {bootstrap} from "./platform/bootstrap";
-export {Module} from "./platform/Module";
+export {Module, ModuleLocation, ModuleLifecycleListener} from "./platform/Module";
 
 export {async, AsyncOptions, AsyncErrorComponentProps} from "./util/async";
 export {captureError} from "./util/error-util";

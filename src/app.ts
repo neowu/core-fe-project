@@ -29,8 +29,8 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
         const extension = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
         if (extension) {
             composeEnhancers = extension({
-                // Ref: https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md
-                actionsBlacklist: [LOADING_ACTION],
+                // Ref: https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments.md#actionsdenylist--actionsallowlist
+                actionsDenylist: [LOADING_ACTION],
             });
         }
     }

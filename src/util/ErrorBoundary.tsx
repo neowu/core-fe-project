@@ -4,6 +4,7 @@ import {captureError} from "./error-util";
 
 interface Props {
     render: (exception: Exception) => React.ReactElement | null;
+    children: React.ReactNode;
 }
 
 interface State {
