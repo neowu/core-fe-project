@@ -10,21 +10,23 @@ export interface APIErrorResponse {
     message?: string | null;
 }
 
-axios.defaults.transformResponse = (data, headers) => {
-    if (data) {
-        // API response may be void, in such case, JSON.parse will throw error
-        const contentType = headers?.["content-type"];
-        if (contentType?.startsWith("application/json")) {
-            return parseWithDate(data);
+const ajaxClient = axios.create({
+    transformResponse: (data, headers) => {
+        if (data) {
+            // API response may be void, in such case, JSON.parse will throw error
+            const contentType = headers?.["content-type"];
+            if (contentType?.startsWith("application/json")) {
+                return parseWithDate(data);
+            } else {
+                throw new NetworkConnectionException("ajax() response not in JSON format", "");
+            }
         } else {
-            throw new NetworkConnectionException("ajax() response not in JSON format", "");
+            return data;
         }
-    } else {
-        return data;
-    }
-};
+    },
+});
 
-axios.interceptors.response.use(
+ajaxClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (axios.isAxiosError(error)) {
@@ -68,13 +70,13 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
         Accept: "application/json",
     };
 
-    const response = await axios.request<Response>(config);
+    const response = await ajaxClient.request<Response>(config);
     return response.data;
 }
 
 export function uri<Request>(path: string, request: Request): string {
     const config: AxiosRequestConfig = {method: "GET", url: path, params: request};
-    return axios.getUri(config);
+    return ajaxClient.getUri(config);
 }
 
 export function urlParams(pattern: string, params: object): string {

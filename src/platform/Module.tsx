@@ -92,7 +92,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             }
         } else {
             const partialState = stateOrUpdater as object;
-            this.setState((state) => Object.assign(state, partialState));
+            this.setState((state: object) => Object.assign(state, partialState));
         }
     }
 

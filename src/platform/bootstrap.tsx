@@ -16,6 +16,7 @@ import {SagaGenerator, call, delay} from "../typed-saga";
 import {IdleDetector, idleTimeoutActions} from "..";
 import {DEFAULT_IDLE_TIMEOUT} from "../util/IdleDetector";
 import {SagaIterator} from "redux-saga";
+import axios, {AxiosRequestConfig} from "axios";
 
 /**
  * Configuration for frontend version check.
@@ -209,19 +210,14 @@ function runBackgroundLoop(loggerConfig?: LoggerConfig, versionCheckConfig?: Ver
             let lastChecksum: string | null = null;
 
             while (true) {
-                yield delay((versionCheckConfig.frequencyInSecond || 600) * 1000);
                 const newChecksum = yield* call(fetchVersionChecksum, versionCheckConfig.versionCheckURL);
                 if (newChecksum) {
                     if (lastChecksum !== null && newChecksum !== lastChecksum) {
-                        app.logger.info({
-                            action: VERSION_CHECK_ACTION,
-                            elapsedTime: 0,
-                            info: {newChecksum, lastChecksum},
-                        });
                         yield* executeAction(VERSION_CHECK_ACTION, versionCheckConfig.onRemind);
                     }
                     lastChecksum = newChecksum;
                 }
+                yield delay((versionCheckConfig.frequencyInSecond || 600) * 1000);
             }
         });
     }
@@ -259,10 +255,10 @@ export async function sendEventLogs(): Promise<void> {
  * Return latest checksum, or null for failure.
  */
 async function fetchVersionChecksum(url: string): Promise<string | null> {
+    const startTime = Date.now();
     try {
-        const startTime = Date.now();
-        const response = await ajax("GET", url, {}, null);
-        const checksum = JSON.stringify(response);
+        const response = await axios.get(url);
+        const checksum = JSON.stringify(response.data);
         app.logger.info({
             action: VERSION_CHECK_ACTION,
             elapsedTime: Date.now() - startTime,
@@ -270,10 +266,12 @@ async function fetchVersionChecksum(url: string): Promise<string | null> {
         });
         return checksum;
     } catch (e) {
-        if (e instanceof APIException) {
-            // Do not log network exceptions
-            app.logger.exception(e, {}, VERSION_CHECK_ACTION);
-        }
+        app.logger.warn({
+            action: VERSION_CHECK_ACTION,
+            elapsedTime: Date.now() - startTime,
+            errorCode: "VERSION_CHECK_FAILURE",
+            errorMessage: errorToException(e).message,
+        });
         return null;
     }
 }
