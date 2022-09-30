@@ -39,10 +39,13 @@ export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> 
         method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
 
-        app.actionHandlers[qualifiedActionType] = method.bind(module);
+        app.actionHandlers[qualifiedActionType] = {
+            handler: method.bind(module),
+            moduleName,
+        };
     });
 
-    return new ModuleProxy(module, actions);
+    return new ModuleProxy(module, actions, moduleName);
 }
 
 export function* executeAction(actionName: string, handler: ActionHandler, ...payload: any[]): SagaGenerator {

@@ -1,7 +1,7 @@
 import React from "react";
 import {RouteComponentProps} from "react-router";
 import {Task} from "redux-saga";
-import {delay, call as rawCall, take, select, cancel, fork} from "redux-saga/effects";
+import {delay, call as rawCall, take, select, cancel, fork, call, put} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {IDLE_STATE_ACTION, navigationPreventionAction, State} from "../reducer";
@@ -11,7 +11,7 @@ import {Location} from "history";
 let startupModuleName: string | null = null;
 
 export class ModuleProxy<M extends Module<any, any>> {
-    constructor(private module: M, private actions: ActionCreators<M>) {}
+    constructor(private module: M, private actions: ActionCreators<M>, private moduleName: string) {}
 
     getActions(): ActionCreators<M> {
         return this.actions;
@@ -88,6 +88,10 @@ export class ModuleProxy<M extends Module<any, any>> {
                     // Only cancel navigation prevention if current component is connected to <Route>
                     app.store.dispatch(navigationPreventionAction(false));
                 }
+
+                app.sagaMiddleware.run(function* () {
+                    yield put({type: `@@${moduleName}/@@cancel-saga`});
+                });
 
                 app.logger.info({
                     action: `${moduleName}/@@DESTROY`,

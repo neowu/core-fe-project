@@ -2,7 +2,7 @@ import {routerMiddleware} from "connected-react-router";
 import {createBrowserHistory, History} from "history";
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {takeEvery} from "redux-saga/effects";
+import {takeEvery, call as rawCall, race as rawRace, take} from "redux-saga/effects";
 import {Logger, LoggerConfig, LoggerImpl} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
@@ -14,7 +14,7 @@ interface App {
     readonly browserHistory: History;
     readonly store: Store<State>;
     readonly sagaMiddleware: SagaMiddleware<any>;
-    readonly actionHandlers: {[actionType: string]: ActionHandler};
+    readonly actionHandlers: {[actionType: string]: {handler: ActionHandler; moduleName: string}};
     readonly logger: LoggerImpl;
     loggerConfig: LoggerConfig | null;
     errorHandler: ErrorHandler;
@@ -46,9 +46,15 @@ function createApp(): App {
     const store: Store<State> = createStore(rootReducer(browserHistory), composeWithDevTools(applyMiddleware(routerMiddleware(browserHistory), sagaMiddleware)));
     sagaMiddleware.run(function* () {
         yield takeEvery("*", function* (action: Action<any>) {
-            const handler = app.actionHandlers[action.type];
-            if (handler) {
-                yield* executeAction(action.type, handler, ...action.payload);
+            const actionHandler = app.actionHandlers[action.type];
+            if (actionHandler) {
+                const {handler, moduleName} = actionHandler;
+                // Cancel all saga when related module destroy
+                // @see https://stackoverflow.com/a/45806187
+                yield rawRace({
+                    task: rawCall(executeAction, action.type, handler, ...action.payload),
+                    cancel: take(`@@${moduleName}/@@cancel-saga`),
+                });
             }
         });
     });
