@@ -26,7 +26,7 @@ function checkCodeStyle() {
 
 function test() {
     console.info("run test ...");
-    return spawn("jest", ["--config", "config/jest.json"], "test failed, please fix");
+    return spawn("jest", ["--config", "config/jest.config.ts"], "test failed, please fix");
 }
 
 function lint() {
@@ -41,18 +41,7 @@ function cleanup() {
 
 function compile() {
     console.info("tsc compile ...");
-    return spawn("tsc", ["-p", "config/tsconfig.json"], "compile failed, please fix");
-}
-
-function distribute() {
-    console.info("distribute ...");
-
-    fs.mkdirsSync("build/dist/lib");
-    fs.copySync("build/out/src", "build/dist/lib/", {dereference: true});
-    fs.copySync("package.json", "build/dist/package.json", {dereference: true});
-    fs.copySync("README.md", "build/dist/README.md", {dereference: true});
-    fs.copySync("src", "build/dist/src", {dereference: true});
-    fs.removeSync("build/out");
+    return spawn("tsc", ["-p", "config/tsconfig.src.json"], "compile failed, please fix");
 }
 
 function build() {
@@ -66,7 +55,6 @@ function build() {
 
     cleanup();
     compile();
-    distribute();
 }
 
 build();

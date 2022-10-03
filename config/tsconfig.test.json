@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "jsx": "react",
+        "composite": true,
+        "lib": ["DOM", "ES2020"],
+        "types": ["jest", "@testing-library/jest-dom"]
+    },
+    "include": ["../test/"],
+    "references": [{"path": "./tsconfig.src.json"}]
+}

@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
-        "outDir": "../build/out",
-        "module": "esnext",
         "target": "es5",
+        "module": "esnext",
         "moduleResolution": "node",
         "sourceMap": true,
         "inlineSources": true,
@@ -12,14 +11,11 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "importHelpers": true,
-        "jsx": "react",
-        "lib": ["dom", "es2017"],
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "suppressImplicitAnyIndexErrors": true,
         "skipLibCheck": true,
         "noImplicitOverride": true,
         "downlevelIteration": true
-    },
-    "include": ["../src", "../test"]
+    }
 }

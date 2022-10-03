@@ -1,7 +1,7 @@
 import {connectRouter, RouterState} from "connected-react-router";
-import {History} from "history";
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
 import {DEFAULT_IDLE_TIMEOUT} from "./util/IdleDetector";
+import type {History} from "history";
 
 // Redux State
 interface LoadingState {
