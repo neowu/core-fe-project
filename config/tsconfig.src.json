@@ -2,7 +2,7 @@
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
         "rootDir": "../src",
-        "outDir": "../build",
+        "outDir": "../lib",
         "composite": true,
         "declarationMap": true,
         "jsx": "react",

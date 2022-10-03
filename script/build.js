@@ -36,7 +36,7 @@ function lint() {
 
 function cleanup() {
     console.info("cleanup ...");
-    fs.emptyDirSync("build");
+    fs.emptyDirSync("lib");
 }
 
 function compile() {
