@@ -41,7 +41,7 @@ function cleanup() {
 
 function compile() {
     console.info("tsc compile ...");
-    return spawn("tsc", ["-p", "config/tsconfig.src.json"], "compile failed, please fix");
+    return spawn("tsc", ["-p", "config/tsconfig.src.json", "--composite", "false"], "compile failed, please fix");
 }
 
 function build() {
