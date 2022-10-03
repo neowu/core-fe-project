@@ -1,12 +1,12 @@
 {
     "name": "core-fe",
-    "version": "1.33.6-beta.4",
+    "version": "1.33.6-beta.5",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
     "license": "MIT",
     "files": [
-        "build",
+        "lib",
         "src"
     ],
     "repository": {
