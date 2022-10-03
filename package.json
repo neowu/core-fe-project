@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.33.6-beta.1",
+    "version": "1.33.6-beta.2",
     "main": "build/index.js",
     "module": "build/index.js",
     "types": "build/index.d.ts",
