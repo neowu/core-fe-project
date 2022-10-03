@@ -4,4 +4,5 @@ build/
 *.iml
 .DS_Store
 .vscode
+*.tsbuildinfo
 

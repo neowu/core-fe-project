@@ -1,21 +1,40 @@
 name: build
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    push:
+        branches: [master]
+    pull_request:
+        branches: [master]
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-        check-latest: true
-    - uses: actions/cache@v2
-      with:
-        path: '**/node_modules'
-        key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-    - run: yarn install
-    - run: yarn build
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: "16"
+                  check-latest: true
+
+            - uses: pnpm/action-setup@v2.2.2
+              with:
+                  version: 7
+                  run_install: false
+
+            - name: Get pnpm store directory
+              id: pnpm-cache
+              run: |
+                  echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+            - uses: actions/cache@v3
+              name: Setup pnpm cache
+              with:
+                  path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-store-
+
+            - uses: Install dependencies
+              run: pnpm install
+
+            - uses: Build
+              run: pnpm build
