@@ -31,11 +31,11 @@ ajaxClient.interceptors.response.use(
     (error) => {
         if (axios.isAxiosError(error)) {
             const typedError = error as AxiosError<APIErrorResponse | undefined>;
-            const requestURL = typedError.config.url || "-";
+            const requestURL = typedError.config?.url || "-";
 
             if (typedError.response) {
                 const responseData = typedError.response.data;
-                // Treat "cloud" error as Network Exception, e.g: gateway/load balancer issue,
+                // Treat "cloud" error as Network Exception, e.g: gateway/load balancer issue
                 const networkErrorStatusCodes: number[] = [0, 502, 504];
                 if (responseData && !networkErrorStatusCodes.includes(typedError.response.status)) {
                     // Try to get server error message/ID/code from response
