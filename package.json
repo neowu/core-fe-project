@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.34.0-beta1",
+    "version": "1.34.0",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -17,7 +17,7 @@
         "build": "node script/build.js",
         "test": "jest --config config/jest.config.ts",
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\"",
-        "prepublish": "node script/build.js"
+        "prepublish": "node script/build.js --mode fast"
     },
     "devDependencies": {
         "@testing-library/dom": "8.18.0",
