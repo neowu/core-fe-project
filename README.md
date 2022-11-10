@@ -4,7 +4,6 @@ core-fe is a frontend framework based on react, redux, react-saga, it's designed
 
 [![Build Status](https://github.com/neowu/core-fe-project/workflows/build/badge.svg)](https://github.com/neowu/core-fe-project/actions)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/neowu/core-fe-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/neowu/core-fe-project/context:javascript)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/neowu/core-fe-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/neowu/core-fe-project/alerts/)
 
 ## Local Dev
 
@@ -15,7 +14,7 @@ This project uses [pnpm](link=https://pnpm.io/) to manage the dependencies.
 - To publish to npm, run `pnpm publish`, which runs `pnpm publish` automatically before publish
 
 
-## Basic Features:
+## Basic Features
 
 The whole website is split into **modules**, usually by routes.
 
@@ -33,7 +32,7 @@ To extend module features, modules can also implement its own lifecycle actions,
 
 (3) Built-in decorator
 
-## Core API:
+## Core API
 
 - startApp
 
