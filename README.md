@@ -11,7 +11,7 @@ This project uses [pnpm](https://pnpm.io/) to manage the dependencies.
 
 - To install the dependencies, run `pnpm install`
 - To run the build script, run `pnpm build`
-- To publish to npm, run `pnpm publish`, which runs `pnpm publish` automatically before publish
+- To publish to npm, run `pnpm publish`, which runs `pnpm build` automatically before publish
 
 
 ## Basic Features
@@ -26,11 +26,11 @@ To extend module features, modules can also implement its own lifecycle actions,
 
 ## Advanced Features
 
-(1) Global error handler
+- global error-handler
 
-(2) Event log collector
+- event collector
 
-(3) Built-in decorator
+- action decorator
 
 ## Core API
 
