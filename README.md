@@ -7,7 +7,7 @@ core-fe is a frontend framework based on react, redux, react-saga, it's designed
 
 ## Local Dev
 
-This project uses [pnpm](link=https://pnpm.io/) to manage the dependencies.
+This project uses [pnpm](https://pnpm.io/) to manage the dependencies.
 
 - To install the dependencies, run `pnpm install`
 - To run the build script, run `pnpm build`
