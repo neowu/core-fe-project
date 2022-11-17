@@ -61,6 +61,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                         // In rare case, it may throw error, just ignore
                     }
                     this.lastDidUpdateSagaTask = app.sagaMiddleware.run(function* () {
+                        yield put({type: `@@${moduleName}/@@cancel-saga`});
                         const action = `${moduleName}/@@LOCATION_MATCHED`;
                         const startTime = Date.now();
                         yield rawCall(executeAction, action, lifecycleListener.onLocationMatched.bind(lifecycleListener), currentRouteParams, currentLocation);
