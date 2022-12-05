@@ -66,6 +66,7 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
     }
 
     config.headers = {
+        ...extraConfig.headers,
         "Content-Type": "application/json",
         Accept: "application/json",
     };
