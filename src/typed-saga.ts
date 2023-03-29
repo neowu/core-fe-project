@@ -1,4 +1,4 @@
-import {StrictEffect, Effect, call as rawCall, race as rawRace, spawn, all as rawAll, delay, put} from "redux-saga/effects";
+import {StrictEffect, Effect, call as rawCall, race as rawRace, spawn, all as rawAll, delay, put, fork} from "redux-saga/effects";
 
 type SagaGeneratorWithReturn<RT> = Generator<Effect, RT, any>;
 
@@ -30,4 +30,4 @@ export function* all(effects: any): any {
     return yield rawAll(effects);
 }
 
-export {spawn, delay, put};
+export {spawn, delay, put, fork};
