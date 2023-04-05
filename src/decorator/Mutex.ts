@@ -10,10 +10,8 @@ export function Mutex() {
         if (lockTime) {
             thisModule.logger.info({
                 action: handler.actionName,
-                info: {
-                    payload: handler.maskedParams,
-                    mutex_locked_duration: (Date.now() - lockTime).toString(),
-                },
+                info: {payload: handler.maskedParams},
+                stats: {mutex_locked_duration: Date.now() - lockTime},
             });
         } else {
             try {

@@ -20,6 +20,7 @@ interface InfoLogEntry {
     elapsedTime?: number;
     info?: {[key: string]: string | undefined};
     stats?: {[key: string]: number | undefined};
+    context?: {[key: string]: string | undefined};
 }
 
 interface ErrorLogEntry extends InfoLogEntry {
@@ -144,9 +145,9 @@ export class LoggerImpl implements Logger {
     private createLog(result: "OK" | "WARN" | "ERROR", entry: InfoLogEntry | ErrorLogEntry): void {
         // Generate context
         const context: {[key: string]: string} = {};
-        Object.entries(this.contextMap).map(([key, value]) => {
+        Object.entries(this.contextMap).forEach(([key, value]) => {
             if (typeof value === "string") {
-                context[key] = value.substr(0, 1000);
+                context[key] = value.substring(0, 1000);
             } else {
                 try {
                     context[key] = value();
@@ -157,14 +158,21 @@ export class LoggerImpl implements Logger {
                 }
             }
         });
+        if (entry.context) {
+            Object.entries(entry.context).forEach(([key, value]) => {
+                if (typeof value === "string") {
+                    context[key] = value.substring(0, 1000);
+                }
+            });
+        }
 
         // Generate info
         const info: {[key: string]: string} = {};
         if (entry.info) {
-            Object.entries(entry.info).map(([key, value]) => {
+            Object.entries(entry.info).forEach(([key, value]) => {
                 if (value !== undefined) {
                     const isBuiltinInfo = ["app_state", "stacktrace", "extra_stacktrace"].includes(key);
-                    info[key] = isBuiltinInfo ? value.substr(0, 500000) : value.substr(0, 500);
+                    info[key] = isBuiltinInfo ? value.substring(0, 500000) : value.substring(0, 500);
                 }
             });
         }

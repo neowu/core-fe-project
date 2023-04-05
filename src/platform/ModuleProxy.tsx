@@ -96,9 +96,9 @@ export class ModuleProxy<M extends Module<any, any>> {
 
                 app.logger.info({
                     action: `${moduleName}/@@DESTROY`,
-                    info: {
-                        tick_count: this.tickCount.toString(),
-                        staying_second: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                    stats: {
+                        tick_count: this.tickCount,
+                        staying_second: (Date.now() - this.mountedTime) / 1000,
                     },
                 });
 
@@ -198,6 +198,7 @@ export class ModuleProxy<M extends Module<any, any>> {
 }
 
 function createStartupPerformanceLog(actionName: string): void {
+    // TODO: use new API
     if (window.performance && performance.timing) {
         // For performance timing API, please refer: https://www.w3.org/blog/2012/09/performance-timing-information/
         const now = Date.now();
