@@ -6,6 +6,7 @@ import {captureError, errorToException} from "./error-util";
 type ReactComponentKeyOf<T> = {[P in keyof T]: T[P] extends React.ComponentType<any> ? P : never}[keyof T];
 
 export interface AsyncOptions {
+    moduleName?: string;
     loadingIdentifier?: string;
     LoadingComponent?: React.ComponentType;
     ErrorComponent?: React.ComponentType<AsyncErrorComponentProps>;
@@ -23,7 +24,7 @@ interface WrapperComponentState {
 
 const ASYNC_LOAD_ACTION = "@@framework/async-import";
 
-export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {LoadingComponent, loadingIdentifier, ErrorComponent}: AsyncOptions = {}): T[K] {
+export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promise<T>, component: K, {moduleName, LoadingComponent, loadingIdentifier, ErrorComponent}: AsyncOptions = {}): T[K] {
     return class AsyncWrapperComponent extends React.PureComponent<{}, WrapperComponentState> {
         constructor(props: {}) {
             super(props);
@@ -49,6 +50,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                             elapsedTime: Date.now() - startTime,
                             errorCode: "LOAD_CHUNK_FAILURE_RETRY",
                             errorMessage: errorToException(e).message,
+                            context: {moduleName},
                             stats: {retry_count: retryCount},
                         });
                         await loadChunk();
@@ -70,6 +72,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                 app.logger.info({
                     action: ASYNC_LOAD_ACTION,
                     elapsedTime: Date.now() - startTime,
+                    context: {moduleName},
                 });
             }
         };
