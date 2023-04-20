@@ -50,7 +50,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                             elapsedTime: Date.now() - startTime,
                             errorCode: "LOAD_CHUNK_FAILURE_RETRY",
                             errorMessage: errorToException(e).message,
-                            context: {moduleName},
+                            context: {module_name: moduleName},
                             stats: {retry_count: retryCount},
                         });
                         await loadChunk();
@@ -72,7 +72,7 @@ export function async<T, K extends ReactComponentKeyOf<T>>(resolve: () => Promis
                 app.logger.info({
                     action: ASYNC_LOAD_ACTION,
                     elapsedTime: Date.now() - startTime,
-                    context: {moduleName},
+                    context: {module_name: moduleName},
                 });
             }
         };
