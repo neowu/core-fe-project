@@ -17,7 +17,7 @@
         "build": "node script/build.js",
         "test": "jest --config config/jest.config.ts",
         "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\"",
-        "prepublish": "node script/build.js --mode fast"
+        "prepublishOnly": "node script/build.js --mode fast"
     },
     "devDependencies": {
         "@testing-library/dom": "8.18.0",
