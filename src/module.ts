@@ -32,9 +32,8 @@ export function register<M extends Module<any, any>>(module: M): ModuleProxy<M> 
 
     // Transform every method into ActionCreator
     const actions: any = {};
-    getKeys(module).forEach((actionType) => {
+    getMethods(module).forEach(({name: actionType, method}) => {
         // Attach action name, for @Log / error handler reflection
-        const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
         method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
@@ -57,12 +56,13 @@ export function* executeAction(actionName: string, handler: ActionHandler, ...pa
     }
 }
 
-function getKeys<M extends Module<any, any>>(module: M) {
+function getMethods<M extends Module<any, any>>(module: M): Array<{name: string; method: any}> {
     // Do not use Object.keys(Object.getPrototypeOf(module)), because class methods are not enumerable
-    const keys: string[] = [];
+    const keys: Array<{name: string; method: any}> = [];
     for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(module))) {
-        if (module[propertyName] instanceof Function && propertyName !== "constructor") {
-            keys.push(propertyName);
+        const method = Reflect.get(module, propertyName);
+        if (method instanceof Function && propertyName !== "constructor") {
+            keys.push({name: propertyName, method});
         }
     }
     return keys;

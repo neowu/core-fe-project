@@ -17,7 +17,7 @@ export interface State {
     loading: LoadingState;
     router: RouterState;
     navigationPrevented: boolean;
-    app: object;
+    app: Record<string, any>;
     idle: IdleState;
 }
 
