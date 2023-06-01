@@ -2,16 +2,13 @@ import {push} from "connected-react-router";
 import {Location} from "history";
 import {SagaGenerator} from "../typed-saga";
 import {put} from "redux-saga/effects";
-import {produce, enablePatches, enableES5} from "immer";
+import {produce, enablePatches} from "immer";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {TickIntervalDecoratorFlag} from "../module";
 import {navigationPreventionAction, setStateAction, State} from "../reducer";
 
-enableES5();
-if (process.env.NODE_ENV === "development") {
-    enablePatches();
-}
+if (process.env.NODE_ENV === "development") enablePatches();
 
 export type ModuleLocation<State> = Location<Readonly<State> | undefined>;
 
