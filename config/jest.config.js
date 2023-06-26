@@ -1,14 +1,15 @@
-import * as path from "path";
-import {Config} from "jest";
+/* eslint-env node */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require("path");
 
-const config: Config = {
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+const config = {
     rootDir: "..",
-    roots: ["<rootDir>/test"],
     transform: {
         "^.+\\.tsx?$": [
             "ts-jest",
             {
-                tsconfig: path.join(__dirname, "./tsconfig.test.json"),
+                tsconfig: path.join(__dirname, "../test/tsconfig.json"),
             },
         ],
     },
@@ -22,4 +23,4 @@ const config: Config = {
     },
 };
 
-export default config;
+module.exports = config;

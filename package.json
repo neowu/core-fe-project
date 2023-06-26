@@ -15,8 +15,8 @@
     },
     "scripts": {
         "build": "node script/build.js",
-        "test": "jest --config config/jest.config.ts",
-        "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\"",
+        "test": "jest --config config/jest.config.js",
+        "format": "prettier --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\"",
         "prepublishOnly": "node script/build.js --mode fast"
     },
     "devDependencies": {

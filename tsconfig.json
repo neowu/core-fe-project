@@ -1,5 +1,14 @@
 {
-    "include": [],
-    "files": [],
-    "references": [{"path": "./config/tsconfig.src.json"}, {"path": "./config/tsconfig.test.json"}]
+    "extends": "./config/tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "lib",
+        "composite": true,
+        "declarationMap": true,
+        "moduleResolution": "Bundler",
+        "jsx": "react",
+        "lib": ["DOM", "ES2020"],
+        "types": ["node"]
+    },
+    "include": ["src"]
 }

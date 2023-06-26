@@ -1,5 +1,5 @@
 import {all, call, race} from "../src/typed-saga";
-import {call as rawCall, delay, Effect} from "redux-saga/effects";
+import {call as rawCall, delay, type Effect} from "redux-saga/effects";
 
 describe("typed-saga (functional test)", () => {
     interface APIResponse {

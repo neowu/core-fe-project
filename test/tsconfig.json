@@ -1,0 +1,13 @@
+{
+    "extends": "../config/tsconfig.base.json",
+    "compilerOptions": {
+        "module": "ES2022",
+        "jsx": "react",
+        "moduleResolution": "Bundler",
+        "composite": true,
+        "verbatimModuleSyntax": false,
+        "lib": ["DOM", "ES2020"],
+        "types": ["jest", "@testing-library/jest-dom", "node"]
+    },
+    "references": [{"path": "../tsconfig.json"}]
+}
