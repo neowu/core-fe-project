@@ -1,22 +1,21 @@
-import {ConnectedRouter} from "connected-react-router";
-import {Location} from "history";
 import React from "react";
 import {createRoot} from "react-dom/client";
+import {ConnectedRouter} from "connected-react-router";
 import {Provider} from "react-redux";
-import {app} from "../app";
+import axios from "axios";
 import {NavigationGuard} from "./NavigationGuard";
-import {LoggerConfig} from "../Logger";
-import {ErrorListener, executeAction} from "../module";
+import {app} from "../app";
+import {executeAction, type ErrorListener} from "../module";
+import {idleTimeoutActions} from "../reducer";
+import {APIException} from "../Exception";
+import {call, delay, type SagaGenerator} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {APIException} from "../Exception";
 import {isBrowserSupported} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
-import {SagaGenerator, call, delay} from "../typed-saga";
-import {IdleDetector, idleTimeoutActions} from "..";
-import {DEFAULT_IDLE_TIMEOUT} from "../util/IdleDetector";
-import {SagaIterator} from "redux-saga";
-import axios, {AxiosRequestConfig} from "axios";
+import {DEFAULT_IDLE_TIMEOUT, IdleDetector} from "../util/IdleDetector";
+import type {Location} from "history";
+import type {LoggerConfig} from "../Logger";
 
 /**
  * Configuration for frontend version check.

@@ -1,7 +1,7 @@
 import React from "react";
-import {connect, DispatchProp} from "react-redux";
+import {connect, type DispatchProp} from "react-redux";
 import {Prompt} from "react-router";
-import {State} from "../reducer";
+import type {State} from "../reducer";
 
 interface OwnProps {
     message: string;
