@@ -11,7 +11,6 @@
         "verbatimModuleSyntax": true,
         "esModuleInterop": true,
         "importHelpers": true,
-        "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "noImplicitOverride": true,

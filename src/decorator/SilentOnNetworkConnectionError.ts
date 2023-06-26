@@ -1,5 +1,5 @@
 import {NetworkConnectionException} from "../Exception";
-import {createActionHandlerDecorator} from "./index";
+import {createActionHandlerDecorator} from "./createActionHandlerDecorator";
 import {app} from "../app";
 
 /**

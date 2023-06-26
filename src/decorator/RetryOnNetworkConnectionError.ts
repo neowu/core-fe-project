@@ -1,7 +1,7 @@
 import {app} from "../app";
 import {NetworkConnectionException} from "../Exception";
 import {delay} from "redux-saga/effects";
-import {createActionHandlerDecorator} from "./index";
+import {createActionHandlerDecorator} from "./createActionHandlerDecorator";
 
 /**
  * Re-execute the action if NetworkConnectionException is thrown.

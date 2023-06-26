@@ -1,4 +1,4 @@
-import {createActionHandlerDecorator} from "./index";
+import {createActionHandlerDecorator} from "./createActionHandlerDecorator";
 import {put} from "redux-saga/effects";
 import {loadingAction} from "../reducer";
 

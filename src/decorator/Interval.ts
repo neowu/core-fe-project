@@ -1,13 +1,17 @@
-import {ActionHandler, TickIntervalDecoratorFlag} from "../module";
+import type {ActionHandler, TickIntervalDecoratorFlag} from "../module";
 
-type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor: TypedPropertyDescriptor<ActionHandler & TickIntervalDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
+export interface OnTickMethodDecorator<Fn extends ActionHandler & TickIntervalDecoratorFlag> extends Omit<ClassMethodDecoratorContext<unknown, Fn>, "name"> {
+    readonly name: "onTick";
+}
 
 /**
  * For *onTick() action only, to specify to tick interval in second.
  */
-export function Interval(second: number): OnTickHandlerDecorator {
-    return (target, propertyKey, descriptor) => {
-        descriptor.value!.tickInterval = second;
-        return descriptor;
+export function Interval<Fn extends ActionHandler>(second: number) {
+    return function (target: Fn, _: OnTickMethodDecorator<Fn>) {
+        Reflect.defineProperty(target, "tickInterval", {
+            value: second,
+            writable: false,
+        });
     };
 }

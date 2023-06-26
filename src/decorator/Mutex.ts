@@ -1,4 +1,4 @@
-import {createActionHandlerDecorator} from "./index";
+import {createActionHandlerDecorator} from "./createActionHandlerDecorator";
 
 /**
  * If specified, the action cannot be entered by other sagas during execution.

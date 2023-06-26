@@ -1,4 +1,4 @@
-import {createActionHandlerDecorator} from "./index";
+import {createActionHandlerDecorator} from "./createActionHandlerDecorator";
 
 /**
  * To add a log item for action, with execution duration, action name, and masked action parameters.
