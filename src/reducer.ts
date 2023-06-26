@@ -1,5 +1,5 @@
-import {connectRouter, RouterState} from "connected-react-router";
-import {Action as ReduxAction, combineReducers, Reducer} from "redux";
+import {connectRouter, type RouterState} from "connected-react-router";
+import {combineReducers, type Action as ReduxAction, type Reducer} from "redux";
 import {DEFAULT_IDLE_TIMEOUT} from "./util/IdleDetector";
 import type {History} from "history";
 

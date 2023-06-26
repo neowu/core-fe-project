@@ -1,5 +1,5 @@
 import React from "react";
-import {Redirect, Route as ReactRouterDOMRoute, RouteComponentProps, RouteProps} from "react-router-dom";
+import {Redirect, Route as ReactRouterDOMRoute, type RouteComponentProps, type RouteProps} from "react-router-dom";
 import {ErrorBoundary} from "./ErrorBoundary";
 import {app} from "../app";
 

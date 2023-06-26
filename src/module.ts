@@ -1,9 +1,9 @@
 import {app} from "./app";
 import {Exception} from "./Exception";
-import {Module, ModuleLifecycleListener} from "./platform/Module";
+import {Module, type ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action, setStateAction} from "./reducer";
-import {SagaGenerator} from "./typed-saga";
+import {setStateAction, type Action} from "./reducer";
+import {type SagaGenerator} from "./typed-saga";
 import {captureError} from "./util/error-util";
 import {stringifyWithMask} from "./util/json-util";
 

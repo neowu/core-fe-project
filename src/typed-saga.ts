@@ -1,4 +1,4 @@
-import {StrictEffect, Effect, call as rawCall, race as rawRace, spawn, all as rawAll, delay, put, fork} from "redux-saga/effects";
+import {call as rawCall, race as rawRace, spawn, all as rawAll, delay, put, fork, type StrictEffect, type Effect} from "redux-saga/effects";
 
 type SagaGeneratorWithReturn<RT> = Generator<Effect, RT, any>;
 

@@ -1,12 +1,12 @@
 import {push} from "connected-react-router";
-import {Location} from "history";
-import {SagaGenerator} from "../typed-saga";
 import {put} from "redux-saga/effects";
 import {produce, enablePatches} from "immer";
 import {app} from "../app";
-import {Logger} from "../Logger";
-import {TickIntervalDecoratorFlag} from "../module";
-import {navigationPreventionAction, setStateAction, State} from "../reducer";
+import {navigationPreventionAction, setStateAction, type State} from "../reducer";
+import type {Location} from "history";
+import type {TickIntervalDecoratorFlag} from "../module";
+import type {SagaGenerator} from "../typed-saga";
+import type {Logger} from "../Logger";
 
 if (process.env.NODE_ENV === "development") enablePatches();
 

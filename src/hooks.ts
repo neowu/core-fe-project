@@ -1,6 +1,6 @@
 import React from "react";
-import {Action, State} from "./reducer";
 import {useDispatch, useSelector} from "react-redux";
+import type {Action, State} from "./reducer";
 
 type DeferLiteralArrayCheck<T> = T extends Array<string | number | boolean | null | undefined> ? T : never;
 

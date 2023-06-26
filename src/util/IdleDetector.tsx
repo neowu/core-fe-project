@@ -1,5 +1,5 @@
 import React from "react";
-import {State, idleStateActions, IdleState} from "../reducer";
+import {idleStateActions, type State, type IdleState} from "../reducer";
 import {useDispatch, useSelector} from "react-redux";
 
 export const DEFAULT_IDLE_TIMEOUT = 300;

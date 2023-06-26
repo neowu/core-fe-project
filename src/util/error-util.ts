@@ -1,9 +1,9 @@
 import {Exception, JavaScriptException} from "../Exception";
-import {ErrorHandler} from "../module";
 import {app} from "../app";
 import {isBrowserSupported} from "./navigator-util";
 import {spawn} from "../typed-saga";
 import {GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION, sendEventLogs} from "../platform/bootstrap";
+import type {ErrorHandler} from "../module";
 
 let errorHandlerRunning = false;
 

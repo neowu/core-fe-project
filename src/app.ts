@@ -1,11 +1,11 @@
 import {routerMiddleware} from "connected-react-router";
-import {createBrowserHistory, History} from "history";
-import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
-import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
+import {createBrowserHistory, type History} from "history";
+import {applyMiddleware, compose, createStore, type Store, type StoreEnhancer} from "redux";
+import createSagaMiddleware, {type SagaMiddleware} from "redux-saga";
 import {takeEvery, call as rawCall, race as rawRace, take} from "redux-saga/effects";
-import {Logger, LoggerConfig, LoggerImpl} from "./Logger";
-import {ActionHandler, ErrorHandler, executeAction} from "./module";
-import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {LoggerImpl, type Logger, type LoggerConfig} from "./Logger";
+import {executeAction, type ActionHandler, type ErrorHandler} from "./module";
+import {LOADING_ACTION, rootReducer, type Action, type State} from "./reducer";
 import {captureError} from "./util/error-util";
 
 declare const window: any;

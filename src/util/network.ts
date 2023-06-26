@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosRequestConfig, Method} from "axios";
+import axios, {AxiosError, type AxiosRequestConfig, type Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
