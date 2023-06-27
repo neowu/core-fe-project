@@ -10,5 +10,6 @@
         "lib": ["DOM", "ES2020"],
         "types": ["node"]
     },
-    "include": ["src"]
+    "include": ["src"],
+    "references": [{"path": "./test/tsconfig.json"}]
 }

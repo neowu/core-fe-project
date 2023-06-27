@@ -4,7 +4,7 @@ import {JavaScriptException} from "../../src/Exception";
 describe("SilentOnNetworkConnectionError", () => {
     it("should silent and only silent NetworkConnectionException", () => {
         const mock = jest.fn();
-        class Person {
+        class Person extends Module<State, "person"> {
             @SilentOnNetworkConnectionError()
             *throwNetworkConnectionException(): SagaGenerator {
                 mock();
@@ -18,7 +18,7 @@ describe("SilentOnNetworkConnectionError", () => {
             }
         }
 
-        const person = new Person();
+        const person = new Person("person", {});
         expect(() => person.throwNetworkConnectionException().next()).not.toThrow();
         expect(mock).toBeCalledTimes(1);
 
