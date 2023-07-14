@@ -11,7 +11,11 @@ import type {Task} from "redux-saga";
 let startupModuleName: string | null = null;
 
 export class ModuleProxy<M extends Module<any, any>> {
-    constructor(private module: M, private actions: ActionCreators<M>, private moduleName: string) {}
+    constructor(
+        private module: M,
+        private actions: ActionCreators<M>,
+        private moduleName: string
+    ) {}
 
     getActions(): ActionCreators<M> {
         return this.actions;

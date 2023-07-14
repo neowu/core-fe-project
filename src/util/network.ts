@@ -2,7 +2,13 @@ import axios, {AxiosError, type AxiosRequestConfig, type Method} from "axios";
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
-export type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
+export type PathParams<T extends string> = string extends T
+    ? {[key: string]: string | number}
+    : T extends `${infer Start}:${infer Param}/${infer Rest}`
+    ? {[k in Param | keyof PathParams<Rest>]: string | number}
+    : T extends `${infer Start}:${infer Param}`
+    ? {[k in Param]: string | number}
+    : {};
 
 export interface APIErrorResponse {
     id?: string | null;
@@ -27,8 +33,8 @@ const ajaxClient = axios.create({
 });
 
 ajaxClient.interceptors.response.use(
-    (response) => response,
-    (error) => {
+    response => response,
+    error => {
         if (axios.isAxiosError(error)) {
             const typedError = error as AxiosError<APIErrorResponse | undefined>;
             const requestURL = typedError.config?.url || "-";
@@ -55,7 +61,13 @@ ajaxClient.interceptors.response.use(
     }
 );
 
-export async function ajax<Request, Response, Path extends string>(method: Method, path: Path, pathParams: PathParams<Path>, request: Request, extraConfig: Partial<AxiosRequestConfig> = {}): Promise<Response> {
+export async function ajax<Request, Response, Path extends string>(
+    method: Method,
+    path: Path,
+    pathParams: PathParams<Path>,
+    request: Request,
+    extraConfig: Partial<AxiosRequestConfig> = {}
+): Promise<Response> {
     const fullURL = urlParams(path, pathParams);
     const config: AxiosRequestConfig = {...extraConfig, method, url: fullURL};
 

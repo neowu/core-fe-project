@@ -16,14 +16,14 @@ export function stringifyWithMask(maskedKeywords: RegExp[], maskedOutput: string
         if (typeof value === "function" || typeof value === "symbol") {
             return undefined;
         }
-        if (maskedKeywords.some((_) => _.test(key))) {
+        if (maskedKeywords.some(_ => _.test(key))) {
             return maskedOutput;
         }
         return value;
     };
 
     const isEvent = (e: any) => Boolean(e && e.target && e.currentTarget);
-    const serializableArgs = args.filter((_) => typeof _ !== "function" && typeof _ !== "symbol" && !isEvent(_));
+    const serializableArgs = args.filter(_ => typeof _ !== "function" && typeof _ !== "symbol" && !isEvent(_));
     switch (serializableArgs.length) {
         case 0:
             return undefined;

@@ -2,7 +2,7 @@ import {Module, SagaGenerator, State, createActionHandlerDecorator, register} fr
 
 describe("createActionHandlerDecorator", () => {
     test("obtain action name", () => {
-        const mock = jest.fn((_) => _);
+        const mock = jest.fn(_ => _);
         const testDecorator = createActionHandlerDecorator(function* (handler) {
             mock(handler.actionName);
         });

@@ -86,7 +86,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     app.errorHandler = errorListener.onError.bind(errorListener);
     window.addEventListener(
         "error",
-        (event) => {
+        event => {
             try {
                 const analyzeByTarget = (): string => {
                     if (event.target && event.target !== window) {
@@ -115,7 +115,7 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
     );
     window.addEventListener(
         "unhandledrejection",
-        (event) => {
+        event => {
             try {
                 captureError(event.reason, GLOBAL_PROMISE_REJECTION_ACTION);
             } catch (e) {

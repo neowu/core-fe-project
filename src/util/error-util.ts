@@ -114,8 +114,8 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
-        const ignoredPatterns = ["chrome-extension://", "moz-extension://"];
-        if (ignoredPatterns.some((_) => stacktrace.includes(_))) {
+        const ignoredPatterns = ["chrome-extension://", "moz-extension://", "@user-script"];
+        if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }
 

@@ -7,19 +7,33 @@ export abstract class Exception {
 }
 
 export class APIException extends Exception {
-    constructor(message: string, public statusCode: number, public requestURL: string, public responseData: any, public errorId: string | null, public errorCode: string | null) {
+    constructor(
+        message: string,
+        public statusCode: number,
+        public requestURL: string,
+        public responseData: any,
+        public errorId: string | null,
+        public errorCode: string | null
+    ) {
         super(message);
     }
 }
 
 export class NetworkConnectionException extends Exception {
-    constructor(message: string, public requestURL: string, public originalErrorMessage: string = "") {
+    constructor(
+        message: string,
+        public requestURL: string,
+        public originalErrorMessage: string = ""
+    ) {
         super(message);
     }
 }
 
 export class JavaScriptException extends Exception {
-    constructor(message: string, public originalError: any) {
+    constructor(
+        message: string,
+        public originalError: any
+    ) {
         super(message);
     }
 }

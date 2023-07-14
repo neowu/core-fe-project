@@ -12,7 +12,11 @@ type HandlerInterceptor<RootState extends State = State> = (handler: ActionHandl
 /**
  * A helper for ActionHandler functions (Saga).
  */
-export function createActionHandlerDecorator<RootState extends State = State, This extends Module<RootState, string> = Module<RootState, string>, Fn extends (this: This, ...args: any[]) => SagaGenerator = ActionHandler>(interceptor: HandlerInterceptor<RootState>) {
+export function createActionHandlerDecorator<
+    RootState extends State = State,
+    This extends Module<RootState, string> = Module<RootState, string>,
+    Fn extends (this: This, ...args: any[]) => SagaGenerator = ActionHandler,
+>(interceptor: HandlerInterceptor<RootState>) {
     return (fn: Fn, context: ClassMethodDecoratorContext<This, Fn>) => {
         return function* (this: This, ...args: any[]): SagaGenerator {
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;

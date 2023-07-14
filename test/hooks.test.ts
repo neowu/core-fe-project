@@ -23,7 +23,7 @@ describe("useAction(type test)", () => {
     });
 
     test("type union test", () => {
-        const createTabChangeAction: ActionCreator<["a" | "b" | "c"]> = (tab) => ({type: "String Union test", payload: [tab]});
+        const createTabChangeAction: ActionCreator<["a" | "b" | "c"]> = tab => ({type: "String Union test", payload: [tab]});
 
         const changeToA = useAction(createTabChangeAction, "a");
         const changeToB = useAction(createTabChangeAction, "b");
@@ -204,7 +204,7 @@ describe("useBinaryAction(type test)", () => {
         useBinaryAction(noArgAction);
     });
     test("Misuse 1-arg action", () => {
-        const oneArgAction: ActionCreator<[number]> = (id) => ({type: "test", payload: [id]});
+        const oneArgAction: ActionCreator<[number]> = id => ({type: "test", payload: [id]});
         // @ts-expect-error
         useBinaryAction(oneArgAction, 1);
         // @ts-expect-error
@@ -214,7 +214,7 @@ describe("useBinaryAction(type test)", () => {
 
 describe("useModuleObjectKeyAction(type test)", () => {
     test("Should accept key of object", () => {
-        const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}]> = (object) => ({type: "update object", payload: [object]});
+        const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}]> = object => ({type: "update object", payload: [object]});
         const updateA = useObjectKeyAction(updateObjectAction, "a");
         const updateB = useObjectKeyAction(updateObjectAction, "b");
         const updateC = useObjectKeyAction(updateObjectAction, "c");

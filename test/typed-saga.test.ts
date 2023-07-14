@@ -57,7 +57,7 @@ describe("typed-saga (type test)", () => {
                     string | undefined,
                     {baz: boolean} | undefined,
                     Effect | undefined,
-                    string | undefined
+                    string | undefined,
                 ] = [a, b, c, d, e];
             }
         });
@@ -81,7 +81,7 @@ describe("typed-saga (type test)", () => {
                     string | undefined,
                     {baz: boolean} | undefined,
                     Effect | undefined,
-                    string | undefined
+                    string | undefined,
                 ] = [a, b, c, d, e];
             }
         });
