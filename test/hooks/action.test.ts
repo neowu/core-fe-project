@@ -1,10 +1,10 @@
-import {useAction, useBinaryAction, useObjectKeyAction, useUnaryAction} from "../src/hooks";
-import {Action} from "../src/reducer";
+import {useAction, useBinaryAction, useObjectKeyAction, useUnaryAction} from "../../src/hooks/action";
+import {Action} from "../../src/reducer";
 
 /**
  * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
  */
-jest.mock("../src/hooks", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useBinaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
+jest.mock("../../src/hooks/action", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useBinaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
 

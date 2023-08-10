@@ -14,11 +14,20 @@ export {ErrorBoundary} from "./util/ErrorBoundary";
 export {IdleDetector, IdleDetectorContext} from "./util/IdleDetector";
 export {Route} from "./util/Route";
 
-export {createActionHandlerDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Log} from "./decorator";
+export {useAction, useObjectKeyAction, useUnaryAction, useBinaryAction} from "./hooks/action";
+export {useLoadingStatus} from "./hooks/loading";
+
+export {Interval} from "./decorator/Interval";
+export {Loading} from "./decorator/Loading";
+export {Log} from "./decorator/Log";
+export {Mutex} from "./decorator/Mutex";
+export {RetryOnNetworkConnectionError} from "./decorator/RetryOnNetworkConnectionError";
+export {SilentOnNetworkConnectionError} from "./decorator/SilentOnNetworkConnectionError";
+export {createActionHandlerDecorator} from "./decorator/createActionHandlerDecorator";
+
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, navigationPreventionAction, idleStateActions, idleTimeoutActions, type State} from "./reducer";
 export {register, type ErrorListener} from "./module";
-export {useLoadingStatus, useAction, useObjectKeyAction, useUnaryAction, useBinaryAction} from "./hooks";
 export {call, put, spawn, delay, all, race, fork, type SagaGenerator} from "./typed-saga";
 export {logger} from "./app";
 
