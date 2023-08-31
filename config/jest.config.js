@@ -17,7 +17,7 @@ const config = {
     moduleFileExtensions: ["ts", "tsx", "js"],
     moduleDirectories: ["node_modules", "src"],
     testEnvironment: "jsdom",
-    setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
+    setupFilesAfterEnv: ["@testing-library/jest-dom"],
     testEnvironmentOptions: {
         url: "http://127.0.0.1",
     },
