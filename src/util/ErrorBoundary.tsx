@@ -21,7 +21,7 @@ export class ErrorBoundary extends React.PureComponent<Props, State> {
     }
 
     override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        const exception = captureError(error, "@@framework/error-boundary", {extraStacktrace: errorInfo.componentStack});
+        const exception = captureError(error, "@@framework/error-boundary", errorInfo.componentStack ? {extraStacktrace: errorInfo.componentStack} : undefined);
         this.setState({exception});
     }
 

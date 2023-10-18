@@ -8,7 +8,7 @@ import type {ErrorHandler} from "../module";
 let errorHandlerRunning = false;
 
 interface ErrorExtra {
-    actionPayload?: string; // Should be masked
+    actionPayload?: string; // masked
     extraStacktrace?: string;
 }
 
@@ -114,7 +114,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
-        const ignoredPatterns = ["chrome-extension://", "moz-extension://", "@user-script", "ucbrowser_script"];
+        const ignoredPatterns = ["chrome-extension://", "moz-extension://", "@user-script", "ucbrowser_script", "<anonymous>:"];
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }
