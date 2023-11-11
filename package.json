@@ -48,7 +48,7 @@
         "@types/react-redux": "7.1.27",
         "@types/react-router": "5.1.20",
         "@types/react-router-dom": "5.3.3",
-        "axios": "1.5.1",
+        "axios": "1.6.0",
         "connected-react-router": "6.9.3",
         "core-js": "3.33.0",
         "history": "4.10.1",
