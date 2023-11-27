@@ -5,10 +5,10 @@ import {parseWithDate} from "./json-util";
 export type PathParams<T extends string> = string extends T
     ? {[key: string]: string | number}
     : T extends `${infer Start}:${infer Param}/${infer Rest}`
-    ? {[k in Param | keyof PathParams<Rest>]: string | number}
-    : T extends `${infer Start}:${infer Param}`
-    ? {[k in Param]: string | number}
-    : {};
+      ? {[k in Param | keyof PathParams<Rest>]: string | number}
+      : T extends `${infer Start}:${infer Param}`
+        ? {[k in Param]: string | number}
+        : {};
 
 export interface APIErrorResponse {
     id?: string | null;

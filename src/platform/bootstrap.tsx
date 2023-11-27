@@ -1,7 +1,7 @@
 import React from "react";
 import {createRoot} from "react-dom/client";
-import {ConnectedRouter} from "connected-react-router";
 import {Provider} from "react-redux";
+import {Router} from "react-router-dom";
 import axios from "axios";
 import {NavigationGuard} from "./NavigationGuard";
 import {app} from "../app";
@@ -11,7 +11,7 @@ import {APIException} from "../Exception";
 import {call, delay, type SagaGenerator} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {isBrowserSupported} from "../util/navigator-util";
+import {isBrowserSupported, isIOS} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {DEFAULT_IDLE_TIMEOUT, IdleDetector} from "../util/IdleDetector";
 import type {Location} from "history";
@@ -137,13 +137,12 @@ function renderRoot(EntryComponent: React.ComponentType, rootContainer: HTMLElem
     root.render(
         <Provider store={app.store}>
             <IdleDetector>
-                {/* @ts-ignore - @types/react removed default props.children in class component, and no children prop in ConnectedRouter */}
-                <ConnectedRouter history={app.browserHistory}>
+                <Router history={app.history}>
                     <NavigationGuard message={navigationPreventionMessage} />
                     <ErrorBoundary>
                         <EntryComponent />
                     </ErrorBoundary>
-                </ConnectedRouter>
+                </Router>
             </IdleDetector>
         </Provider>
     );
@@ -158,10 +157,9 @@ function injectRootContainer(): HTMLElement {
 
 function setupAppExitListener(eventServerURL?: string) {
     if (eventServerURL) {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
+        // ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
         window.addEventListener(
-            // Ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
-            isIOS ? "pagehide" : "unload",
+            isIOS() ? "pagehide" : "unload",
             () => {
                 try {
                     app.logger.info({action: "@@EXIT"});
@@ -183,7 +181,7 @@ function setupAppExitListener(eventServerURL?: string) {
 
 function setupLocationChangeListener(listener?: (location: Location) => void) {
     if (listener) {
-        app.browserHistory.listen(listener);
+        app.history.listen(listener);
     }
 }
 

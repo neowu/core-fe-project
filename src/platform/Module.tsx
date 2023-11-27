@@ -1,4 +1,4 @@
-import {push} from "connected-react-router";
+import {push} from "redux-first-history";
 import {put} from "redux-saga/effects";
 import {produce, enablePatches} from "immer";
 import {app} from "../app";
@@ -15,7 +15,7 @@ export type ModuleLocation<State> = Location<Readonly<State> | undefined>;
 export interface ModuleLifecycleListener<RouteParam extends object = object, HistoryState extends object = object> {
     onEnter: (entryComponentProps?: any) => SagaGenerator;
     onDestroy: () => SagaGenerator;
-    onLocationMatched: (routeParameters: RouteParam, location: Location<Readonly<HistoryState> | undefined>) => SagaGenerator;
+    onLocationMatched: (routeParameters: RouteParam, location: ModuleLocation<HistoryState>) => SagaGenerator;
     onTick: (() => SagaGenerator) & TickIntervalDecoratorFlag;
 }
 
@@ -126,7 +126,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
         if (typeof urlOrState === "string") {
             const url: string = urlOrState;
             if (state) {
-                yield put(push(url, state === "keep-state" ? app.browserHistory.location.state : state));
+                yield put(push(url, state === "keep-state" ? app.history.location.state : state));
             } else {
                 yield put(push(url));
             }

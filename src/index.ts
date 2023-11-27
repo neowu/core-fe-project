@@ -2,7 +2,7 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 import "./debug";
 
-export {push} from "connected-react-router";
+export {push, replace} from "redux-first-history";
 export * as immer from "immer";
 export {bootstrap} from "./platform/bootstrap";
 export {Module, type ModuleLocation, type ModuleLifecycleListener} from "./platform/Module";
@@ -31,6 +31,8 @@ export {register, type ErrorListener} from "./module";
 export {call, put, spawn, delay, all, race, fork, type SagaGenerator} from "./typed-saga";
 export {logger} from "./app";
 
+export {Switch, Redirect, NavLink, useLocation, useHistory, useParams, useRouteMatch, matchPath} from "react-router-dom";
 export {useStore, useSelector, useDispatch} from "react-redux";
 export type {Action, Dispatch, Reducer} from "redux";
 export type {Location} from "history";
+export {produce} from "immer";

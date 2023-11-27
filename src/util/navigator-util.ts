@@ -10,3 +10,7 @@ export function isBrowserSupported() {
 
     return true;
 }
+
+export function isIOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
