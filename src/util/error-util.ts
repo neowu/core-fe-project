@@ -103,9 +103,15 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
     if (matchedPattern) {
         return `IGNORED_${matchedPattern.errorCode}_ISSUE`;
     }
+
+    if (exception instanceof JavaScriptException && stacktrace?.includes("https://cdn.livechatinc.com/tracking.js") && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
+        return "IGNORED_LIVE_CHAT_PLUGIN_ISSUE";
+    }
+
     if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
         return "IGNORED_UNCATEGORIZED_ISSUE";
     }
+
     if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage.includes("minified react error #188") && stacktrace.includes("getRootDomNode")) {
         return "IGNORED_ANTD_POPOVER_ISSUE";
     }
@@ -118,13 +124,6 @@ function isValidStacktrace(stacktrace?: string): boolean {
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }
-
-        /**
-         * Use fuzzy search, instead of document.querySelectorAll("script") to get all script tag URLs.
-         *
-         * The reason is, in latest webpack, the code-split chunk script is just injected and then removed.
-         * In other words, the <script> tag only exists temporarily, not persisted in the DOM.
-         */
         return stacktrace.includes(".js");
     }
     return false;
