@@ -90,10 +90,11 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         // CORS or CSP issues
         {pattern: "content security policy", errorCode: "CSP"},
         {pattern: "script error", errorCode: "CORS"},
-        // Vendor injected, mostly still with stacktrace
+        // Vendor related, mostly still with stacktrace
         {pattern: "ucbrowser", errorCode: "VENDOR"},
         {pattern: "vivo", errorCode: "VENDOR"},
         {pattern: "huawei", errorCode: "VENDOR"},
+        {pattern: "proxy: trap result did not include", errorCode: "PROXY_UNSUPPORTED"},
         // Browser sandbox issues
         {pattern: "the operation is insecure", errorCode: "BROWSER_LIMIT"},
         {pattern: "access is denied for this document", errorCode: "BROWSER_LIMIT"},
