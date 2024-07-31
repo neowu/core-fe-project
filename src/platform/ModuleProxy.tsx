@@ -21,6 +21,19 @@ export class ModuleProxy<M extends Module<any, any>> {
         return this.actions;
     }
 
+    attachLifecycleWithActions<P extends object>(ComponentType: React.ComponentType<P & {actions: ActionCreators<M>}>): React.ComponentType<P> {
+        const LifecycleComponent = this.attachLifecycle(ComponentType);
+        const actions = this.actions as any;
+        return class extends React.PureComponent<P> {
+            constructor(props: P) {
+                super(props);
+            }
+            override render() {
+                return <LifecycleComponent {...this.props} actions={actions} />;
+            }
+        };
+    }
+
     attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name as string;
         const lifecycleListener = this.module as ModuleLifecycleListener;
