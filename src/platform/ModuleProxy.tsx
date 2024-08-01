@@ -21,7 +21,7 @@ export class ModuleProxy<M extends Module<any, any>> {
         return this.actions;
     }
 
-    attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
+    attachLifecycle<P extends object>(ComponentType: React.ComponentType<P & {actions: ActionCreators<M>}>): React.ComponentType<P> {
         const moduleName = this.module.name as string;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const modulePrototype = Object.getPrototypeOf(lifecycleListener);
@@ -115,7 +115,7 @@ export class ModuleProxy<M extends Module<any, any>> {
             }
 
             override render() {
-                return <ComponentType {...this.props} />;
+                return <ComponentType {...this.props} actions={actions} />;
             }
 
             private areLocationsEqual = (a: Location, b: Location): boolean => {
