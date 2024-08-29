@@ -1,5 +1,5 @@
 import React from "react";
-import {idleStateActions, type State, type IdleState} from "../reducer";
+import {idleStateAction, type State, type IdleState} from "../reducer";
 import {useDispatch, useSelector} from "react-redux";
 
 export const DEFAULT_IDLE_TIMEOUT = 300;
@@ -45,7 +45,7 @@ export function IdleDetector(props: Props) {
         if (timeout > 0) {
             const idleTimer = createTimer(timeout, newIdleState => {
                 if (newIdleState !== stateRef.current) {
-                    dispatch(idleStateActions(newIdleState));
+                    dispatch(idleStateAction(newIdleState));
                 }
             });
             idleTimer.start();

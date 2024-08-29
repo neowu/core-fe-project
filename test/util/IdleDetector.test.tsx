@@ -3,7 +3,7 @@ import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src
 import {render, act, screen, cleanup} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {Provider, useSelector} from "react-redux";
-import {idleReducer, idleTimeoutActions, State} from "../../src/reducer";
+import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
 import {combineReducers, createStore, Store} from "redux";
 
 describe("IdleDetector Provider Integration Test", () => {
@@ -16,7 +16,7 @@ describe("IdleDetector Provider Integration Test", () => {
                 idle: idleReducer,
             })
         );
-        store.dispatch(idleTimeoutActions(DEFAULT_IDLE_TIMEOUT));
+        store.dispatch(idleTimeoutAction(DEFAULT_IDLE_TIMEOUT));
     });
 
     afterEach(() => {

@@ -6,7 +6,7 @@ import axios from "axios";
 import {NavigationGuard} from "./NavigationGuard";
 import {app} from "../app";
 import {executeAction, type ErrorListener} from "../module";
-import {idleTimeoutActions} from "../reducer";
+import {type Action, idleTimeoutAction} from "../reducer";
 import {APIException} from "../Exception";
 import {call, delay, type SagaGenerator} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
@@ -186,7 +186,7 @@ function setupLocationChangeListener(listener?: (location: Location) => void) {
 }
 
 function setupIdleTimeout(timeout: number) {
-    app.store.dispatch(idleTimeoutActions(timeout));
+    app.store.dispatch<Action<any>>(idleTimeoutAction(timeout));
 }
 
 function runBackgroundLoop(loggerConfig?: LoggerConfig, versionCheckConfig?: VersionCheckConfig) {

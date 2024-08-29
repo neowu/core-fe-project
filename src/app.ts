@@ -1,5 +1,5 @@
 import {createBrowserHistory, type History} from "history";
-import {applyMiddleware, compose, createStore, type Store, type StoreEnhancer} from "redux";
+import {applyMiddleware, compose, legacy_createStore as createStore, type Store, type StoreEnhancer} from "redux";
 import {createReduxHistoryContext} from "redux-first-history";
 import createSagaMiddleware, {type SagaMiddleware} from "redux-saga";
 import {call as rawCall, race as rawRace, take, takeEvery} from "redux-saga/effects";

@@ -12,12 +12,12 @@ jobs:
 
             - uses: actions/setup-node@v3
               with:
-                  node-version: "19"
+                  node-version: "20"
                   check-latest: true
 
             - uses: pnpm/action-setup@v4
               with:
-                  version: 9.5
+                  version: 9.9
                   run_install: false
 
             - name: Get pnpm store directory

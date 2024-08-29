@@ -26,7 +26,7 @@ export {SilentOnNetworkConnectionError} from "./decorator/SilentOnNetworkConnect
 export {createActionHandlerDecorator} from "./decorator/createActionHandlerDecorator";
 
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
-export {showLoading, loadingAction, navigationPreventionAction, idleStateActions, idleTimeoutActions, type State} from "./reducer";
+export {showLoading, loadingAction, navigationPreventionAction, idleStateAction, idleTimeoutAction, type State} from "./reducer";
 export {register, type ErrorListener} from "./module";
 export {call, put, spawn, delay, all, race, fork, type SagaGenerator} from "./typed-saga";
 export {logger} from "./app";

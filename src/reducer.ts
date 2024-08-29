@@ -1,5 +1,5 @@
 import {type RouterState} from "redux-first-history";
-import {combineReducers, type Action as ReduxAction, type Reducer} from "redux";
+import {combineReducers, type Reducer, type UnknownAction as OriginalReduxAction} from "redux";
 import {DEFAULT_IDLE_TIMEOUT} from "./util/IdleDetector";
 
 // Redux State
@@ -23,7 +23,7 @@ export interface State {
 // Redux Action
 const SET_STATE_ACTION = "@@framework/setState";
 
-export interface Action<P> extends ReduxAction<string> {
+export interface Action<P> extends OriginalReduxAction {
     payload: P;
     name?: typeof SET_STATE_ACTION;
 }
@@ -108,7 +108,7 @@ interface IdleStateActionPayload {
 
 export const IDLE_STATE_ACTION = "@@framework/idle-state";
 
-export function idleStateActions(state: "active" | "idle"): Action<IdleStateActionPayload> {
+export function idleStateAction(state: "active" | "idle"): Action<IdleStateActionPayload> {
     return {
         type: IDLE_STATE_ACTION,
         payload: {state},
@@ -122,7 +122,7 @@ interface IdleTimeoutActionPayload {
 
 const IDLE_TIMEOUT_ACTION = "@@framework/idle-timeout";
 
-export function idleTimeoutActions(timeout: number): Action<IdleTimeoutActionPayload> {
+export function idleTimeoutAction(timeout: number): Action<IdleTimeoutActionPayload> {
     return {
         type: IDLE_TIMEOUT_ACTION,
         payload: {timeout},
@@ -142,8 +142,9 @@ export function idleReducer(state: IdleState = {timeout: DEFAULT_IDLE_TIMEOUT, s
 }
 
 // Root Reducer
-export function rootReducer(routerReducer: Reducer<RouterState>): Reducer<State> {
-    return combineReducers<State>({
+// TODO: investigate why return-type Reducer<State, Action<any>> does not work
+export function rootReducer(routerReducer: Reducer<RouterState>): Reducer<any, Action<any>> {
+    return combineReducers({
         router: routerReducer,
         loading: loadingReducer,
         app: setStateReducer,
