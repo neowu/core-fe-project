@@ -142,8 +142,7 @@ export function idleReducer(state: IdleState = {timeout: DEFAULT_IDLE_TIMEOUT, s
 }
 
 // Root Reducer
-// TODO: investigate why return-type Reducer<State, Action<any>> does not work
-export function rootReducer(routerReducer: Reducer<RouterState>): Reducer<any, Action<any>> {
+export function rootReducer(routerReducer: Reducer<RouterState>): Reducer<State, Action<any>, {}> {
     return combineReducers({
         router: routerReducer,
         loading: loadingReducer,
