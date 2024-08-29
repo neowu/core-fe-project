@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* eslint-disable @typescript-eslint/no-var-requires */
 
 const childProcess = require("child_process");
 const fs = require("fs-extra");
@@ -34,7 +33,7 @@ function test() {
 
 function lint() {
     console.info("run lint ...");
-    return spawn("eslint", ["{src,test}/**/*.{ts,tsx}"], "lint failed, please fix");
+    return spawn("eslint", ["--no-warn-ignored", "./{src,test}/**"], "lint failed, please fix");
 }
 
 function cleanup() {
