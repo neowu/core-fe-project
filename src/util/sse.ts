@@ -23,7 +23,7 @@ export interface SSE<Response extends Record<string, any>> {
     connect: () => Promise<void>;
     disconnect: () => void;
     onConnected: (listener: ConnectedListener) => Unsubscriber;
-    onError: (subscriber: ErrorListener) => Unsubscriber;
+    onError: (listener: ErrorListener) => Unsubscriber;
     onResponse: <E extends keyof Response>(event: E, listener: (data: NonNullable<Response[E]>) => void) => Unsubscriber;
 }
 

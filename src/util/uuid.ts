@@ -1,5 +1,5 @@
 export function uuid() {
-    // A UUID for current visitor, based on:
+    // A simplified UUID generator
     // - Current time (in millisecond)
     // - Some random number (around 1000~10000000)
     // E.g: 169e68f80c9-1b4104
