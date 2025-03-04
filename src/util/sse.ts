@@ -4,6 +4,7 @@ import {parseWithDate} from "./json-util";
 import type {Method} from "axios";
 import {NetworkConnectionException} from "../Exception";
 import {errorToException} from "./error-util";
+import {uuid} from "./uuid";
 
 export interface SSEConfig<Request> {
     actionPrefix: string;
@@ -17,8 +18,8 @@ type Unsubscriber = () => void;
 type ConnectedListener = (connectedTimes: number) => void;
 type ErrorListener = (error: ErrorEvent) => void;
 
-// Register your listeners before calling connect()
-export interface SSEHandler<Response extends Record<string, any>> {
+// Register listeners before calling connect()
+export interface SSE<Response extends Record<string, any>> {
     connect: () => Promise<void>;
     disconnect: () => void;
     onConnected: (listener: ConnectedListener) => Unsubscriber;
@@ -33,28 +34,31 @@ export function sse<Request, Response extends Record<string, any>>({
     method = "GET",
     payload,
     logResponse = false,
-}: SSEConfig<Request>): SSEHandler<Response> {
+}: SSEConfig<Request>): SSE<Response> {
     let eventSource: EventSource | null = null;
-    let startTime: number | null = Date.now();
+    let startTime: number | null = null;
     let connectingTimes: number = 1;
+    let traceId: string | null = null;
 
     const connectedListeners: Array<ConnectedListener> = [];
     const errorListeners: Array<ErrorListener> = [];
     const messageListeners: Map<keyof Response, Array<(data: NonNullable<Response[keyof Response]>) => void>> = new Map();
 
     const generalMessageListener = (e: MessageEvent) => {
-        const originalData = e.data as string;
         const data = parseWithDate(e.data) as Response;
-        if (logResponse) {
-            app.logger.info({
-                action: `${actionPrefix}/@@SSE_RESPONSE`,
-                context: {sse_url: url},
-                info: {data: originalData},
-            });
-        }
 
         const validMessageFields = Object.keys(data).filter(_ => data[_] !== null) as (keyof Response)[];
-        validMessageFields.forEach(field => messageListeners.get(field)?.forEach(listener => listener(data[field])));
+        if (validMessageFields.length > 0) {
+            validMessageFields.forEach(field => messageListeners.get(field)?.forEach(listener => listener(data[field])));
+
+            if (logResponse) {
+                app.logger.info({
+                    action: `${actionPrefix}/@@SSE_RESPONSE`,
+                    context: {sse_url: url},
+                    info: {message: validMessageFields.map(field => `${field.toString()}:${JSON.stringify(data[field])}`).join(`\n`)},
+                });
+            }
+        }
     };
     const generalErrorListener = (e: ErrorEvent) => {
         app.logger.warn({
@@ -62,6 +66,7 @@ export function sse<Request, Response extends Record<string, any>>({
             errorCode: "SSE_ERROR",
             errorMessage: errorToException(e).message,
             context: {sse_url: url},
+            info: {trace_id: traceId || undefined},
         });
         errorListeners.forEach(listener => listener(e));
         startTime = Date.now(); // reset startTime for next connection
@@ -72,6 +77,9 @@ export function sse<Request, Response extends Record<string, any>>({
             const sseState = eventSource?.readyState;
             if (sseState === EventSource.CONNECTING || sseState === EventSource.OPEN) return;
 
+            startTime = Date.now();
+            traceId = uuid();
+
             return new Promise<void>((resolve, reject) => {
                 eventSource = new EventSource(url, {
                     fetch: (input, init) =>
@@ -79,7 +87,11 @@ export function sse<Request, Response extends Record<string, any>>({
                             ...init,
                             method,
                             body: payload ? JSON.stringify(payload) : null,
-                            headers: {...init?.headers, "content-type": "application/json"},
+                            headers: {
+                                ...init?.headers,
+                                "x-trace-id": traceId!,
+                                "content-type": "application/json",
+                            },
                         }),
                 });
 
@@ -87,12 +99,12 @@ export function sse<Request, Response extends Record<string, any>>({
                     app.logger.info({
                         action: `${actionPrefix}/@@SSE_CONNECTED`,
                         context: {sse_url: url},
+                        info: {trace_id: traceId || undefined},
                         stats: {connecting_times: connectingTimes},
                         elapsedTime: startTime ? Date.now() - startTime : undefined,
                     });
 
                     // onopen callback may be called many times by EventSource auto-retry
-                    // only log `elapsedTime` for first connection
                     startTime = null;
                     connectingTimes++;
 
