@@ -10,6 +10,7 @@ export {Module, type ModuleLocation, type ModuleLifecycleListener} from "./platf
 export {async, type AsyncOptions, type AsyncErrorComponentProps} from "./util/async";
 export {captureError} from "./util/error-util";
 export {ajax, uri} from "./util/network";
+export {sse, type SSEConfig, type SSEHandler} from "./util/sse";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 export {IdleDetector, IdleDetectorContext} from "./util/IdleDetector";
 export {Route} from "./util/Route";

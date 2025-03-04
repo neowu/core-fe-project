@@ -110,7 +110,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
     }
 
     if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
-        return "IGNORED_UNCATEGORIZED_ISSUE";
+        return "IGNORED_EXTERNAL_PLUGIN_ISSUE";
     }
 
     if (action === GLOBAL_ERROR_ACTION && stacktrace && errorMessage.includes("minified react error #188") && stacktrace.includes("getRootDomNode")) {
@@ -121,7 +121,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
-        const ignoredPatterns = ["extension://", "@user-script", "ucbrowser_script", "x-plugin-script", "<anonymous>:"];
+        const ignoredPatterns = ["extension://", "@user-script", "ucbrowser_script", "x-plugin-script", "<anonymous>:", "@FormMetadata.js"];
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }

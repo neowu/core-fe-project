@@ -1,14 +1,13 @@
 import React from "react";
 import {delay, call as rawCall, take, select, cancel, fork, call, put} from "redux-saga/effects";
-import {app} from "../app";
-import {executeAction, type ActionCreators} from "../module";
-import {IDLE_STATE_ACTION, navigationPreventionAction, type State} from "../reducer";
-import {Module, type ModuleLifecycleListener} from "./Module";
+import {app} from "../../app";
+import {executeAction, type ActionCreators} from "../../module";
+import {IDLE_STATE_ACTION, navigationPreventionAction, type State} from "../../reducer";
+import {Module, type ModuleLifecycleListener} from "../Module";
 import type {Location} from "history";
 import type {RouteComponentProps} from "react-router";
 import type {Task} from "redux-saga";
-
-let startupModuleName: string | null = null;
+import {StartupModulePerformanceLogger} from "./StartupModulePerformanceLogger";
 
 export class ModuleProxy<M extends Module<any, any>> {
     constructor(
@@ -36,9 +35,7 @@ export class ModuleProxy<M extends Module<any, any>> {
 
             constructor(props: P) {
                 super(props);
-                if (!startupModuleName) {
-                    startupModuleName = moduleName;
-                }
+                StartupModulePerformanceLogger.registerIfNotExist(moduleName);
             }
 
             override componentDidMount() {
@@ -166,9 +163,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                     }
                 }
 
-                if (moduleName === startupModuleName) {
-                    createStartupPerformanceLog(`${moduleName}/@@STARTUP_PERF`);
-                }
+                StartupModulePerformanceLogger.log(moduleName);
 
                 if (this.hasOwnLifecycle("onTick")) {
                     yield rawCall(this.onTickWatcherSaga.bind(this));
@@ -198,46 +193,5 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
             }
         };
-    }
-}
-
-function createStartupPerformanceLog(actionName: string): void {
-    // TODO: use new API
-    if (window.performance && performance.timing) {
-        // For performance timing API, please refer: https://www.w3.org/blog/2012/09/performance-timing-information/
-        const now = Date.now();
-        const perfTiming = performance.timing;
-        const baseTime = perfTiming.navigationStart;
-        const duration = now - baseTime;
-        const stats: {[key: string]: number} = {};
-
-        const createStat = (key: string, timeStamp: number) => {
-            if (timeStamp >= baseTime) {
-                stats[key] = timeStamp - baseTime;
-            }
-        };
-
-        createStat("http_start", perfTiming.requestStart);
-        createStat("http_end", perfTiming.responseEnd);
-        createStat("dom_start", perfTiming.domLoading);
-        createStat("dom_content", perfTiming.domContentLoadedEventEnd); // Mostly same time with domContentLoadedEventStart
-        createStat("dom_end", perfTiming.loadEventEnd); // Mostly same with domComplete/loadEventStart
-
-        const slowStartupThreshold = app.loggerConfig?.slowStartupThresholdInSecond || 5;
-        if (duration / 1000 >= slowStartupThreshold) {
-            app.logger.warn({
-                action: actionName,
-                elapsedTime: duration,
-                stats,
-                errorCode: "SLOW_STARTUP",
-                errorMessage: `Startup took ${(duration / 1000).toFixed(2)} sec, longer than ${slowStartupThreshold}`,
-            });
-        } else {
-            app.logger.info({
-                action: actionName,
-                elapsedTime: duration,
-                stats,
-            });
-        }
     }
 }

@@ -17,7 +17,7 @@ interface Log {
 
 interface InfoLogEntry {
     action: string;
-    elapsedTime?: number;
+    elapsedTime?: number | undefined;
     info?: {[key: string]: string | undefined};
     stats?: {[key: string]: number | undefined};
     context?: {[key: string]: string | undefined};
