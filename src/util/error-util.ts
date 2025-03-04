@@ -121,7 +121,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
-        const ignoredPatterns = ["extension://", "@user-script", "ucbrowser_script", "x-plugin-script", "<anonymous>:", "@FormMetadata.js"];
+        const ignoredPatterns = ["extension://", "@user-script", "ucbrowser_script", "x-plugin-script", "<anonymous>:", "@FormMetadata.js", "image.uc.cn"];
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }
