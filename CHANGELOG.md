@@ -4,7 +4,7 @@
 
 - update `performance` API usage, stop using deprecated `performance.timing`
 - add `sse` function to simplify Server-Side EventSource call
-- ignore `@FormMetadata.js` plugin error
+- ignore `@FormMetadata.js` / `image.ur.cn` external JS error
 - upgrade `react` to 19.0
 - upgrade `axios` to 1.8
 - remove `/script` folder, inline check/build scripts inside `package.json` to make it clear

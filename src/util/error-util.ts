@@ -84,9 +84,10 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
     const errorMessage = exception.message.toLowerCase();
     const ignoredPatterns = [
-        // Network error while downloading JavaScript/CSS (webpack async loading)
+        // Network error while downloading JavaScript/CSS/assets
         {pattern: "loading chunk", errorCode: "JS_CHUNK"},
         {pattern: "loading css chunk", errorCode: "CSS_CHUNK"},
+        {pattern: "dom source error", errorCode: "DOM_ASSET"},
         // CORS or CSP issues
         {pattern: "content security policy", errorCode: "CSP"},
         {pattern: "script error", errorCode: "CORS"},
