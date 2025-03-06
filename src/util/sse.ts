@@ -76,7 +76,7 @@ export function sse<Request, Response extends Record<string, any>>({
 
         app.logger.exception(exception, {
             action: `${actionPrefix}/@@SSE_ERROR`,
-            info: {trace_id: traceId || undefined},
+            context: {trace_id: traceId || undefined},
         });
         errorListeners.forEach(listener => listener(exception));
         startTime = Date.now(); // reset startTime for next connection
