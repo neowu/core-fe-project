@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.39.0-beta1",
+    "version": "1.39.0",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -28,7 +28,7 @@
         "@testing-library/react": "16.0.0",
         "@testing-library/user-event": "14.5.2",
         "@types/jest": "29.5.14",
-        "@types/node": "22.13.8",
+        "@types/node": "22.13.9",
         "typescript-eslint": "8.4.0",
         "eslint": "9.9.1",
         "eslint-config-prettier": "9.1.0",
