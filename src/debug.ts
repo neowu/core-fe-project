@@ -24,6 +24,9 @@ if (process.env.NODE_ENV === "development") {
                 if (Object.keys(_.info).length > 0) {
                     console.info(`%c INFO `, "background:#ddd; color:#111", _.info);
                 }
+                if (Object.keys(_.context).length > 0) {
+                    console.info(`%c CONTEXT `, "background:#ddd; color:#111", _.context);
+                }
                 if (Object.keys(_.stats).length > 0) {
                     console.info(`%c STATS `, "background:#ddd; color:#111", _.stats);
                 }

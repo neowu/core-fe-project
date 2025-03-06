@@ -1,9 +1,10 @@
 import {ErrorEvent, EventSource} from "eventsource";
-import {app} from "../app";
-import {parseWithDate} from "./json-util";
 import type {Method} from "axios";
-import {APIException, NetworkConnectionException} from "../Exception";
+import {parseWithDate} from "./json-util";
 import {uuid} from "./uuid";
+import type {APIErrorResponse} from "./network";
+import {app} from "../app";
+import {APIException, NetworkConnectionException} from "../Exception";
 
 export interface SSEConfig<Request> {
     actionPrefix: string;
@@ -47,7 +48,17 @@ export function sse<Request, Response extends Record<string, any>>({
     const errorEventToNetworkException = (e: ErrorEvent) => new NetworkConnectionException(`Failed to connect SSE: ${url}`, url, `${e.type || "UNKNOWN"}: ${e.message || "UNKNOWN"}`);
 
     const generalMessageListener = (e: MessageEvent) => {
-        const data = parseWithDate(e.data) as Response;
+        const data = safeParse<Response>(e.data);
+        if (!data) {
+            if (logResponse) {
+                app.logger.info({
+                    action: `${actionPrefix}/@@SSE_RESPONSE`,
+                    context: {sse_url: url, trace_id: traceId || undefined},
+                    info: {message: e.data},
+                });
+            }
+            return;
+        }
 
         const validMessageFields = Object.keys(data).filter(_ => data[_] !== null) as (keyof Response)[];
         if (validMessageFields.length > 0) {
@@ -66,10 +77,9 @@ export function sse<Request, Response extends Record<string, any>>({
         let exception: APIException | NetworkConnectionException;
         if (e.type === "error" && e instanceof MessageEvent && e.data) {
             // a special case for backend API exception, which will be followed by an error event (triggered by server-side close)
-            const errorId: string | null = e.data?.id || null;
-            const errorCode: string | null = e.data?.errorCode || null;
-            const errorMessage: string = e.data?.message || `[No Response]`;
-            exception = new APIException(errorMessage, 0, url, e.data, errorId, errorCode);
+            const errorResponse = safeParse<APIErrorResponse>(e.data);
+            const message: string = errorResponse?.message || `[No Response]`;
+            exception = new APIException(message, 0, url, e.data, errorResponse?.id || null, errorResponse?.errorCode || null);
         } else {
             exception = errorEventToNetworkException(e);
         }
@@ -177,4 +187,12 @@ export function sse<Request, Response extends Record<string, any>>({
             };
         },
     };
+}
+
+function safeParse<T = any>(data: string): T | null {
+    try {
+        return parseWithDate(data);
+    } catch (e) {
+        return null;
+    }
 }

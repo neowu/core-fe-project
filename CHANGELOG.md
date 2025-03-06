@@ -1,10 +1,11 @@
 # Change Log
 
-## 1.39.2 (2025-03)
+## 1.39.3 (2025-03)
 
 - put SSE `trace-id` to logger context, instead of info
 - change `SSE.onError` callback argument to `NetworkConnectionException | APIException`, which lets the caller decide how to handle the error
 - optimize internal `logger.exception` usage
+- optimize `__PRINT_LOGS__` debug output, with complete context
 
 ## 1.39.0 (2025-03)
 
