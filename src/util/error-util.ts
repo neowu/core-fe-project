@@ -57,7 +57,7 @@ export function captureError(error: unknown, action: string, extra: ErrorExtra =
             errorCode,
         });
     } else {
-        app.logger.exception(exception, info, action);
+        app.logger.exception(exception, {action, info});
         app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
     }
 

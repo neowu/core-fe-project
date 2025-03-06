@@ -17,14 +17,13 @@ export function RetryOnNetworkConnectionError(retryIntervalSecond: number = 3) {
             } catch (e) {
                 if (e instanceof NetworkConnectionException) {
                     retryTime++;
-                    app.logger.exception(
-                        e,
-                        {
+                    app.logger.exception(e, {
+                        action: handler.actionName,
+                        info: {
                             payload: handler.maskedParams,
                             process_method: `will retry #${retryTime}`,
                         },
-                        handler.actionName
-                    );
+                    });
                     yield delay(retryIntervalSecond * 1000);
                 } else {
                     throw e;

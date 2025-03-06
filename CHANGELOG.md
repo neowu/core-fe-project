@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.39.1 (2025-03)
+
+- put SSE `trace-id` to logger context, instead of info
+- change `SSE.onError` callback argument to `NetworkConnectionException | APIException`, which lets the caller decide how to handle the error
+- optimize internal `logger.exception` usage
+
 ## 1.39.0 (2025-03)
 
 - update `performance` API usage, stop using deprecated `performance.timing`

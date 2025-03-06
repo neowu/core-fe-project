@@ -2,8 +2,7 @@ import {ErrorEvent, EventSource} from "eventsource";
 import {app} from "../app";
 import {parseWithDate} from "./json-util";
 import type {Method} from "axios";
-import {NetworkConnectionException} from "../Exception";
-import {errorToException} from "./error-util";
+import {APIException, NetworkConnectionException} from "../Exception";
 import {uuid} from "./uuid";
 
 export interface SSEConfig<Request> {
@@ -16,7 +15,8 @@ export interface SSEConfig<Request> {
 
 type Unsubscriber = () => void;
 type ConnectedListener = (connectedTimes: number) => void;
-type ErrorListener = (error: ErrorEvent) => void;
+// APIException.status code is always 0 here
+type ErrorListener = (error: NetworkConnectionException | APIException) => void;
 
 // Register listeners before calling connect()
 export interface SSE<Response extends Record<string, any>> {
@@ -44,6 +44,8 @@ export function sse<Request, Response extends Record<string, any>>({
     const errorListeners: Array<ErrorListener> = [];
     const messageListeners: Map<keyof Response, Array<(data: NonNullable<Response[keyof Response]>) => void>> = new Map();
 
+    const errorEventToNetworkException = (e: ErrorEvent) => new NetworkConnectionException(`Failed to connect SSE: ${url}`, url, `${e.type || "UNKNOWN"}: ${e.message || "UNKNOWN"}`);
+
     const generalMessageListener = (e: MessageEvent) => {
         const data = parseWithDate(e.data) as Response;
 
@@ -54,21 +56,29 @@ export function sse<Request, Response extends Record<string, any>>({
             if (logResponse) {
                 app.logger.info({
                     action: `${actionPrefix}/@@SSE_RESPONSE`,
-                    context: {sse_url: url},
+                    context: {sse_url: url, trace_id: traceId || undefined},
                     info: {message: validMessageFields.map(field => `${field.toString()}:${JSON.stringify(data[field])}`).join(`\n`)},
                 });
             }
         }
     };
     const generalErrorListener = (e: ErrorEvent) => {
-        app.logger.warn({
+        let exception: APIException | NetworkConnectionException;
+        if (e.type === "error" && e instanceof MessageEvent && e.data) {
+            // a special case for backend API exception, which will be followed by an error event (triggered by server-side close)
+            const errorId: string | null = e.data?.id || null;
+            const errorCode: string | null = e.data?.errorCode || null;
+            const errorMessage: string = e.data?.message || `[No Response]`;
+            exception = new APIException(errorMessage, 0, url, e.data, errorId, errorCode);
+        } else {
+            exception = errorEventToNetworkException(e);
+        }
+
+        app.logger.exception(exception, {
             action: `${actionPrefix}/@@SSE_ERROR`,
-            errorCode: "SSE_ERROR",
-            errorMessage: errorToException(e).message,
-            context: {sse_url: url},
             info: {trace_id: traceId || undefined},
         });
-        errorListeners.forEach(listener => listener(e));
+        errorListeners.forEach(listener => listener(exception));
         startTime = Date.now(); // reset startTime for next connection
     };
 
@@ -98,8 +108,7 @@ export function sse<Request, Response extends Record<string, any>>({
                 eventSource.onopen = e => {
                     app.logger.info({
                         action: `${actionPrefix}/@@SSE_CONNECTED`,
-                        context: {sse_url: url},
-                        info: {trace_id: traceId || undefined},
+                        context: {sse_url: url, trace_id: traceId || undefined},
                         stats: {connecting_times: connectingTimes},
                         elapsedTime: startTime ? Date.now() - startTime : undefined,
                     });
@@ -121,7 +130,7 @@ export function sse<Request, Response extends Record<string, any>>({
                     eventSource!.onopen = null;
                     eventSource!.onerror = null;
                     eventSource!.close();
-                    reject(new NetworkConnectionException(`Failed to connect SSE: ${url}`, url, `${e.code || "UNKNOWN"}: ${e.message}`));
+                    reject(errorEventToNetworkException(e));
                 };
             });
         },

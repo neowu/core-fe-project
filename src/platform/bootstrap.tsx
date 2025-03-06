@@ -240,7 +240,10 @@ export async function sendEventLogs(): Promise<void> {
                     // For APIException, retry always leads to same error, so have to give up
                     // Do not log network exceptions
                     app.logger.emptyLastCollection();
-                    app.logger.exception(e, {dropped_logs: logLength.toString()}, LOGGER_ACTION);
+                    app.logger.exception(e, {
+                        action: LOGGER_ACTION,
+                        info: {dropped_logs: logLength.toString()},
+                    });
                 }
             }
         }

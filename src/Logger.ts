@@ -88,10 +88,10 @@ export class LoggerImpl implements Logger {
         this.createLog("ERROR", entry);
     }
 
-    exception(exception: Exception, extraInfo: {[key: string]: string | undefined}, action: string): void {
+    exception(exception: Exception, entry: InfoLogEntry): void {
         let isWarning: boolean;
         let errorCode: string;
-        const info: {[key: string]: string | undefined} = {...extraInfo};
+        const info: {[key: string]: string | undefined} = entry.info || {};
 
         if (exception instanceof NetworkConnectionException) {
             isWarning = true;
@@ -124,7 +124,12 @@ export class LoggerImpl implements Logger {
             errorCode = "JAVASCRIPT_ERROR";
         }
 
-        this.createLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
+        this.createLog(isWarning ? "WARN" : "ERROR", {
+            ...entry,
+            errorCode,
+            errorMessage: exception.message,
+            info,
+        });
     }
 
     collect(maxSize: number = 0): ReadonlyArray<Log> {
