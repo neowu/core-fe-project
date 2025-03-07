@@ -1,13 +1,17 @@
 # Change Log
 
-## 1.39.3 (2025-03)
+## 1.39.4 (2025-03-07)
+
+- log SSE onConnect error
+
+## 1.39.3 (2025-03-06)
 
 - put SSE `trace-id` to logger context, instead of info
 - change `SSE.onError` callback argument to `NetworkConnectionException | APIException`, which lets the caller decide how to handle the error
 - optimize internal `logger.exception` usage
 - optimize `__PRINT_LOGS__` debug output, with complete context
 
-## 1.39.0 (2025-03)
+## 1.39.0 (2025-03-01)
 
 - update `performance` API usage, stop using deprecated `performance.timing`
 - add `sse` function to simplify Server-Side EventSource call

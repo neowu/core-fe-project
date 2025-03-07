@@ -86,7 +86,7 @@ export function sse<Request, Response extends Record<string, any>>({
 
         app.logger.exception(exception, {
             action: `${actionPrefix}/@@SSE_ERROR`,
-            context: {trace_id: traceId || undefined},
+            context: {sse_url: url, trace_id: traceId || undefined},
         });
         errorListeners.forEach(listener => listener(exception));
         startTime = Date.now(); // reset startTime for next connection
@@ -140,7 +140,14 @@ export function sse<Request, Response extends Record<string, any>>({
                     eventSource!.onopen = null;
                     eventSource!.onerror = null;
                     eventSource!.close();
-                    reject(errorEventToNetworkException(e));
+
+                    const exception = errorEventToNetworkException(e);
+                    app.logger.exception(exception, {
+                        action: `${actionPrefix}/@@SSE_CONNECT_ERROR`,
+                        context: {sse_url: url, trace_id: traceId || undefined},
+                        elapsedTime: startTime ? Date.now() - startTime : undefined,
+                    });
+                    reject(exception);
                 };
             });
         },
