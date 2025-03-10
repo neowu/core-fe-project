@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.39.5 (2025-03-10)
+
+- upgrade `eslint` to 9.22
+- upgrade `axios` to 1.8.2 (1.8.1 has a bug)
+- upgrade `pnpm` to 10.6.2
+
 ## 1.39.4 (2025-03-07)
 
 - log SSE onConnect error
