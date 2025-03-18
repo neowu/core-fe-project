@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.39.6 (2025-03-18)
+
+- upgrade `react-redux` to 9.2.0 (for better React 19 support)
+- upgrade `axios` to 1.8.3
+
 ## 1.39.5 (2025-03-10)
 
 - upgrade `eslint` to 9.22
