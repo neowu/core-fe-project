@@ -16,7 +16,7 @@ describe("createActionHandlerDecorator", () => {
         register(mary); //actionName is attached after register()
 
         mary.test().next();
-        expect(mock).toBeCalledTimes(1);
-        expect(mock).toReturnWith("person/test");
+        expect(mock).toHaveBeenCalledTimes(1);
+        expect(mock).toHaveReturnedWith("person/test");
     });
 });

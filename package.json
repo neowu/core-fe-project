@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.39.6",
+    "version": "1.40.0-beta",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -23,33 +23,34 @@
         "prepublishOnly": "pnpm build:fast"
     },
     "devDependencies": {
+        "@eslint/js": "9.29.0",
         "@testing-library/dom": "10.4.0",
-        "@testing-library/jest-dom": "6.5.0",
-        "@testing-library/react": "16.0.0",
-        "@testing-library/user-event": "14.5.2",
-        "@types/jest": "29.5.14",
-        "@types/node": "22.13.10",
-        "typescript-eslint": "8.26.1",
-        "eslint": "9.22.0",
-        "eslint-config-prettier": "10.1.1",
-        "jest": "29.7.0",
-        "jest-environment-jsdom": "29.7.0",
+        "@testing-library/jest-dom": "6.6.3",
+        "@testing-library/react": "16.3.0",
+        "@testing-library/user-event": "14.6.1",
+        "@types/jest": "30.0.0",
+        "@types/node": "24.0.3",
+        "eslint": "9.29.0",
+        "eslint-config-prettier": "10.1.5",
+        "jest": "30.0.0",
+        "jest-environment-jsdom": "30.0.0",
         "prettier": "3.5.3",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
-        "ts-jest": "29.2.6",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
+        "ts-jest": "29.4.0",
         "ts-node": "10.9.2",
-        "typescript": "5.8.2"
+        "typescript": "5.8.3",
+        "typescript-eslint": "8.34.1"
     },
     "dependencies": {
         "@types/history": "4.7.11",
-        "@types/react": "19.0.11",
-        "@types/react-dom": "19.0.4",
+        "@types/react": "19.1.8",
+        "@types/react-dom": "19.1.6",
         "@types/react-router": "5.1.20",
         "@types/react-router-dom": "5.3.3",
-        "axios": "1.8.3",
-        "core-js": "3.41.0",
-        "eventsource": "3.0.5",
+        "axios": "1.10.0",
+        "core-js": "3.43.0",
+        "eventsource": "4.0.0",
         "history": "4.10.1",
         "immer": "10.1.1",
         "react-redux": "9.2.0",
@@ -66,7 +67,7 @@
         "react-dom": ">=18.0.0"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
-    "packageManager": "pnpm@10.6.4"
+    "packageManager": "pnpm@10.12.1"
 }

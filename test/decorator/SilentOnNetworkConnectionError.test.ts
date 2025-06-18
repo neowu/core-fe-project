@@ -20,9 +20,9 @@ describe("SilentOnNetworkConnectionError", () => {
 
         const person = new Person("person", {});
         expect(() => person.throwNetworkConnectionException().next()).not.toThrow();
-        expect(mock).toBeCalledTimes(1);
+        expect(mock).toHaveBeenCalledTimes(1);
 
         expect(() => person.throwJavaScriptException().next()).toThrow();
-        expect(mock).toBeCalledTimes(2);
+        expect(mock).toHaveBeenCalledTimes(2);
     });
 });
