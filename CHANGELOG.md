@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.40.0 (2025-06-18)
+
+- add `@debugger` pattern for ignoreable global errors
+- upgrade `react` to 19.1
+- upgrade `event-source` to 4.0
+- upgrade `core-js` to 3.43
+- upgrade `eslint`, `jest` with minor config updates
+- update node min version requirement to 22
+
 ## 1.39.6 (2025-03-18)
 
 - upgrade `react-redux` to 9.2.0 (for better React 19 support)
