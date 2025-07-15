@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.40.1 (2025-07-15)
+
+- add error log throttling
+  - in case of too many same errors/warnings (check by `action + errorCode + errorMessage`) in a short time, only log the first one
+- upgrade `eslint` and `prettier`
+- upgrade `pnpm` to 10.13.1
+
 ## 1.40.0 (2025-06-18)
 
 - add `@debugger` pattern for ignoreable global errors

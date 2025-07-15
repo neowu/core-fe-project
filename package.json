@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.40.0",
+    "version": "1.40.1",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -23,24 +23,24 @@
         "prepublishOnly": "pnpm build:fast"
     },
     "devDependencies": {
-        "@eslint/js": "9.29.0",
+        "@eslint/js": "9.31.0",
         "@testing-library/dom": "10.4.0",
         "@testing-library/jest-dom": "6.6.3",
         "@testing-library/react": "16.3.0",
         "@testing-library/user-event": "14.6.1",
         "@types/jest": "30.0.0",
-        "@types/node": "24.0.3",
-        "eslint": "9.29.0",
+        "@types/node": "24.0.13",
+        "eslint": "9.31.0",
         "eslint-config-prettier": "10.1.5",
-        "jest": "30.0.0",
-        "jest-environment-jsdom": "30.0.0",
-        "prettier": "3.5.3",
+        "jest": "30.0.4",
+        "jest-environment-jsdom": "30.0.4",
+        "prettier": "3.6.2",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "ts-jest": "29.4.0",
         "ts-node": "10.9.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.34.1"
+        "typescript-eslint": "8.37.0"
     },
     "dependencies": {
         "@types/history": "4.7.11",
@@ -69,5 +69,5 @@
     "engines": {
         "node": ">=22"
     },
-    "packageManager": "pnpm@10.12.1"
+    "packageManager": "pnpm@10.13.1"
 }

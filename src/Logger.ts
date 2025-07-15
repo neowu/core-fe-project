@@ -3,10 +3,12 @@ import {errorToException} from "./util/error-util";
 import {app} from "./app";
 import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 
+type LogResult = "OK" | "WARN" | "ERROR";
+
 interface Log {
     date: Date;
     action: string;
-    result: "OK" | "WARN" | "ERROR";
+    result: LogResult;
     elapsedTime: number;
     context: {[key: string]: string}; // Indexed data for Elastic Search, key in lowercase with underscore, e.g: some_field
     info: {[key: string]: string}; // Text data for view only, key in lowercase with underscore, e.g: some_field
@@ -147,7 +149,16 @@ export class LoggerImpl implements Logger {
         this.logQueue = this.logQueue.slice(this.collectPosition);
     }
 
-    private createLog(result: "OK" | "WARN" | "ERROR", entry: InfoLogEntry | ErrorLogEntry): void {
+    private createLog(result: "OK", entry: InfoLogEntry): void;
+    private createLog(result: "ERROR" | "WARN", entry: ErrorLogEntry): void;
+    private createLog(result: LogResult, entry: InfoLogEntry | ErrorLogEntry): void {
+        if (result === "OK") {
+            const errorEntry = entry as ErrorLogEntry; // function overloading for type safety
+            if (this.isContinuousDuplicateError(errorEntry.action, errorEntry.errorCode, errorEntry.errorMessage)) {
+                return;
+            }
+        }
+
         // Generate context
         const context: {[key: string]: string} = {};
         Object.entries(this.contextMap).forEach(([key, value]) => {
@@ -204,5 +215,18 @@ export class LoggerImpl implements Logger {
             errorMessage: "errorMessage" in entry ? entry.errorMessage.substring(0, 1000) : undefined,
         };
         this.logQueue.push(event);
+    }
+
+    private isContinuousDuplicateError(action: string, errorCode: string, errorMessage: string): boolean {
+        if (this.logQueue.length > 0) {
+            const lastLog = this.logQueue[this.logQueue.length - 1];
+            return (
+                new Date().getTime() - lastLog.date.getTime() <= 1000 && // only 1 same error log per 1s
+                lastLog.action === action &&
+                lastLog.errorCode === errorCode &&
+                lastLog.errorMessage === errorMessage
+            );
+        }
+        return false;
     }
 }
