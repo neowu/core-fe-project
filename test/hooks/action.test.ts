@@ -1,10 +1,16 @@
-import {useAction, useBinaryAction, useObjectKeyAction, useUnaryAction} from "../../src/hooks/action";
+import {useAction, useBinaryAction, useObjectKeyAction, useOptionalObjectAction, useUnaryAction} from "../../src/hooks/action";
 import {Action} from "../../src/reducer";
 
 /**
  * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
  */
-jest.mock("../../src/hooks/action", () => ({useAction: () => () => {}, useUnaryAction: () => () => {}, useBinaryAction: () => () => {}, useObjectKeyAction: () => () => {}}));
+jest.mock("../../src/hooks/action", () => ({
+    useAction: () => () => {},
+    useUnaryAction: () => () => {},
+    useBinaryAction: () => () => {},
+    useObjectKeyAction: () => () => {},
+    useOptionalObjectAction: () => () => {},
+}));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
 
@@ -212,7 +218,7 @@ describe("useBinaryAction(type test)", () => {
     });
 });
 
-describe("useModuleObjectKeyAction(type test)", () => {
+describe("useObjectKeyAction(type test)", () => {
     test("Should accept key of object", () => {
         const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}]> = object => ({type: "update object", payload: [object]});
         const updateA = useObjectKeyAction(updateObjectAction, "a");
@@ -220,6 +226,8 @@ describe("useModuleObjectKeyAction(type test)", () => {
         const updateC = useObjectKeyAction(updateObjectAction, "c");
         const updateD = useObjectKeyAction(updateObjectAction, "d");
 
+        // @ts-expect-error
+        const updateWithUndefinedObject = useObjectKeyAction(updateObjectAction);
         // @ts-expect-error
         const updateNotKey = useObjectKeyAction(updateObjectAction, "NOT KEY");
 
@@ -240,5 +248,57 @@ describe("useModuleObjectKeyAction(type test)", () => {
         updateD("e");
         // @ts-expect-error
         updateD(undefined);
+    });
+});
+
+describe("useObjectKeyAction(type test)", () => {
+    test("Should accept key of optional object", () => {
+        const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}?]> = object => ({type: "update object", payload: object ? [object] : []});
+        const updateA = useObjectKeyAction(updateObjectAction, "a");
+        const updateB = useObjectKeyAction(updateObjectAction, "b");
+        const updateC = useObjectKeyAction(updateObjectAction, "c");
+        const updateD = useObjectKeyAction(updateObjectAction, "d");
+
+        // @ts-expect-error
+        const updateNotKey = useObjectKeyAction(updateObjectAction, "NOT KEY");
+
+        updateA("string");
+        updateB(1);
+        updateC(false);
+        updateD(null);
+        updateD("a");
+        updateD("b");
+
+        // @ts-expect-error
+        updateA(1);
+        // @ts-expect-error
+        updateA();
+        // @ts-expect-error
+        updateB("s");
+        // @ts-expect-error
+        updateB();
+        // @ts-expect-error
+        updateC(3);
+        // @ts-expect-error
+        updateC();
+        // @ts-expect-error
+        updateD("e");
+        // @ts-expect-error
+        updateD(undefined);
+    });
+});
+
+describe("useOptionalObjectAction(type test)", () => {
+    test("Should accept optional object", () => {
+        const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}]> = object => ({type: "update object", payload: [object]});
+        const updateOptionalObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}?]> = object => ({type: "update object", payload: object ? [object] : []});
+        const update = useOptionalObjectAction(updateOptionalObjectAction);
+
+        // @ts-expect-error
+        const updateWithNonOptionalObject = useOptionalObjectAction(updateObjectAction);
+        // @ts-expect-error
+        const updateWithKey = useOptionalObjectAction(updateObjectAction, "a");
+        // @ts-expect-error
+        update(1);
     });
 });
