@@ -56,6 +56,8 @@ export function useObjectKeyAction<T extends object, K extends keyof T>(actionCr
 /**
  * For actions like:
  * *foo(data: {key: number} = {}): SagaGenerator {..}
+ * or
+ * *foo(data?: {key: number}): SagaGenerator {..}
  *
  * useOptionalObjectAction(foo) will return:
  * () => void;
