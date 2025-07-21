@@ -40,11 +40,29 @@ export function useBinaryAction<P extends any[], U, K>(actionCreator: (...args: 
 /**
  * For actions like:
  * *foo(data: {key: number}): SagaGenerator {..}
+ * or
+ * *foo(data: {key: number} = {}): SagaGenerator {..}
  *
- * useModuleObjectAction(foo, "key") will return:
+ * useObjectKeyAction(foo, "key") will return:
  * (objectValue: number) => void;
  */
-export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg: T) => Action<[T]>, objectKey: K): (objectValue: T[K]) => void {
+export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg: T) => Action<[T]>, objectKey: K): (objectValue: T[K]) => void;
+export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg?: T) => Action<[T?]>, objectKey: K): (objectValue: T[K]) => void;
+export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg?: T) => Action<[T?]>, objectKey: K): (objectValue: T[K]) => void {
     const dispatch = useDispatch();
     return React.useCallback((objectValue: T[K]) => dispatch(actionCreator({[objectKey]: objectValue} as T)), [dispatch, actionCreator, objectKey]);
+}
+
+/**
+ * For actions like:
+ * *foo(data: {key: number} = {}): SagaGenerator {..}
+ * or
+ * *foo(data?: {key: number}): SagaGenerator {..}
+ *
+ * useDefaultObjectAction(foo) will return:
+ * () => void;
+ */
+export function useDefaultObjectAction<T extends object>(actionCreator: (arg?: T) => Action<[T?]>): () => void {
+    const dispatch = useDispatch();
+    return React.useCallback(() => dispatch(actionCreator()), [dispatch, actionCreator]);
 }
