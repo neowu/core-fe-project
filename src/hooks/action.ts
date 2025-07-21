@@ -59,10 +59,10 @@ export function useObjectKeyAction<T extends object, K extends keyof T>(actionCr
  * or
  * *foo(data?: {key: number}): SagaGenerator {..}
  *
- * useOptionalObjectAction(foo) will return:
+ * useDefaultObjectAction(foo) will return:
  * () => void;
  */
-export function useOptionalObjectAction<T extends object>(actionCreator: (arg?: T) => Action<[T?]>): () => void {
+export function useDefaultObjectAction<T extends object>(actionCreator: (arg?: T) => Action<[T?]>): () => void {
     const dispatch = useDispatch();
     return React.useCallback(() => dispatch(actionCreator()), [dispatch, actionCreator]);
 }

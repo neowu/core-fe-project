@@ -1,4 +1,4 @@
-import {useAction, useBinaryAction, useObjectKeyAction, useOptionalObjectAction, useUnaryAction} from "../../src/hooks/action";
+import {useAction, useBinaryAction, useObjectKeyAction, useDefaultObjectAction, useUnaryAction} from "../../src/hooks/action";
 import {Action} from "../../src/reducer";
 
 /**
@@ -9,7 +9,7 @@ jest.mock("../../src/hooks/action", () => ({
     useUnaryAction: () => () => {},
     useBinaryAction: () => () => {},
     useObjectKeyAction: () => () => {},
-    useOptionalObjectAction: () => () => {},
+    useDefaultObjectAction: () => () => {},
 }));
 
 type ActionCreator<P extends any[]> = (...args: P) => Action<P>;
@@ -292,12 +292,12 @@ describe("useOptionalObjectAction(type test)", () => {
     test("Should accept optional object", () => {
         const updateObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}]> = object => ({type: "update object", payload: [object]});
         const updateOptionalObjectAction: ActionCreator<[{a: string; b: number; c: boolean; d: null | "a" | "b"}?]> = object => ({type: "update object", payload: object ? [object] : []});
-        const update = useOptionalObjectAction(updateOptionalObjectAction);
+        const update = useDefaultObjectAction(updateOptionalObjectAction);
 
         // @ts-expect-error
-        const updateWithNonOptionalObject = useOptionalObjectAction(updateObjectAction);
+        const updateWithNonOptionalObject = useDefaultObjectAction(updateObjectAction);
         // @ts-expect-error
-        const updateWithKey = useOptionalObjectAction(updateObjectAction, "a");
+        const updateWithKey = useDefaultObjectAction(updateObjectAction, "a");
         // @ts-expect-error
         update(1);
     });
