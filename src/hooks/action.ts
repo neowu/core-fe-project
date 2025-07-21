@@ -41,7 +41,7 @@ export function useBinaryAction<P extends any[], U, K>(actionCreator: (...args: 
  * For actions like:
  * *foo(data: {key: number}): SagaGenerator {..}
  *
- * useModuleObjectAction(foo, "key") will return:
+ * useObjectKeyAction(foo, "key") will return:
  * (objectValue: number) => void;
  */
 export function useObjectKeyAction<T extends object, K extends keyof T>(actionCreator: (arg: T) => Action<[T]>, objectKey: K): (objectValue: T[K]) => void {
