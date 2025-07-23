@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.40.2 (2025-07-23)
+
+- add `useDefaultObjectAction` and optimize `useObjectKeyAction` hooks
+- upgrade dev deps
+
 ## 1.40.1 (2025-07-15)
 
 - add error log throttling
