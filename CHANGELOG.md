@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.40.3 (2025-07-24)
+
+- upgrade `axios` 1.11 due to security issue: https://github.com/axios/axios/issues/6969
+
 ## 1.40.2 (2025-07-23)
 
 - add `useDefaultObjectAction` and optimize `useObjectKeyAction` hooks

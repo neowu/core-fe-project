@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.40.2",
+    "version": "1.40.3",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -48,7 +48,7 @@
         "@types/react-dom": "19.1.6",
         "@types/react-router": "5.1.20",
         "@types/react-router-dom": "5.3.3",
-        "axios": "1.10.0",
+        "axios": "1.11.0",
         "core-js": "3.43.0",
         "eventsource": "4.0.0",
         "history": "4.10.1",
