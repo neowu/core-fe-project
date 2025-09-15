@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.40.4 (2025-09-15)
+
+- upgrade `axios` to 1.12 due to security issue: https://github.com/advisories/GHSA-4hjh-wcwx-xvwj
+- upgrade `React` to 19.1.1
+- upgrade `immer` to 10.1.3
+- upgrade `TypeScript` to 5.9.2
+- upgrade `pnpm` to 10.16.1
+
 ## 1.40.3 (2025-07-24)
 
 - upgrade `axios` 1.11 due to security issue: https://github.com/axios/axios/issues/6969
