@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.40.5 (2025-09-29)
+
+- ignore Google Recaptcha related errors
+- upgrade `eslint` related to latest
+- upgrade `@types/react` to 19.1.15
+- upgrade `pnpm` to 10.17.1
+
 ## 1.40.4 (2025-09-15)
 
 - upgrade `axios` to 1.12 due to security issue: https://github.com/advisories/GHSA-4hjh-wcwx-xvwj
