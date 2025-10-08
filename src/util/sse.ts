@@ -9,6 +9,7 @@ import {APIException, NetworkConnectionException} from "../Exception";
 export interface SSEConfig<Request> {
     actionPrefix: string;
     url: string;
+    customHeaders?: Record<string, string>;
     method?: Method;
     payload?: Request;
     logResponse?: boolean;
@@ -33,6 +34,7 @@ export function sse<Request, Response extends Record<string, any>>({
     actionPrefix,
     url,
     method = "GET",
+    customHeaders = {},
     payload,
     logResponse = false,
 }: SSEConfig<Request>): SSE<Response> {
@@ -108,6 +110,7 @@ export function sse<Request, Response extends Record<string, any>>({
                             method,
                             body: payload ? JSON.stringify(payload) : null,
                             headers: {
+                                ...customHeaders,
                                 ...init?.headers,
                                 "x-trace-id": traceId!,
                                 "content-type": "application/json",

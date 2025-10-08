@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.41.0 (2025-10-08)
+
+- allow `sse` support custom headers
+- improve Google Recaptcha related errors pattern check
+- upgrade `React` to 18.2.0
+- upgrade `pnpm` to 10.18.1
+
 ## 1.40.5 (2025-09-29)
 
 - ignore Google Recaptcha related errors

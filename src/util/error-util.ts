@@ -110,7 +110,12 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         return "IGNORED_LIVE_CHAT_PLUGIN_ISSUE";
     }
 
-    if (exception instanceof JavaScriptException && stacktrace?.includes("https://www.gstatic.cn/recaptcha") && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
+    if (
+        exception instanceof JavaScriptException &&
+        stacktrace?.includes("www.gstatic") &&
+        stacktrace?.includes("recaptcha") &&
+        [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)
+    ) {
         return "IGNORED_GOOGLE_RECAPTCHA_ISSUE";
     }
 
