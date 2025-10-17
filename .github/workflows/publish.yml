@@ -1,12 +1,13 @@
-name: build
+name: publish to npm
 on:
     push:
-        branches: [master]
-    pull_request:
-        branches: [master]
+        tags: v*
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
         steps:
             - uses: actions/checkout@v5
             - uses: pnpm/action-setup@v4
@@ -17,5 +18,8 @@ jobs:
               with:
                   node-version: "24"
                   check-latest: true
+                  registry-url: 'https://registry.npmjs.org'
             - run: pnpm install
             - run: pnpm build
+            # `pnpm publish` will cause failure: https://github.com/pnpm/pnpm/issues/9011
+            - run: npm publish --provenance --access public

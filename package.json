@@ -11,7 +11,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/neowu/core-fe-project.git"
+        "url": "git+https://github.com/neowu/core-fe-project.git"
     },
     "scripts": {
         "lint": "eslint --no-warn-ignored \"./{src,test}/**\"",
@@ -67,7 +67,7 @@
         "react-dom": ">=18.0.0"
     },
     "engines": {
-        "node": ">=22"
+        "node": ">=24"
     },
-    "packageManager": "pnpm@10.18.1"
+    "packageManager": "pnpm@10.18.3"
 }
