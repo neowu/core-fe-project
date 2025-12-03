@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.42.0 (2025-12-03)
+
+- upgrade `immer` to 11
+- upgrade `axios` to 1.13
+- upgrade `eventsource` to 4.1
+- upgrade `pnpm` to 10.24.0
+
 ## 1.41.0 (2025-10-08)
 
 - allow `sse` support custom headers
