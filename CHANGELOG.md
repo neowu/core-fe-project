@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.42.1 (2026-02-26)
+
+- upgrade `react` to 19.2.4, and require peer version requirement 19+
+- upgrade `redux-saga` to 1.4.2
+- upgrade `immer` to 11.1.4
+- upgrade `axios` to 1.13.5
+- upgrade `pnpm` to 10.30.0
+
 ## 1.42.0 (2025-12-03)
 
 - upgrade `immer` to 11

@@ -51,14 +51,7 @@ describe("typed-saga (type test)", () => {
                     e: Promise.resolve("a"),
                 });
 
-                const [_a, _b, _c, _d, _e]: [
-                    // prettier-reserve
-                    number | undefined,
-                    string | undefined,
-                    {baz: boolean} | undefined,
-                    Effect | undefined,
-                    string | undefined,
-                ] = [a, b, c, d, e];
+                const [_a, _b, _c, _d, _e]: [number | undefined, string | undefined, {baz: boolean} | undefined, Effect | undefined, string | undefined] = [a, b, c, d, e];
             }
         });
 
@@ -76,8 +69,10 @@ describe("typed-saga (type test)", () => {
                     Promise.resolve("a"),
                 ]);
                 const [_a, _b, _c, _d, _e]: [
-                    // prettier-reserve
-                    number | undefined,
+                    (
+                        // prettier-reserve
+                        number | undefined
+                    ),
                     string | undefined,
                     {baz: boolean} | undefined,
                     Effect | undefined,

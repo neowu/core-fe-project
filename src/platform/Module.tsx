@@ -19,9 +19,12 @@ export interface ModuleLifecycleListener<RouteParam extends object = object, His
     onTick: (() => SagaGenerator) & TickIntervalDecoratorFlag;
 }
 
-export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object, HistoryState extends object = object>
-    implements ModuleLifecycleListener<RouteParam, HistoryState>
-{
+export class Module<
+    RootState extends State,
+    ModuleName extends keyof RootState["app"] & string,
+    RouteParam extends object = object,
+    HistoryState extends object = object,
+> implements ModuleLifecycleListener<RouteParam, HistoryState> {
     constructor(
         readonly name: ModuleName,
         readonly initialState: RootState["app"][ModuleName]

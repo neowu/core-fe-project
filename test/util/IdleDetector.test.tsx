@@ -1,6 +1,6 @@
 import React from "react";
 import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
-import {render, act, screen, cleanup} from "@testing-library/react";
+import {render, act, cleanup} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {Provider, useSelector} from "react-redux";
 import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
