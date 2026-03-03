@@ -1,6 +1,7 @@
 import React from "react";
 import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
-import {render, act, cleanup, fireEvent} from "@testing-library/react";
+import {render, act, cleanup} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {Provider, useSelector} from "react-redux";
 import {combineReducers, legacy_createStore as createStore, Store} from "redux";
 import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
@@ -9,6 +10,10 @@ describe("IdleDetector Provider Integration Test", () => {
     let store: Store;
 
     beforeEach(() => {
+        // ref: https://github.com/testing-library/user-event/issues/1115
+        vi.stubGlobal("jest", {
+            advanceTimersByTime: vi.advanceTimersByTime.bind(vi),
+        });
         vi.useFakeTimers();
         store = createStore(
             combineReducers({
@@ -57,23 +62,23 @@ const fastForward = () => {
 
 async function testComponentWithUserEvent(component: React.ReactElement, testId: string) {
     const {getByTestId} = render(component);
+    const user = userEvent.setup({advanceTimers: vi.advanceTimersByTime.bind(vi)});
 
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    fireEvent.click(window);
+    await user.click(document.body);
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    fireEvent.keyDown(window, {key: "a"});
+    await user.keyboard("a");
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    // Simulate tab key press
-    fireEvent.keyDown(window, {key: "Tab"});
+    await user.tab();
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
