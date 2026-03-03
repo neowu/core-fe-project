@@ -2,7 +2,7 @@ import React from "react";
 import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
 import {render, act, cleanup, fireEvent} from "@testing-library/react";
 import {Provider, useSelector} from "react-redux";
-import {combineReducers, configureStore, type Store} from "@reduxjs/toolkit";
+import {combineReducers, createStore, Store} from "redux";
 import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
 
 describe("IdleDetector Provider Integration Test", () => {
@@ -10,9 +10,11 @@ describe("IdleDetector Provider Integration Test", () => {
 
     beforeEach(() => {
         vi.useFakeTimers();
-        store = configureStore({
-            reducer: combineReducers({idle: idleReducer}),
-        });
+        store = createStore(
+            combineReducers({
+                idle: idleReducer,
+            })
+        );
         store.dispatch(idleTimeoutAction(DEFAULT_IDLE_TIMEOUT));
     });
 
