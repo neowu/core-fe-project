@@ -17,17 +17,15 @@
         "lint": "eslint --no-warn-ignored \"./{src,test}/**\"",
         "format": "prettier --write \"{src,test,config}/**/*.{js,jsx,ts,tsx,json}\"",
         "format-check": "prettier --check \"{src,test,config}/**/*.{js,jsx,ts,tsx,json}\"",
-        "test": "vitest run",
+        "test": "vitest run --config ./config/vitest.config.ts",
         "build": "pnpm format-check && pnpm lint && pnpm test && pnpm build:fast",
         "build:fast": "rm -rf ./lib && tsc --composite false",
         "prepublishOnly": "pnpm build:fast"
     },
     "devDependencies": {
         "@eslint/js": "9.36.0",
-        "@testing-library/dom": "10.4.1",
         "@testing-library/jest-dom": "6.9.1",
         "@testing-library/react": "16.3.2",
-        "@testing-library/user-event": "14.6.1",
         "@types/node": "24.10.1",
         "eslint": "9.36.0",
         "eslint-config-prettier": "10.1.8",
