@@ -3,7 +3,7 @@ import {JavaScriptException} from "../../src/Exception";
 
 describe("SilentOnNetworkConnectionError", () => {
     it("should silent and only silent NetworkConnectionException", () => {
-        const mock = jest.fn();
+        const mock = vi.fn();
         class Person extends Module<State, "person"> {
             @SilentOnNetworkConnectionError()
             *throwNetworkConnectionException(): SagaGenerator {

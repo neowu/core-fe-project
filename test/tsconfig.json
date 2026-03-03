@@ -1,5 +1,6 @@
 {
     "extends": "../config/tsconfig.base.json",
+    "include": ["**/*.ts", "**/*.tsx", "../src/**/*.ts", "../src/**/*.tsx"],
     "compilerOptions": {
         "module": "ES2022",
         "jsx": "react",
@@ -7,6 +8,6 @@
         "composite": true,
         "verbatimModuleSyntax": false,
         "lib": ["DOM", "ES2020"],
-        "types": ["jest", "@testing-library/jest-dom", "node"]
+        "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
     }
 }

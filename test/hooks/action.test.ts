@@ -2,9 +2,9 @@ import {useAction, useBinaryAction, useObjectKeyAction, useDefaultObjectAction, 
 import {Action} from "../../src/reducer";
 
 /**
- * Using real useModuleAction in Jest environment will error, because the hooks are not called in a React component context.
+ * Using real useModuleAction in Vitest environment will error, because the hooks are not called in a React component context.
  */
-jest.mock("../../src/hooks/action", () => ({
+vi.mock("../../src/hooks/action", () => ({
     useAction: () => () => {},
     useUnaryAction: () => () => {},
     useBinaryAction: () => () => {},

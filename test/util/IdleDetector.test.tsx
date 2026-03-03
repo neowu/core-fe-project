@@ -1,16 +1,15 @@
 import React from "react";
 import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
-import {render, act, cleanup} from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import {render, act, cleanup, fireEvent} from "@testing-library/react";
 import {Provider, useSelector} from "react-redux";
+import {combineReducers, legacy_createStore as createStore, Store} from "redux";
 import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
-import {combineReducers, createStore, Store} from "redux";
 
 describe("IdleDetector Provider Integration Test", () => {
     let store: Store;
 
     beforeEach(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         store = createStore(
             combineReducers({
                 idle: idleReducer,
@@ -21,7 +20,7 @@ describe("IdleDetector Provider Integration Test", () => {
 
     afterEach(() => {
         cleanup();
-        jest.useRealTimers();
+        vi.useRealTimers();
     });
 
     const Wrapper = (component: React.ReactNode) => {
@@ -52,29 +51,29 @@ describe("IdleDetector Provider Integration Test", () => {
 
 const fastForward = () => {
     act(() => {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
     });
 };
 
 async function testComponentWithUserEvent(component: React.ReactElement, testId: string) {
     const {getByTestId} = render(component);
-    const user = userEvent.setup({delay: null});
 
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    await user.click(document.body);
+    fireEvent.click(window);
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    await user.keyboard("a");
+    fireEvent.keyDown(window, {key: "a"});
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
 
-    await user.tab();
+    // Simulate tab key press
+    fireEvent.keyDown(window, {key: "Tab"});
     expect(getByTestId(testId)).toHaveTextContent("active");
     fastForward();
     expect(getByTestId(testId)).toHaveTextContent("idle");
