@@ -2,7 +2,7 @@ import React from "react";
 import {IdleDetectorContext, IdleDetector, DEFAULT_IDLE_TIMEOUT} from "../../src/util/IdleDetector";
 import {render, act, cleanup, fireEvent} from "@testing-library/react";
 import {Provider, useSelector} from "react-redux";
-import {combineReducers, createStore, Store} from "redux";
+import {combineReducers, legacy_createStore as createStore, Store} from "redux";
 import {idleReducer, idleTimeoutAction, State} from "../../src/reducer";
 
 describe("IdleDetector Provider Integration Test", () => {
