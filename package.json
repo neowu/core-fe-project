@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.42.1",
+    "version": "1.42.2",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -15,27 +15,27 @@
     },
     "scripts": {
         "lint": "eslint --no-warn-ignored \"./{src,test}/**\"",
-        "format": "prettier --write \"{src,test,config}/**/*.{js,jsx,ts,tsx,json}\"",
-        "format-check": "prettier --check \"{src,test,config}/**/*.{js,jsx,ts,tsx,json}\"",
+        "format": "prettier --write \"{src,test,config}/**/*.{js,jsx,ts,tsx,mts,mjs,json}\"",
+        "format-check": "prettier --check \"{src,test,config}/**/*.{js,jsx,ts,tsx,mts,mjs,json}\"",
         "test": "vitest run --config ./config/vitest.config.ts",
         "build": "pnpm format-check && pnpm lint && pnpm test && pnpm build:fast",
         "build:fast": "rm -rf ./lib && tsc --composite false",
         "prepublishOnly": "pnpm build:fast"
     },
     "devDependencies": {
-        "@eslint/js": "9.36.0",
+        "@eslint/js": "10.0.1",
         "@testing-library/jest-dom": "6.9.1",
         "@testing-library/react": "16.3.2",
         "@testing-library/user-event": "14.6.1",
-        "@types/node": "25.3.3",
-        "eslint": "9.36.0",
-        "eslint-config-prettier": "10.1.8",
+        "@types/node": "25.5.0",
+        "eslint": "10.0.3",
+        "globals": "17.4.0",
         "prettier": "3.8.1",
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "ts-node": "10.9.2",
         "typescript": "5.9.3",
-        "typescript-eslint": "8.44.1",
+        "typescript-eslint": "8.57.1",
         "vitest": "4.0.18"
     },
     "dependencies": {
@@ -70,5 +70,5 @@
             "glob": "13.0.6"
         }
     },
-    "packageManager": "pnpm@10.30.2"
+    "packageManager": "pnpm@10.32.1"
 }

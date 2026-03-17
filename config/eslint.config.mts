@@ -1,23 +1,17 @@
-// @ts-check
-const eslintConfigPrettier = require("eslint-config-prettier");
-const eslint = require("@eslint/js");
-const tsESlint = require("typescript-eslint");
+import globals from "globals";
+import js from "@eslint/js";
+import tsESLint from "typescript-eslint";
+import {defineConfig} from "eslint/config";
 
-module.exports = tsESlint.config(
+export default defineConfig([
     {
-        files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
-        plugins: {
-            "@typescript-eslint": tsESlint.plugin,
-        },
-        extends: [eslint.configs.recommended, ...tsESlint.configs.recommended, tsESlint.configs.eslintRecommended, eslintConfigPrettier],
-        languageOptions: {
-            parser: tsESlint.parser,
-            parserOptions: {
-                ecmaVersion: 2018,
-                sourceType: "module",
-                ecmaFeatures: {jsx: true},
-            },
-        },
+        files: ["**/*.{js,ts,jsx,tsx}"],
+        plugins: {js},
+        extends: ["js/recommended"],
+        languageOptions: {globals: globals.browser},
+    },
+    tsESLint.configs.recommended,
+    {
         rules: {
             "@typescript-eslint/ban-types": "off",
             "@typescript-eslint/no-empty-object-type": "off",
@@ -71,13 +65,4 @@ module.exports = tsESlint.config(
             "require-yield": "off",
         },
     },
-    {
-        files: ["**/*.config.js", "**/*.config.jsx", "**/*.config.ts", "**/*.config.tsx", "**/script/*.js"],
-        rules: {
-            "@typescript-eslint/no-require-imports": "off",
-        },
-    },
-    {
-        ignores: ["**/build/**/*", "**/dist/**/*", "**/node_modules/**/*"],
-    }
-);
+]);

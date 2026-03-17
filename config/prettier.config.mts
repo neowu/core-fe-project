@@ -1,7 +1,6 @@
-// @ts-check
+import {type Config} from "prettier";
 
-/** @type {import("prettier").Options} */
-const config = {
+const config: Config = {
     tabWidth: 4,
     printWidth: 200,
     trailingComma: "es5",
@@ -9,4 +8,4 @@ const config = {
     arrowParens: "avoid",
 };
 
-module.exports = config;
+export default config;

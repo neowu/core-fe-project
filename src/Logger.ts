@@ -166,7 +166,7 @@ export class LoggerImpl implements Logger {
                 context[key] = value.substring(0, 1000);
             } else {
                 try {
-                    context[key] = value();
+                    context[key] = value().substring(0, 1000);
                 } catch (e) {
                     const message = errorToException(e).message;
                     context[key] = "ERR# " + message;

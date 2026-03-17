@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.42.2 (2026-03-17)
+
+- fix logger context-generator missing truncation
+- upgrade `eslint` to 10.0
+- unify eslint/prettier config to `mts` format
+- change `jest` to `vitest` for better performance and modern features
+- upgrade `pnpm` to 10.32.1
+
 ## 1.42.1 (2026-02-26)
 
 - upgrade `react` to 19.2.4, and require peer version requirement 19+
