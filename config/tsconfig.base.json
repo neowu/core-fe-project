@@ -1,19 +1,16 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "esnext",
         "module": "esnext",
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
         "strict": true,
         "exactOptionalPropertyTypes": true,
-        "allowSyntheticDefaultImports": true,
         "verbatimModuleSyntax": true,
-        "esModuleInterop": true,
         "importHelpers": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "noImplicitOverride": true,
-        "downlevelIteration": true
+        "noImplicitOverride": true
     }
 }

@@ -2,6 +2,7 @@ import {push} from "redux-first-history";
 import {put} from "redux-saga/effects";
 import {produce, enablePatches} from "immer";
 import {app} from "../app";
+import {matchPath} from "react-router";
 import {navigationPreventionAction, setStateAction, type State} from "../reducer";
 import type {Location} from "history";
 import type {TickIntervalDecoratorFlag} from "../module";
@@ -67,6 +68,10 @@ export class Module<
 
     get logger(): Logger {
         return app.logger;
+    }
+
+    get historyState(): HistoryState | undefined {
+        return app.store.getState().router.location?.state as HistoryState | undefined;
     }
 
     setNavigationPrevented(isPrevented: boolean) {

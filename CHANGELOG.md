@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.43.0 (2026-03-26)
+
+- make `plugin-script`, `webscraper` stacktrace pattern as ignoreable error
+- add `historyState` getter in `Module`
+- upgrade `TypeScript` to 6.0, and remove deprecated config options
+- upgrade `pnpm` to 10.33.0
+
 ## 1.42.2 (2026-03-17)
 
 - fix logger context-generator missing truncation
