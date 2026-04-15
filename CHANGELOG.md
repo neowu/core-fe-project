@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.43.1 (2026-03-26)
+
+- upgrade `React` to 19.2.5
+- upgrade `axios` to 13.5
+- upgrade dev deps to latest
+
 ## 1.43.0 (2026-03-26)
 
 - make `plugin-script`, `webscraper` stacktrace pattern as ignoreable error
