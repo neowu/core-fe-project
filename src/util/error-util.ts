@@ -87,6 +87,7 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
         // Network error while downloading JavaScript/CSS/assets
         {pattern: "loading chunk", errorCode: "JS_CHUNK"},
         {pattern: "loading css chunk", errorCode: "CSS_CHUNK"},
+        {pattern: "css_chunk_load_failed", errorCode: "CSS_CHUNK"},
         {pattern: "dom source error", errorCode: "DOM_ASSET"},
         // CORS or CSP issues
         {pattern: "content security policy", errorCode: "CSP"},

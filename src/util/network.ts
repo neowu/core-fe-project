@@ -17,14 +17,14 @@ export interface APIErrorResponse {
 }
 
 const ajaxClient = axios.create({
-    transformResponse: (data, headers) => {
+    transformResponse: data => {
         if (data) {
             // API response may be void, in such case, JSON.parse will throw error
-            const contentType = headers?.["content-type"];
-            if (contentType?.startsWith("application/json")) {
+            try {
                 return parseWithDate(data);
-            } else {
-                throw new NetworkConnectionException("ajax() response not in JSON format", "");
+            } catch (e) {
+                const dataStr = typeof data.toString === "function" ? data.toString() : "";
+                throw new NetworkConnectionException("ajax() response not in JSON format", "", dataStr);
             }
         } else {
             return data;
