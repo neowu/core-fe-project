@@ -1,15 +1,22 @@
 # Change Log
 
+## 1.43.3 (2026-05-12)
+
+- upgrade `axios` to 1.16.0
+- upgrade `immer` to 11.1.8
+- upgrade dev deps to latest
+- upgrade `pnpm` to 11.1.0 and tune related config
+
 ## 1.43.2 (2026-04-21)
 
 - make `CSS_CHUNK_LOAD_FAILED` error as warning
-- upgrade `axios` to 13.5.1, tune `transformResponse` API usage
+- upgrade `axios` to 1.15.1, tune `transformResponse` API usage
 - upgrade dev deps to latest
 
 ## 1.43.1 (2026-04-15)
 
 - upgrade `React` to 19.2.5
-- upgrade `axios` to 13.5
+- upgrade `axios` to 1.13.5
 - upgrade dev deps to latest
 
 ## 1.43.0 (2026-03-26)
