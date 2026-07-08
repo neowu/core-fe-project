@@ -69,10 +69,8 @@ describe("typed-saga (type test)", () => {
                     Promise.resolve("a"),
                 ]);
                 const [_a, _b, _c, _d, _e]: [
-                    (
-                        // prettier-reserve
-                        number | undefined
-                    ),
+                    // prettier-reserve
+                    number | undefined,
                     string | undefined,
                     {baz: boolean} | undefined,
                     Effect | undefined,

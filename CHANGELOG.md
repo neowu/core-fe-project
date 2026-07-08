@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.43.4 (2026-07-08)
+
+- make `hammerhead.js` stacktrace pattern as ignoreable error
+- upgrade `axios` to 1.18.0
+- upgrade `redux-saga` to 1.5.0
+- upgrade dev deps to latest
+- upgrade `pnpm` to 11.10.0
+
 ## 1.43.3 (2026-05-12)
 
 - upgrade `axios` to 1.16.0

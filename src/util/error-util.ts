@@ -129,7 +129,19 @@ function specialErrorCode(exception: Exception, action: string, stacktrace?: str
 
 function isValidStacktrace(stacktrace?: string): boolean {
     if (stacktrace) {
-        const ignoredPatterns = ["extension://", "@user-script", "@debugger", "eval code", "ucbrowser_script", "plugin-script", "<anonymous>:", "@FormMetadata.js", "image.uc.cn", "webscraper"];
+        const ignoredPatterns = [
+            "extension://",
+            "@user-script",
+            "@debugger",
+            "eval code",
+            "ucbrowser_script",
+            "plugin-script",
+            "<anonymous>:",
+            "@FormMetadata.js",
+            "hammerhead.js",
+            "image.uc.cn",
+            "webscraper",
+        ];
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;
         }
