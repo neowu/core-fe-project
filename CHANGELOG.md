@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.43.5 (2026-07-27)
+
+- make `playwright-core` stacktrace pattern as ignoreable error
+- upgrade `React` to 19.2.8
+- upgrade `immer` to 11.1.15 (only bug fixes)
+- upgrade `react-redux` to 9.3.0 (deprecate `connect` API)
+- upgrade `redux-saga` to 1.5.1 (dep patch for typing)
+- upgrade dev deps to latest
+- upgrade `pnpm` to 11.17.0
+
 ## 1.43.4 (2026-07-08)
 
 - make `hammerhead.js` stacktrace pattern as ignoreable error

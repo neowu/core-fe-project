@@ -141,6 +141,7 @@ function isValidStacktrace(stacktrace?: string): boolean {
             "hammerhead.js",
             "image.uc.cn",
             "webscraper",
+            "playwright-core",
         ];
         if (ignoredPatterns.some(_ => stacktrace.includes(_))) {
             return false;

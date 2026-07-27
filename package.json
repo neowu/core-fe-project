@@ -1,6 +1,6 @@
 {
     "name": "core-fe",
-    "version": "1.43.4",
+    "version": "1.43.5",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -28,15 +28,15 @@
         "@testing-library/react": "16.3.2",
         "@testing-library/user-event": "14.6.1",
         "@types/node": "26.1.1",
-        "eslint": "10.6.0",
-        "globals": "17.7.0",
+        "eslint": "10.8.0",
+        "globals": "17.8.0",
         "jsdom": "29.1.1",
-        "prettier": "3.9.4",
-        "react": "19.2.7",
-        "react-dom": "19.2.7",
+        "prettier": "3.9.6",
+        "react": "19.2.8",
+        "react-dom": "19.2.8",
         "ts-node": "10.9.2",
         "typescript": "6.0.3",
-        "typescript-eslint": "8.63.0",
+        "typescript-eslint": "8.65.0",
         "vitest": "4.1.10"
     },
     "dependencies": {
@@ -49,13 +49,13 @@
         "core-js": "3.49.0",
         "eventsource": "4.1.0",
         "history": "4.10.1",
-        "immer": "11.1.11",
-        "react-redux": "9.2.0",
+        "immer": "11.1.15",
+        "react-redux": "9.3.0",
         "react-router": "5.2.1",
         "react-router-dom": "5.3.0",
         "redux": "5.0.1",
         "redux-first-history": "5.2.0",
-        "redux-saga": "1.5.0",
+        "redux-saga": "1.5.1",
         "regenerator-runtime": "0.14.1"
     },
     "peerDependencies": {
@@ -65,5 +65,5 @@
     "engines": {
         "node": ">=24"
     },
-    "packageManager": "pnpm@11.10.0"
+    "packageManager": "pnpm@11.17.0"
 }
