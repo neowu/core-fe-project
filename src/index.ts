@@ -1,5 +1,4 @@
 import "core-js/stable";
-import "regenerator-runtime/runtime";
 import "./debug";
 
 export {push, replace} from "redux-first-history";
@@ -15,7 +14,7 @@ export {ErrorBoundary} from "./util/ErrorBoundary";
 export {IdleDetector, IdleDetectorContext} from "./util/IdleDetector";
 export {Route} from "./util/Route";
 
-export {useAction, useObjectKeyAction, useUnaryAction, useBinaryAction, useDefaultObjectAction as useOptionalObjectAction} from "./hooks/action";
+export {useAction, useObjectKeyAction, useUnaryAction, useBinaryAction, useDefaultObjectAction} from "./hooks/action";
 export {useLoadingStatus} from "./hooks/loading";
 
 export {Interval} from "./decorator/Interval";

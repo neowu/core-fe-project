@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.43.6 (2026-08-28)
+
+- upgrade `@types/react` to 19.2.18
+- upgrade `immer` to 11.1.18 (only bug fixes)
+- add generator support check at startup, and remove `regenerator/runtime` dep
+- upgrade `pnpm` to 11.24.0
+
 ## 1.43.5 (2026-07-27)
 
 - make `playwright-core` stacktrace pattern as ignoreable error

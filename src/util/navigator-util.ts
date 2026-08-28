@@ -8,9 +8,20 @@ export function isBrowserSupported() {
     const shadowRootSupported = typeof ShadowRoot === "function"; // required by antd
     if (!shadowRootSupported) return false;
 
+    if (!isGeneratorSupported()) return false; // required by redux-saga
+
     return true;
 }
 
 export function isIOS() {
     return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function isGeneratorSupported() {
+    try {
+        new Function("function* test() {}");
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
