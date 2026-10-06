@@ -47,7 +47,7 @@ export function captureError(error: unknown, action: string, extra: ErrorExtra =
         stacktrace: errorStacktrace,
     };
 
-    const errorCode = specialErrorCode(exception, action, errorStacktrace);
+    const errorCode = specialWarningErrorCode(exception, action, errorStacktrace);
     if (errorCode) {
         app.logger.warn({
             action,
@@ -79,49 +79,36 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
     }
 }
 
-function specialErrorCode(exception: Exception, action: string, stacktrace?: string): string | null {
+function specialWarningErrorCode(exception: Exception, action: string, stacktrace?: string): string | null {
     if (!isBrowserSupported()) return "UNSUPPORTED_BROWSER";
 
-    const errorMessage = exception.message.toLowerCase();
-    const ignoredPatterns = [
-        // Network error while downloading JavaScript/CSS/assets
-        {pattern: "loading chunk", errorCode: "JS_CHUNK"},
-        {pattern: "loading css chunk", errorCode: "CSS_CHUNK"},
-        {pattern: "css_chunk_load_failed", errorCode: "CSS_CHUNK"},
-        {pattern: "dom source error", errorCode: "DOM_ASSET"},
+    const ignorableMessagePatterns = [
+        // asset download issues
+        "loading chunk",
+        "loading css chunk",
+        "css_chunk_load_failed",
+        "dom source error",
         // CORS or CSP issues
-        {pattern: "content security policy", errorCode: "CSP"},
-        {pattern: "script error", errorCode: "CORS"},
-        // Vendor related, mostly still with stacktrace
-        {pattern: "ucbrowser", errorCode: "VENDOR"},
-        {pattern: "vivo", errorCode: "VENDOR"},
-        {pattern: "huawei", errorCode: "VENDOR"},
-        {pattern: "proxy: trap result did not include", errorCode: "PROXY_UNSUPPORTED"},
-        // Browser sandbox issues
-        {pattern: "the operation is insecure", errorCode: "BROWSER_LIMIT"},
-        {pattern: "access is denied for this document", errorCode: "BROWSER_LIMIT"},
+        "content security policy",
+        "script error",
+        // vendor related (mostly still with stacktrace)
+        "ucbrowser",
+        "vivo",
+        "huawei",
+        // Browser sandbox or environment issues
+        "proxy: trap result did not include",
+        "the operation is insecure",
+        "access is denied for this document",
     ];
+    if (ignorableMessagePatterns.includes(exception.message.toLowerCase())) return `IGNORED_BROWSER_ENV_ISSUE`;
 
-    const matchedPattern = ignoredPatterns.find(({pattern}) => errorMessage.includes(pattern));
-    if (matchedPattern) {
-        return `IGNORED_${matchedPattern.errorCode}_ISSUE`;
-    }
+    // weird errors encountered in reality
+    if (exception instanceof JavaScriptException && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
+        if (!isValidStacktrace(stacktrace)) return "IGNORED_EXTERNAL_PLUGIN_ISSUE";
 
-    if (exception instanceof JavaScriptException && stacktrace?.includes("https://cdn.livechatinc.com/tracking.js") && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
-        return "IGNORED_LIVE_CHAT_PLUGIN_ISSUE";
-    }
-
-    if (
-        exception instanceof JavaScriptException &&
-        stacktrace?.includes("www.gstatic") &&
-        stacktrace?.includes("recaptcha") &&
-        [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)
-    ) {
-        return "IGNORED_GOOGLE_RECAPTCHA_ISSUE";
-    }
-
-    if (exception instanceof JavaScriptException && !isValidStacktrace(stacktrace) && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
-        return "IGNORED_EXTERNAL_PLUGIN_ISSUE";
+        if (stacktrace?.includes("https://cdn.livechatinc.com/tracking.js")) return "IGNORED_LIVE_CHAT_PLUGIN_ISSUE";
+        if (stacktrace?.includes("www.gstatic") && stacktrace?.includes("recaptcha")) return "IGNORED_GOOGLE_RECAPTCHA_ISSUE";
+        if (exception.message === "Cannot redefine property: message" && stacktrace?.includes("at XMLHttpRequest")) return "IGNORED_GLOBAL_ERROR_OVERWRITE_ISSUE";
     }
 
     return null;

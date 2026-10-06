@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.44.0 (2026-10-06)
+
+- make `Cannot redefine property: message` error as warning
+- upgrade `react` family to 19.3.0
+- upgrade `axios` to 1.20.0 (security fixes + more HTTP status support)
+- upgrade `immer` to 11.1.21 (bug fixes)
+- upgrade `eventsource` to 4.1.1 (improvement only, cannot upgraded to 5 currently, as it requires Chrome 84+ for private # field)
+- upgrade dev deps to latest
+- upgrade `pnpm` to 12.9.1
+
 ## 1.43.6 (2026-08-28)
 
 - upgrade `@types/react` to 19.2.18
