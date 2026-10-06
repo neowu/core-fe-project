@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.44.1 (2026-10-06)
+
+- upgrade `@types/react` family to 19.3.0
+
 ## 1.44.0 (2026-10-06)
 
 - make `Cannot redefine property: message` error as warning
