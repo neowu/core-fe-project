@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.44.2 (2026-10-07)
+
+- bug fix for `specialWarningErrorCode` logic
+
 ## 1.44.1 (2026-10-06)
 
 - upgrade `@types/react` family to 19.3.0

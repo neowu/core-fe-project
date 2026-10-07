@@ -82,6 +82,7 @@ export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception
 function specialWarningErrorCode(exception: Exception, action: string, stacktrace?: string): string | null {
     if (!isBrowserSupported()) return "UNSUPPORTED_BROWSER";
 
+    const errorMessageInLowerCase = exception.message.toLowerCase();
     const ignorableMessagePatterns = [
         // asset download issues
         "loading chunk",
@@ -100,7 +101,7 @@ function specialWarningErrorCode(exception: Exception, action: string, stacktrac
         "the operation is insecure",
         "access is denied for this document",
     ];
-    if (ignorableMessagePatterns.includes(exception.message.toLowerCase())) return `IGNORED_BROWSER_ENV_ISSUE`;
+    if (ignorableMessagePatterns.find(pattern => errorMessageInLowerCase.includes(pattern))) return `IGNORED_BROWSER_ENV_ISSUE`;
 
     // weird errors encountered in reality
     if (exception instanceof JavaScriptException && [GLOBAL_ERROR_ACTION, GLOBAL_PROMISE_REJECTION_ACTION].includes(action)) {
