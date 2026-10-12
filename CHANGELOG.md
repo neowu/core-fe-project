@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.44.3 (2026-10-12)
+
+- enhance min browser version check, if too low, use WARNING instead for unsupported errors
+- upgrade dev deps (eslint, prettier, vitest) to latest
+
 ## 1.44.2 (2026-10-07)
 
 - bug fix for `specialWarningErrorCode` logic

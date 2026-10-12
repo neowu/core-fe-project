@@ -5,6 +5,9 @@ export function isBrowserSupported() {
     const proxySupported = typeof Proxy === "function"; // required by immer
     if (!proxySupported) return false;
 
+    const resizeObserverSupported = typeof ResizeObserver === "function";
+    if (!resizeObserverSupported) return false;
+
     const shadowRootSupported = typeof ShadowRoot === "function"; // required by antd
     if (!shadowRootSupported) return false;
 
