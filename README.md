@@ -14,7 +14,7 @@ This project uses [pnpm](https://pnpm.io/) to manage the dependencies.
 - To publish to npm, run `pnpm publish`, which runs `pnpm build` automatically before publish
 
 
-## Basic Features
+## Module
 
 The whole website is split into **modules**, usually by routes.
 
@@ -22,40 +22,16 @@ For each module, it contains **1 state** and **some actions**, to handle busines
 
 No matter sync or async, every action is automatically wrapped as saga generator.
 
-To extend module features, modules can also implement its own lifecycle actions, like onEnter/onDestroy/onActive etc.
+To extend module features, modules can also implement its own lifecycle actions: `onEnter`/ `onDestroy` / `onLocationMatched` / `onTick`.
 
-## Advanced Features
+## Other Features
 
 - global error-handler
-
 - event collector
-
 - action decorator
+- useful React hooks
 
 ## Core API
 
-- startApp
-
-Bootstrap function, configuring entry component / error handler / log / initialization action.
-
-- register
-
-Register a module (including lifecycle actions and custom actions).
-
-## Usage:
-
-(To be done)
-
-## Similar Frameworks
-
-We also develop a same (90% similarity) framework for app, using the same tech stack (in React Native).
-
-https://github.com/dionshihk/core-native-project
-
-Our idea is also inspired by many React-based frameworks
-
-https://github.com/dvajs/dva
-
-https://github.com/rematch/rematch
-
-https://github.com/wangtao0101/resa
+- boostrap: entrypoint, setting entry component / error handler / log ...
+- register: register a module for other modules to use
