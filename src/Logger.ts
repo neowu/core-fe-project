@@ -31,17 +31,20 @@ interface ErrorLogEntry extends InfoLogEntry {
 }
 
 /**
- * If eventLogger config is provided in non-DEV environment.
- * All collected logs will automatically sent to {serverURL} in a regular basis.
- *
- * The request will be PUT to the server in the following format:
- *      {events: Log[]}
+ * All collected logs will automatically be sent to server regularly (non-DEV only)
+ * The request will be POST to the server in the following format: {app: string; events: Log[]}
  */
 export interface LoggerConfig {
-    serverURL: string;
+    endpointURL: string;
+    appName: string;
     slowStartupThresholdInSecond?: number; // Default: 5
     frequencyInSecond?: number; // Default: 20
     maskedKeywords?: RegExp[];
+}
+
+export interface LogCollectorRequest {
+    app: string;
+    events: ReadonlyArray<Log>;
 }
 
 export interface Logger {

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.45.0 (2026-10-14)
+
+- tune bootstrap logger config, need pass {endpointURL, appName} to meet latest backend log-collector design (formerly `serverURL`)
+- improve page-exit `navigator.sendBeacon` call, using JSON-typed Blob
+- upgrade `pnpm` to 12.11.2
+
 ## 1.44.3 (2026-10-12)
 
 - enhance min browser version check, if too low, use WARNING instead for unsupported errors

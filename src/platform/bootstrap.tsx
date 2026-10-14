@@ -15,7 +15,7 @@ import {isBrowserSupported, isIOS} from "../util/navigator-util";
 import {captureError, errorToException} from "../util/error-util";
 import {DEFAULT_IDLE_TIMEOUT, IdleDetector} from "../util/IdleDetector";
 import type {Location} from "history";
-import type {LoggerConfig} from "../Logger";
+import type {LogCollectorRequest, LoggerConfig} from "../Logger";
 
 /**
  * Configuration for frontend version check.
@@ -57,7 +57,7 @@ export const GLOBAL_PROMISE_REJECTION_ACTION = "@@framework/promise-rejection";
 export function bootstrap(option: BootstrapOption): void {
     detectOldBrowser(option.browserConfig?.onOldBrowserDetected);
     setupGlobalErrorHandler(option.errorListener);
-    setupAppExitListener(option.loggerConfig?.serverURL);
+    setupAppExitListener(option.loggerConfig);
     setupLocationChangeListener(option.browserConfig?.onLocationChange);
     setupIdleTimeout(option.idleTimeoutInSecond ?? DEFAULT_IDLE_TIMEOUT);
     runBackgroundLoop(option.loggerConfig, option.versionConfig);
@@ -155,8 +155,8 @@ function injectRootContainer(): HTMLElement {
     return rootContainer;
 }
 
-function setupAppExitListener(eventServerURL?: string) {
-    if (eventServerURL) {
+function setupAppExitListener(loggerConfig?: LoggerConfig) {
+    if (loggerConfig) {
         // ref: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW5
         window.addEventListener(
             isIOS() ? "pagehide" : "unload",
@@ -164,12 +164,13 @@ function setupAppExitListener(eventServerURL?: string) {
                 try {
                     app.logger.info({action: "@@EXIT"});
                     const logs = app.logger.collect();
+                    const request: LogCollectorRequest = {app: loggerConfig.appName, events: logs};
+                    const requestBlob = new Blob([JSON.stringify(request)], {type: "application/json"});
                     /**
                      * navigator.sendBeacon() uses HTTP POST, but does not support CORS.
                      * We have to use text/plain as content type, instead of JSON.
                      */
-                    const textData = JSON.stringify({events: logs});
-                    navigator.sendBeacon(eventServerURL, textData);
+                    navigator.sendBeacon(loggerConfig.endpointURL, requestBlob);
                 } catch (e) {
                     // Silent if sending error
                 }
@@ -226,6 +227,7 @@ export async function sendEventLogs(): Promise<void> {
         const logLength = logs.length;
         if (logLength > 0) {
             try {
+                const request: LogCollectorRequest = {app: app.loggerConfig.appName, events: logs};
                 /**
                  * Event server URL may be different from current domain (supposing abc.com)
                  *
@@ -233,7 +235,7 @@ export async function sendEventLogs(): Promise<void> {
                  * - Event server allows cross-origin request from current domain
                  * - Root-domain cookies, whose domain is set by current domain as ".abc.com", can be sent (withCredentials = true)
                  */
-                await ajax("POST", app.loggerConfig.serverURL, {}, {events: logs}, {withCredentials: true});
+                await ajax("POST", app.loggerConfig.endpointURL, {}, request, {withCredentials: true});
                 app.logger.emptyLastCollection();
             } catch (e) {
                 if (e instanceof APIException) {
